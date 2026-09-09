@@ -11,6 +11,7 @@
 | `index.html` | 首頁，列出所有練習 |
 | `l1-vocab.html` | 第五冊 Lesson 1 單字四階練習（28 字） |
 | `l2-vocab.html` | 第五冊 Lesson 2 單字四階練習（29 字） |
+| `grammar.html` | 第五冊 L1–L2 文法四階練習（五個文法點，162 題） |
 
 ## 每週要改的地方
 
@@ -30,6 +31,17 @@ const HOMEWORK = {
 ```
 
 改完存檔，push 上去就生效。
+
+文法頁（`grammar.html`）多一個 `group`，可以指定這週只練哪一個文法點：
+
+```js
+const HOMEWORK = {
+  group: "pp",   // pp 現在完成式／tag 附加問句／that 名詞子句／it 虛主詞／emo 情緒動詞／all 全部
+  tasks: [ { stage:0, pass:13 }, { stage:2, pass:12 } ]
+};
+```
+
+題庫比每回合的題數多（`ROUND = 15`），每次進去都是隨機抽題，重練不會一模一樣。
 
 ## 學生紀錄
 
