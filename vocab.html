@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>單字庫　隨時練</title>
+<style>
+  :root{
+    --bg:#F7F5EF; --card:#fff; --ink:#26241F; --sub:#5A554C;
+    --line:#E2DDD0; --brand:#1F6B58; --brand-soft:#E6F1ED;
+    --gold:#C98A17; --gold-soft:#FDF3DE;
+    --ok:#1F7A44; --ok-soft:#E4F3E9;
+    --no:#B23A32; --no-soft:#FBE9E7; --r:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Hiragino Sans TC",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:19px;line-height:1.75;-webkit-text-size-adjust:100%}
+  .wrap{max-width:860px;margin:0 auto;padding:20px 16px 72px}
+  .hide{display:none!important}
+
+  header{background:var(--brand);color:#fff;border-radius:var(--r);padding:20px 22px;margin-bottom:18px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  header h1{margin:0 0 6px;font-size:26px;letter-spacing:.5px}
+  header p{margin:0;font-size:16px;opacity:.92}
+  .who{background:rgba(255,255,255,.16);border-radius:99px;padding:6px 16px;font-size:17px;white-space:nowrap}
+  .who button{background:none;border:none;color:#fff;font-size:15px;cursor:pointer;
+    text-decoration:underline;font-family:inherit;padding:0 0 0 8px;opacity:.85}
+
+  .seatgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:10px;margin-top:18px}
+  .seat{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:16px 0;
+    font-size:24px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .seat:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .seat.guest{border-style:dashed;color:var(--sub);font-size:20px}
+
+  /* 模式：練全部 / 只練沒過的 */
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  @media(max-width:520px){.modes{grid-template-columns:1fr}}
+  .mode{background:var(--card);border:2px solid var(--line);border-radius:var(--r);
+    padding:14px 18px;cursor:pointer;font-family:inherit;font-size:18px;text-align:left;color:var(--ink)}
+  .mode small{display:block;font-size:14px;color:var(--sub);font-weight:400;margin-top:2px}
+  .mode:hover{border-color:var(--brand)}
+  .mode.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .mode.on small{color:rgba(255,255,255,.85)}
+  .mode.hot{border-color:var(--gold);background:var(--gold-soft)}
+  .mode.hot.on{background:var(--gold);border-color:var(--gold);color:#fff}
+
+  .picker{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;margin-bottom:14px}
+  .picker .lb{font-size:15px;color:var(--sub);margin-bottom:10px}
+  .gs{display:flex;gap:8px;flex-wrap:wrap}
+  .gchip{background:var(--card);border:2px solid var(--line);border-radius:99px;
+    padding:7px 16px;font-size:17px;cursor:pointer;font-family:inherit;color:var(--sub)}
+  .gchip:hover{border-color:var(--brand);color:var(--brand)}
+  .gchip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .gchip i{font-style:normal;opacity:.7;font-size:14px}
+
+  .tabs{display:grid;gap:8px;margin-bottom:16px}
+  .tab{background:var(--card);border:2px solid var(--line);border-radius:12px;
+    padding:12px 6px;text-align:center;cursor:pointer;font-size:15px;line-height:1.4;
+    color:var(--sub);transition:.15s}
+  .tab b{display:block;font-size:19px;color:var(--ink);font-weight:600;margin-bottom:2px}
+  .tab:hover{border-color:var(--brand)}
+  .tab.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .tab.on b{color:#fff}
+
+  .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:12px 16px;margin-bottom:14px;font-size:16px;color:var(--sub)}
+  .bar .grow{flex:1;min-width:100px}
+  .track{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+  .fill{height:100%;background:var(--brand);width:0;transition:width .25s}
+  .pill{background:var(--gold-soft);color:var(--gold);border-radius:99px;
+    padding:3px 12px;font-size:15px;white-space:nowrap}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:26px 24px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .stage{font-size:15px;color:var(--sub);margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .gtag{background:var(--brand-soft);color:var(--brand);border-radius:99px;padding:2px 12px;font-size:14px}
+
+  .word{font-size:44px;font-weight:700;margin:6px 0 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;line-height:1.25}
+  .zh{font-size:17px;color:var(--sub);margin:-2px 0 18px}
+  .say{background:var(--brand-soft);border:none;border-radius:50%;width:44px;height:44px;
+    font-size:20px;cursor:pointer;color:var(--brand);flex:none}
+  .say:hover{background:#D5E7E1}
+  .sent{font-size:23px;line-height:2;margin:6px 0 20px}
+  .sent .gap{display:inline-block;min-width:116px;height:1.5em;vertical-align:-.3em;
+    border-bottom:4px solid var(--gold);margin:0 4px}
+  .hint{font-size:30px;letter-spacing:5px;color:var(--gold);font-weight:700;margin-bottom:4px}
+
+  .opts{display:grid;gap:12px}
+  .opts.two{grid-template-columns:1fr 1fr}
+  @media(max-width:560px){.opts.two{grid-template-columns:1fr}}
+  .opt{background:var(--card);border:2px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-size:21px;text-align:left;cursor:pointer;
+    font-family:inherit;color:var(--ink);transition:.12s}
+  .opt:hover:not(:disabled){border-color:var(--brand);background:var(--brand-soft)}
+  .opt:disabled{cursor:default}
+  .opt.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok);font-weight:600}
+  .opt.wrong{border-color:var(--no);background:var(--no-soft);color:var(--no)}
+
+  .typebox{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+  input[type=text]{font-size:26px;padding:12px 16px;border:2px solid var(--line);
+    border-radius:12px;font-family:inherit;width:300px;max-width:100%;letter-spacing:1px}
+  input[type=text]:focus{outline:none;border-color:var(--brand)}
+
+  button.go{background:var(--brand);color:#fff;border:none;border-radius:12px;
+    padding:14px 26px;font-size:19px;cursor:pointer;font-family:inherit}
+  button.go:hover{background:#17553f}
+  button.ghost{background:transparent;color:var(--brand);border:2px solid var(--brand)}
+  button.ghost:hover{background:var(--brand-soft)}
+
+  .fb{margin-top:20px;padding:16px 18px;border-radius:12px;font-size:19px;display:none}
+  .fb.show{display:block}
+  .fb.good{background:var(--ok-soft);color:var(--ok)}
+  .fb.bad{background:var(--no-soft);color:var(--no)}
+  .fb .big{font-size:22px;font-weight:700;display:block;margin-bottom:4px}
+
+  .done{text-align:center;padding:20px 0}
+  .done .score{font-size:64px;font-weight:700;color:var(--brand);line-height:1.1}
+  .done .of{font-size:20px;color:var(--sub);margin-bottom:16px}
+  .done .best{display:inline-block;background:var(--gold-soft);color:var(--gold);
+    border-radius:99px;padding:8px 20px;font-size:17px;margin-bottom:22px}
+  .done .msg{font-size:21px;margin-bottom:24px}
+  .btnrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  .review{margin-top:26px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r);padding:18px 20px}
+  .review h3{margin:0 0 10px;font-size:18px;color:var(--sub);font-weight:600}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--no-soft);color:var(--no);border-radius:99px;padding:5px 14px;font-size:16px}
+  .chip.clear{background:var(--ok-soft);color:var(--ok)}
+  .mini{font-size:15px;color:var(--sub);margin-top:10px}
+  .tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .tools button{font-size:15px;padding:9px 16px;border-radius:10px;cursor:pointer;
+    font-family:inherit;border:2px solid var(--line);background:var(--card);color:var(--sub)}
+  .tools button:hover{border-color:var(--brand);color:var(--brand)}
+
+  .hw{background:var(--gold-soft);border:2px solid #EBD9AE;border-radius:var(--r);
+    padding:16px 20px;margin-bottom:16px;color:#6B4A0E}
+  .hw.done{background:var(--ok-soft);border-color:#B9DCC6;color:var(--ok)}
+  .hw .t{font-size:20px;font-weight:700}
+  .hw ul{margin:10px 0 0;padding:0;list-style:none;font-size:17px}
+  .hw li{margin:5px 0}
+  .hw .n{margin:10px 0 0;font-size:15px;opacity:.85}
+  .ok{color:var(--ok);font-weight:600}
+  .wait{color:var(--sub)}
+
+  .foot{margin-top:30px;text-align:center}
+  .foot button{background:none;border:none;color:var(--sub);font-size:15px;
+    cursor:pointer;font-family:inherit;text-decoration:underline;opacity:.7}
+  h2.sec{font-size:22px;margin:0 0 4px}
+  p.secsub{margin:0 0 18px;color:var(--sub);font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:17px}
+  th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-size:15px;color:var(--sub);font-weight:600;white-space:nowrap}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.none td{color:var(--sub)}
+  .seatlink{color:var(--brand);cursor:pointer;text-decoration:underline;font-weight:600}
+  .barcell{display:flex;align-items:center;gap:8px}
+  .barcell i{display:block;height:12px;background:var(--no);border-radius:3px;opacity:.75}
+  .scroll{overflow-x:auto}
+  .note{background:var(--gold-soft);border-radius:12px;padding:14px 16px;font-size:16px;color:#7A5410;margin:16px 0}
+  .big2{font-size:34px;font-weight:700;color:var(--brand);line-height:1.2}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:6px 0 20px}
+  .kpi{background:var(--brand-soft);border-radius:12px;padding:14px 16px}
+  .kpi span{display:block;font-size:15px;color:var(--sub)}
+  @media print{ body{background:#fff} .noprint{display:none!important} .card{box-shadow:none;border:1px solid #ccc} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>單字庫　隨時練</h1>
+    <p id="sub"></p>
+  </div>
+  <div class="who hide" id="who"></div>
+</header>
+
+<div id="viewSeat">
+  <div class="card">
+    <h2 class="sec" id="seatTitle">先選你的座號</h2>
+    <p class="secsub">選了以後，你的練習紀錄就會分開存，不會跟別人混在一起。</p>
+    <div class="seatgrid" id="seatgrid"></div>
+  </div>
+</div>
+
+<div id="viewPractice" class="hide">
+  <div id="hwPractice"></div>
+  <div class="modes" id="modes"></div>
+  <div class="picker">
+    <div class="lb">範圍</div>
+    <div class="gs" id="gs"></div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="bar">
+    <span id="stageName"></span>
+    <span class="grow"><span class="track"><span class="fill" id="fill"></span></span></span>
+    <span id="count">0 / 0</span>
+    <span class="pill" id="best">最佳 —</span>
+  </div>
+  <div class="card" id="card"></div>
+  <div class="review">
+    <h3>我還沒過的字</h3>
+    <div class="chips" id="chips"></div>
+    <p class="mini" id="mini"></p>
+  </div>
+</div>
+
+<div id="viewTeacher" class="hide">
+  <div class="card">
+    <h2 class="sec">全班作答狀況</h2>
+    <p class="secsub" id="tSub"></p>
+    <div class="scroll"><table id="tClass"></table></div>
+    <h2 class="sec" style="margin-top:32px">全班最常錯的字</h2>
+    <p class="secsub">這是下一堂課最該花時間的地方。</p>
+    <div class="scroll"><table id="tWrong"></table></div>
+    <div class="tools noprint">
+      <button onclick="exportCSV()">匯出 CSV</button>
+      <button onclick="show('seat')">回到練習</button>
+      <button onclick="wipe()">清空全部紀錄</button>
+    </div>
+  </div>
+</div>
+
+<div id="viewReport" class="hide">
+  <div class="card">
+    <h2 class="sec" id="rTitle">學習報告</h2>
+    <p class="secsub" id="rRange"></p>
+    <div class="kpis" id="rKpis"></div>
+    <div class="note" id="rMsg"></div>
+    <h2 class="sec" style="margin-top:26px;font-size:19px">每次練習紀錄</h2>
+    <div class="scroll"><table id="rLogs"></table></div>
+    <h2 class="sec" style="margin-top:26px;font-size:19px">目前還沒過的字</h2>
+    <div class="chips" id="rChips"></div>
+    <div class="tools noprint">
+      <button onclick="window.print()">列印 / 存成 PDF</button>
+      <button onclick="show('teacher')">回到全班</button>
+    </div>
+  </div>
+</div>
+
+<div class="foot noprint" id="foot"></div>
+
+</div>
+<script>
+const WORDS = [{"w": "dress", "p": "n.", "z": "洋裝", "n": "夾克", "L": 1, "g": "Amy bought a fashionable ___ for her birthday party.", "o": ["dress", "area", "earthquake", "joke"]}, {"w": "on sale", "p": "", "z": "特價", "n": "牛仔褲", "L": 1, "g": "The clothes in this shop are ___, so they’re cheaper now.", "o": ["on sale", "recycle", "set / set up", "concert"]}, {"w": "shirt", "p": "n.", "z": "襯衫", "n": "脫下", "L": 1, "g": "Matthew is wearing a blue ___ to work.", "o": ["shirt", "cheese", "violin", "part"]}, {"w": "shorts", "p": "n.", "z": "短褲", "n": "洋裝", "L": 1, "g": "Larry usually wears ___ in the summer.", "o": ["shorts", "line", "meal", "workbook"]}, {"w": "jeans", "p": "n.", "z": "牛仔褲", "n": "襪子", "L": 1, "g": "Nick spent three thousand NT dollars on this pair of ___.", "o": ["jeans", "elevator", "garbage", "fool"]}, {"w": "sweater", "p": "n.", "z": "毛衣", "n": "舒服的", "L": 1, "g": "Jennifer is wearing jeans and a ___ today.", "o": ["sweater", "moon", "fork", "cheese"]}, {"w": "jacket", "p": "n.", "z": "夾克", "n": "中等尺寸", "L": 1, "g": "It’s cold outside. Put on your ___.", "o": ["jacket", "moment", "concert", "envelope"]}, {"w": "skirt", "p": "n.", "z": "裙子", "n": "手套", "L": 1, "g": "This ___ comes in three colors: red, black, and brown.", "o": ["skirt", "bite", "apartment", "candle"]}, {"w": "ring", "p": "n.", "z": "戒指", "n": "牛仔褲", "L": 1, "g": "Patty is wearing a ___ on her middle finger.", "o": ["ring", "sign", "cookie", "moon"]}, {"w": "sock", "p": "n.", "z": "襪子", "n": "比", "L": 1, "g": "Lisa never wears shoes without ___.", "o": ["socks", "chopstickses", "towels", "picnics"]}, {"w": "cap", "p": "n.", "z": "（有帽舌的）帽子", "n": "毛衣", "L": 1, "g": "The man is wearing a black ___.", "o": ["cap", "violin", "festival", "fork"]}, {"w": "tie", "p": "n.", "z": "領帶", "n": "襯衫", "L": 1, "g": "Michael has to wear a shirt and ___ at work.", "o": ["tie", "grass", "businessman", "vegetable"]}, {"w": "belt", "p": "n.", "z": "腰帶", "n": "已經", "L": 1, "g": "Ivy bought her father a ___ as his birthday gift.", "o": ["belt", "workbook", "cheese", "lamp"]}, {"w": "pants", "p": "n.", "z": "長褲", "n": "如同……一樣地……", "L": 1, "g": "These ___ were too long for me, so I didn’t buy them.", "o": ["pants", "information", "seller", "newspaper"]}, {"w": "wallet", "p": "n.", "z": "錢包", "n": "項目", "L": 1, "g": "Jason had only twenty NT dollars in his ___.", "o": ["wallet", "tape", "sentence", "vegetable"]}, {"w": "a pair of", "p": "", "z": "一件（褲子）；一雙（鞋）", "n": "戒指", "L": 1, "g": "I bought ___ pants on the Internet last week.", "o": ["a pair of", "recycle", "Earth", "hold / held on"]}, {"w": "glove", "p": "n.", "z": "手套", "n": "流行", "L": 1, "g": "Emily bought a pair of ___ in the department store.", "o": ["gloves", "pizzas", "sights", "meals"]}, {"w": "try on", "p": "", "z": "試穿", "n": "手套", "L": 1, "g": "This jacket is too big. Can I ___ a smaller one?", "o": ["try on", "if", "joke", "ham"]}, {"w": "take / took off", "p": "", "z": "脫下", "n": "特價", "L": 1, "g": "Please ___ off your hat when you go into the building.", "o": ["take", "stand / stood for", "skirt", "hang / hung out"]}, {"w": "be full of", "p": "", "z": "充滿", "n": "已經", "L": 1, "g": "This restaurant is really popular, so it’s always ___ people.", "o": ["full of", "lie / lay", "fake", "take / took off"]}, {"w": "fashionable", "p": "adj.", "z": "流行的；時尚的", "n": "所有人", "L": 1, "g": "Your jeans are so ___. Where did you get them?", "o": ["fashionable", "gray", "scared", "real-life"]}, {"w": "as... as...", "p": "", "z": "如同……一樣地……", "n": "手套", "L": 1}, {"w": "than", "p": "prep.", "z": "比；比較", "n": "領帶", "L": 1, "g": "Your bag is heavier ___ mine. What did you put in it?", "o": ["than", "except", "angry", "towel"]}, {"w": "already", "p": "adv.", "z": "已經", "n": "公司", "L": 1, "g": "Mia wants to buy more shoes, but she ___ has 50 pairs.", "o": ["already", "somewhere", "most", "soon"]}, {"w": "fashion", "p": "n.", "z": "流行；時尚", "n": "舒服的", "L": 1, "g": "Short hair is in ___ for girls now.", "o": ["fashion", "joke", "elevator", "apartment"]}, {"w": "medium", "p": "n.", "z": "中等尺寸；adj. 中等的", "n": "腰帶", "L": 1, "g": "Ann: What size do you wear? Ben: I wear a ___.", "o": ["medium", "tape", "violin", "tip"]}, {"w": "fitting room", "p": "n.", "z": "試衣間", "n": "戒指", "L": 1, "g": "Paul is trying on the jeans in the ___.", "o": ["fitting room", "bun", "stair", "turtle"]}, {"w": "agree", "p": "v.", "z": "同意", "n": "流行的", "L": 1, "g": "Jay: Eric is kind and always helps others. Ed: I ___. He is a nice person.", "o": ["agree", "laugh", "cheer", "invite"]}, {"w": "comfortable", "p": "adj.", "z": "舒服的", "n": "新鮮的", "L": 1, "g": "I am not ___ in these shoes. They are too small.", "o": ["comfortable", "leading", "sweet", "perfect"]}, {"w": "light", "p": "adj.", "z": "輕薄的", "n": "項目", "L": 1, "g": "This jacket is really ___ and comfortable. I’ll take it.", "o": ["light", "friendly", "rich", "real-life"]}, {"w": "recycle", "p": "v.", "z": "回收", "n": "襯衫", "L": 1, "g": "Can you ___ old clothes?", "o": ["recycle", "sound", "trick", "pack"]}, {"w": "planet", "p": "n.", "z": "星球", "n": "項目", "L": 1, "g": "Is there life on other ___?", "o": ["planets", "envelopes", "vegetables", "screens"]}, {"w": "business", "p": "n.", "z": "公司；生意", "n": "洋裝", "L": 1, "g": "Helen started a new ___ with her friends.", "o": ["business", "service", "elevator", "land"]}, {"w": "customer", "p": "n.", "z": "顧客", "n": "手套", "L": 1, "g": "The department store is full of ___.", "o": ["customers", "meats", "meals", "vegetables"]}, {"w": "actually", "p": "adv.", "z": "實際上", "n": "所有人", "L": 1, "g": "___, I have a test tomorrow and can’t go to the party.", "o": ["Actually", "loudly", "slowly", "besides"]}, {"w": "owner", "p": "n.", "z": "所有人", "n": "意指", "L": 1, "g": "Mars is the ___ of this white car.", "o": ["owner", "workbook", "candle", "pizza"]}, {"w": "item", "p": "n.", "z": "項目", "n": "回收", "L": 1, "g": "The restaurant has a long menu of about 60 ___.", "o": ["items", "picnics", "parts", "lands"]}, {"w": "fresh", "p": "adj.", "z": "新鮮的", "n": "意指", "L": 1, "g": "Would you like some ___ strawberries?", "o": ["fresh", "deep", "gray", "scary"]}, {"w": "mean / meant", "p": "v.", "z": "意指", "n": "舒服的", "L": 1, "g": "Larry: What does “ clever” mean? Berry: It ___ “ smart.”", "o": ["means", "carries", "smells", "jogs"]}, {"w": "Earth", "p": "n.", "z": "地球", "n": "脫下", "L": 1, "g": "There are many beautiful animals on ___.", "o": ["Earth", "vegetable", "picnic", "pizza"]}, {"w": "turn (...) into...", "p": "", "z": "（使）成為……", "n": "手套", "L": 1}, {"w": "sofa", "p": "n.", "z": "沙發", "n": "故障的", "L": 2, "g": "My pet cat is under the ___.", "o": ["sofa", "choice", "customer", "meat"]}, {"w": "lamp", "p": "n.", "z": "燈", "n": "行動電源", "L": 2, "g": "Turn on the desk ___ before you start reading.", "o": ["lamp", "pizza", "moon", "oil"]}, {"w": "piano", "p": "n.", "z": "鋼琴", "n": "螢幕", "L": 2, "g": "Rebecca practices the ___ every night.", "o": ["piano", "turtle", "drawer", "ocean"]}, {"w": "radio", "p": "n.", "z": "收音機", "n": "欺騙", "L": 2, "g": "My grandpa used to listen to the ___ every morning.", "o": ["radio", "paper", "circle", "postcard"]}, {"w": "washing machine", "p": "n.", "z": "洗衣機", "n": "最", "L": 2, "g": "Nick put his dirty clothes in the ___.", "o": ["washing machine", "drawer", "owner", "sock"]}, {"w": "refrigerator (fridge)", "p": "n.", "z": "冰箱", "n": "十億", "L": 2, "g": "We put milk in the ___ to stop it from going bad.", "o": ["refrigerator", "fool", "vegetable", "wall"]}, {"w": "violin", "p": "n.", "z": "小提琴", "n": "關上（電器）", "L": 2, "g": "It is not easy to learn to play the ___.", "o": ["violin", "customer", "planet", "shirt"]}, {"w": "bow", "p": "n.", "z": "（弦樂器的）琴弓", "n": "演唱會", "L": 2, "g": "The seller showed us the best ___ in his store.", "o": ["bow", "garbage", "service", "workbook"]}, {"w": "tape", "p": "n.", "z": "膠帶", "n": "玩笑", "L": 2, "g": "I need some ___ to fix my broken book.", "o": ["tape", "cookie", "sight", "bun"]}, {"w": "concert", "p": "n.", "z": "演唱會；音樂會", "n": "玩笑", "L": 2, "g": "I’ll play the piano at the ___ next Saturday.", "o": ["concert", "steak", "shirt", "festival"]}, {"w": "turn on", "p": "", "z": "打開（電器）", "n": "甜的", "L": 2, "g": "I ___ the TV to watch my favorite show.", "o": ["turned on", "instead of", "boil", "fool"]}, {"w": "turn off", "p": "", "z": "關上（電器）", "n": "冰箱", "L": 2, "g": "Remember to ___ the lamp before you leave the room.", "o": ["turn off", "take / took off", "taste", "notice"]}, {"w": "screen", "p": "n.", "z": "螢幕", "n": "膠帶", "L": 2, "g": "The photo on your cellphone ___ is beautiful.", "o": ["screen", "garbage", "ring", "wallet"]}, {"w": "power bank", "p": "n.", "z": "行動電源", "n": "有用的", "L": 2, "g": "Dave: Oh, no. My phone is out. Fred: Don’t worry. You can use my ___.", "o": ["power bank", "toast", "festival", "shape"]}, {"w": "out of order", "p": "", "z": "故障的", "n": "收音機", "L": 2, "g": "The toilet is ___. We can’t use it now.", "o": ["out of order", "screen", "sight", "glove"]}, {"w": "sweet", "p": "adj.", "z": "甜的；甜蜜的", "n": "收音機", "L": 2, "g": "For Debbie, being a mother is the ___ thing in the world.", "o": ["sweetest", "luckyest", "angryest", "grayest"]}, {"w": "most", "p": "adv.", "z": "最；adj. 最多的", "n": "有用的", "L": 2, "g": "Emma is the ___ popular student in my class.", "o": ["most", "abroad", "well", "ever"]}, {"w": "envelope", "p": "n.", "z": "信封", "n": "小提琴", "L": 2, "g": "I wrote a letter to my mom and put it in an ___.", "o": ["envelope", "metal", "towel", "fool"]}, {"w": "used to", "p": "", "z": "過去經常", "n": "行動電源", "L": 2, "g": "I ___ take photos with a camera, but now I use my smartphone.", "o": ["used to", "baby", "raise", "pull"]}, {"w": "useful", "p": "adj.", "z": "有用的", "n": "保持", "L": 2, "g": "This book is very ___ to me. I need it to do my science report.", "o": ["useful", "real-life", "lucky", "perfect"]}, {"w": "fake", "p": "adj.", "z": "假的", "n": "句子", "L": 2, "g": "The woman used a ___ name at the hotel.", "o": ["fake", "lucky", "possible", "dangerous"]}, {"w": "deal", "p": "n. v.", "z": "交易（動詞過去式為 dealt [dElt]）", "n": "過去經常", "L": 2, "g": "The jeans only cost NT$200. It’s a great ___.", "o": ["deal", "wish", "experience", "tip"]}, {"w": "scam", "p": "n.", "z": "詐騙", "n": "取（某物）", "L": 2, "g": "There are a lot of online stores, and some are ___. You need to be careful.", "o": ["scams", "postcards", "hearts", "wallets"]}, {"w": "strange", "p": "adj.", "z": "奇怪的；陌生的", "n": "字", "L": 2, "g": "There is a ___ woman behind the tree. Who is she?", "o": ["strange", "correct", "perfect", "light"]}, {"w": "joke", "p": "n.", "z": "玩笑；笑話", "n": "演唱會", "L": 2, "g": "This is not a ___, and we must act right now.", "o": ["joke", "fork", "candle", "bun"]}, {"w": "seller", "p": "n.", "z": "賣家", "n": "取（某物）", "L": 2, "g": "They are the largest ___ of books in Taiwan.", "o": ["seller", "meal", "coffee", "moment"]}, {"w": "anymore", "p": "adv.", "z": "再也（不……）", "n": "取（某物）", "L": 2, "g": "Sam doesn’t live here ___. He moved to Tainan last month.", "o": ["anymore", "probably", "loudly", "ever"]}, {"w": "stop by", "p": "", "z": "順道拜訪", "n": "膠帶", "L": 2, "g": "I will ___ your house tomorrow after lunch.", "o": ["stop by", "stranger", "coffee", "tell / told... from..."]}, {"w": "pick up", "p": "", "z": "取（某物）", "n": "交易（動詞過去式為 dealt [dElt]）", "L": 2, "g": "Can you ___ the tickets on your way home from work?", "o": ["pick up", "bread", "radio", "billion"]}, {"w": "trick", "p": "v.", "z": "欺騙；n. 騙局", "n": "收音機", "L": 2, "g": "Sue is planning to play a ___ on her brother.", "o": ["trick", "recycle", "pack", "agree"]}, {"w": "billion", "p": "n.", "z": "十億", "n": "鋼琴", "L": 2, "g": "There are over one ___ people in India.", "o": ["billion", "newspaper", "moon", "cookie"]}, {"w": "part", "p": "n.", "z": "部分", "n": "信封", "L": 2, "g": "Jerry: What’s your favorite ___ of this song? Gina: The last minute.", "o": ["part", "moment", "newspaper", "oil"]}, {"w": "tip", "p": "n.", "z": "提示；指導", "n": "再也（不……）", "L": 2, "g": "My mother gave me some useful ___ for buying watermelons.", "o": ["tips", "bites", "planets", "shortses"]}, {"w": "information", "p": "n.", "z": "資料；消息", "n": "十億", "L": 2, "g": "I need some ___ about good restaurants in Taipei.", "o": ["information", "vegetable", "owner", "festival"]}, {"w": "stranger", "p": "n.", "z": "陌生人", "n": "鋼琴", "L": 2, "g": "Elisa told her daughter not to talk to ___.", "o": ["strangers", "apartments", "mediums", "newspapers"]}, {"w": "secret", "p": "n. adj.", "z": "祕密（的）", "n": "演唱會", "L": 2, "g": "John and his wife have no ___ from each other.", "o": ["secrets", "oils", "smells", "tell / told... from..."]}, {"w": "word", "p": "n.", "z": "字", "n": "陌生人", "L": 2, "g": "Those ___ are too difficult for Mike. He’s just five.", "o": ["words", "metals", "pantses", "elevators"]}, {"w": "sentence", "p": "n.", "z": "句子", "n": "（弦樂器的）琴弓", "L": 2, "g": "I don’t know the meaning of this Japanese ___. Could you explain it to me?", "o": ["sentence", "knife", "ham", "earthquake"]}, {"w": "tell / told... from...", "p": "", "z": "區分……與……", "n": "玩笑", "L": 2, "g": "Ms. Lee can’t ___ Paul from his brother Mark.", "o": ["tell", "bite", "lamp", "picnic"]}, {"w": "stay", "p": "v.", "z": "保持", "n": "部分", "L": 2, "g": "The department store ___ open until 10 p.m.", "o": ["stays", "arrives", "trips", "burns"]}, {"w": "salad", "p": "n.", "z": "沙拉", "n": "招牌", "L": 3, "g": "I had some ___ with my steak.", "o": ["salad", "candle", "pot", "fool"]}, {"w": "hamburger (burger)", "p": "n.", "z": "漢堡", "n": "聽起來", "L": 3, "g": "The fast food restaurant is famous for its ___.", "o": ["burgers", "lands", "bows", "towels"]}, {"w": "coffee", "p": "n.", "z": "咖啡", "n": "變得", "L": 3, "g": "Ken couldn’t sleep last night because he drank too much ___.", "o": ["coffee", "bug", "lamp", "owner"]}, {"w": "steak", "p": "n.", "z": "牛排", "n": "火腿", "L": 3, "g": "Patty ordered a ___ at the restaurant.", "o": ["steak", "glove", "line", "earthquake"]}, {"w": "French fries", "p": "n.", "z": "薯條", "n": "開始吃", "L": 3, "g": "I would like to order some ___ without salt.", "o": ["French fries", "radio", "tip", "moon"]}, {"w": "fried chicken", "p": "n.", "z": "炸雞", "n": "聽起來", "L": 3, "g": "Fred eats ___ three times a week.", "o": ["fried chicken", "Earth", "metal", "information"]}, {"w": "ham", "p": "n.", "z": "火腿", "n": "嘗起來", "L": 3, "g": "Dan usually has a ___ sandwich and milk for breakfast.", "o": ["ham", "lesson", "festival", "apartment"]}, {"w": "cheese", "p": "n.", "z": "起司；乳酪", "n": "聽起來", "L": 3, "g": "Blue ___ smells bad but tastes good.", "o": ["cheese", "glove", "stranger", "screen"]}, {"w": "pork", "p": "n.", "z": "豬肉", "n": "點餐", "L": 3, "g": "Al and his family don’t eat ___.", "o": ["pork", "fashion", "dress", "concert"]}, {"w": "bean soup", "p": "n.", "z": "豆子湯", "n": "開始吃", "L": 3, "g": "My mom’s ___ is delicious. We can’t get enough of it.", "o": ["bean soup", "knife", "lesson", "jacket"]}, {"w": "vegetable", "p": "n.", "z": "蔬菜", "n": "小圓麵包", "L": 3, "g": "I had a bowl of ___ soup for lunch.", "o": ["vegetable", "sight", "bug", "sock"]}, {"w": "pizza", "p": "n.", "z": "披薩", "n": "炸雞", "L": 3, "g": "Ivy ate all the ___ without sharing it with her friends.", "o": ["pizza", "ring", "baby", "workbook"]}, {"w": "bun", "p": "n.", "z": "小圓麵包", "n": "也許", "L": 3, "g": "Some people don’t eat the ___ when they have a hamburger.", "o": ["buns", "jellyfishes", "items", "fools"]}, {"w": "toast", "p": "n.", "z": "烤麵包片", "n": "（某處）令人愉快的", "L": 3, "g": "Jim always puts butter on his ___.", "o": ["toast", "Earth", "ocean", "cookie"]}, {"w": "meat", "p": "n.", "z": "肉", "n": "炸雞", "L": 3, "g": "Chicken is white ___, and beef is red meat.", "o": ["meat", "violin", "land", "belt"]}, {"w": "bread", "p": "n.", "z": "麵包", "n": "油", "L": 3, "g": "Would you like some ___ and butter?", "o": ["bread", "jacket", "seller", "lesson"]}, {"w": "wall", "p": "n.", "z": "牆壁", "n": "豆子湯", "L": 3, "g": "William put pictures on the ___ of his bedroom.", "o": ["walls", "informations", "socks", "violins"]}, {"w": "meal", "p": "n.", "z": "一餐", "n": "變得", "L": 3, "g": "Gina cooks three ___ for her family every day.", "o": ["meals", "screens", "straws", "cookies"]}, {"w": "oil", "p": "n.", "z": "油；石油", "n": "邀請", "L": 3, "g": "Maggie started to cook the chicken with some ___.", "o": ["oil", "circle", "straw", "fashion"]}, {"w": "sound", "p": "v.", "z": "聽起來；n. 聲音", "n": "點餐", "L": 3, "g": "Ian: What do you think about my plan? Lily: It ___ good.", "o": ["sounds", "bothers", "laughs", "covers"]}, {"w": "weight", "p": "n.", "z": "體重；重量", "n": "增加（體重）", "L": 3, "g": "Tommy lost a lot of ___ when he was sick.", "o": ["weight", "jeans", "heart", "part"]}, {"w": "smell", "p": "v.", "z": "聞起來；n. 氣味", "n": "聽起來", "L": 3, "g": "The vegetable soup ___ good. Who made it?", "o": ["smells", "pulls", "trips", "tricks"]}, {"w": "taste", "p": "v.", "z": "嘗起來；n. 味道", "n": "咖啡", "L": 3, "g": "The fried rice ___ good. I couldn’t stop eating it.", "o": ["tasted", "laughed", "recycled", "packed"]}, {"w": "dig / dug in", "p": "", "z": "開始吃", "n": "豬肉", "L": 3, "g": "Let’s ___ in before the food gets cold.", "o": ["dig", "gently", "Earth", "agree"]}, {"w": "soon", "p": "adv.", "z": "很快地", "n": "有關係", "L": 3, "g": "Gemma is going to be a mother ___.", "o": ["soon", "well", "actually", "ever"]}, {"w": "order", "p": "v. n.", "z": "點餐；訂購", "n": "嘗起來", "L": 3, "g": "Excuse me. May I take your ___, sir?", "o": ["order", "smile", "clap", "refrigerator (fridge)"]}, {"w": "put / put on", "p": "", "z": "增加（體重）", "n": "招牌", "L": 3, "g": "I don’t eat a lot because I’m afraid of ___ weight.", "o": ["putting on", "land", "wall", "owner"]}, {"w": "get / got", "p": "v.", "z": "變得", "n": "小圓麵包", "L": 3, "g": "Eat your soup first, or it will ___ cold.", "o": ["get", "boil", "jog", "push"]}, {"w": "notice", "p": "v.", "z": "注意；看到", "n": "體重", "L": 3, "g": "Zack: Dad is back. Liza: I know. I ___ his car outside.", "o": ["noticed", "pulled", "joged", "raised"]}, {"w": "invite", "p": "v.", "z": "邀請", "n": "聞起來", "L": 3, "g": "Jordan ___ us to his party last weekend.", "o": ["invited", "boiled", "recycled", "flooded"]}, {"w": "besides", "p": "adv.", "z": "此外；而且", "n": "咖啡", "L": 3, "g": "I don’t want to eat out. ___, I don’t have any money.", "o": ["Besides", "successfully", "else", "gently"]}, {"w": "probably", "p": "adv.", "z": "也許", "n": "薯條", "L": 3, "g": "Helen likes the green T-shirt, so she will ___ buy it.", "o": ["probably", "slowly", "well", "somewhere"]}, {"w": "bite", "p": "n.", "z": "一口的量；v. 咬（動詞過去式為 bit [bIt]）", "n": "變得", "L": 3, "g": "Nick took a ___ of the sandwich.", "o": ["bite", "dozen", "area", "dress"]}, {"w": "stand / stood for", "p": "", "z": "代表", "n": "增加（體重）", "L": 3, "g": "The flowers ___ for my love.", "o": ["stand", "than", "agree", "pot"]}, {"w": "matter", "p": "v.", "z": "有關係", "n": "也許", "L": 3, "g": "To Julie, her children ___ the most in the world.", "o": ["matter", "jog", "stay", "agree"]}, {"w": "sign", "p": "n.", "z": "招牌；標誌", "n": "注意", "L": 3, "g": "The ___ on the wall says “ Wash hands before you eat.”", "o": ["sign", "lamp", "part", "bug"]}, {"w": "friendly", "p": "adj.", "z": "（某處）令人愉快的", "n": "麵包", "L": 3, "g": "Mr. Chen’s restaurant is ___. My family and I feel happy and comfortable there.", "o": ["friendly", "light", "perfect", "correct"]}, {"w": "set / set up", "p": "", "z": "搭（帳篷）；建立", "n": "能夠", "L": 4, "g": "It’s getting dark. Let’s ___ camp quickly.", "o": ["set up", "moment", "pork", "sweater"]}, {"w": "make / made a fire", "p": "", "z": "生火", "n": "晾（掛）", "L": 4, "g": "Be careful when you ___ a fire.", "o": ["make", "out of order", "trip", "excellent"]}, {"w": "boil", "p": "v.", "z": "煮沸", "n": "繩燈", "L": 4, "g": "I am ___ water for the tea.", "o": ["boiling", "mattering", "sounding", "tasting"]}, {"w": "bug", "p": "n.", "z": "蟲", "n": "形狀", "L": 4, "g": "James caught some ___.", "o": ["bugs", "oceans", "workbooks", "informations"]}, {"w": "picnic", "p": "n.", "z": "野餐", "n": "輕柔地", "L": 4, "g": "Let’s go on a ___ at the park today.", "o": ["picnic", "fashion", "owner", "seller"]}, {"w": "hang / hung out", "p": "", "z": "晾（掛）", "n": "列", "L": 4, "g": "Dad ___ the clothes to dry.", "o": ["hung out", "heart", "baby", "dangerous"]}, {"w": "towel", "p": "n.", "z": "毛巾", "n": "幸運的", "L": 4, "g": "Howard dried his hands with the ___.", "o": ["towel", "paper", "steak", "newspaper"]}, {"w": "lie / lay", "p": "v.", "z": "躺下", "n": "笑", "L": 4, "g": "Max ___ down and took a rest.", "o": ["lay", "notice", "cover", "invite"]}, {"w": "grass", "p": "n.", "z": "草地；草", "n": "野餐", "L": 4, "g": "The sign reads, “ Keep off the ___.”", "o": ["grass", "salad", "dozen", "fork"]}, {"w": "string lights", "p": "n.", "z": "繩燈", "n": "日記", "L": 4, "g": "We put ___ around the trees for the party.", "o": ["string lights", "garbage", "pizza", "belt"]}, {"w": "moon", "p": "n.", "z": "月亮", "n": "搭（帳篷）", "L": 4, "g": "We can usually see a full ___ during the Mid-Autumn Festival.", "o": ["moon", "stair", "sofa", "glove"]}, {"w": "count", "p": "v.", "z": "數數；計算", "n": "輕柔地", "L": 4, "g": "___ to ten before we start the game.", "o": ["Count", "recycle", "bother", "enter"]}, {"w": "pack", "p": "v.", "z": "打包", "n": "成功地", "L": 4, "g": "Sandy was still ___ her bag when the taxi came.", "o": ["packing", "bothering", "smelling", "staying"]}, {"w": "perfect", "p": "adj.", "z": "完美的", "n": "蟲", "L": 4, "g": "David had ___ weather during his vacation in Japan.", "o": ["perfect", "real-life", "angry", "strange"]}, {"w": "be able to", "p": "", "z": "能夠", "n": "輕柔地", "L": 4, "g": "The young birds are ___ fly now.", "o": ["able to", "invite", "quite", "towel"]}, {"w": "well", "p": "adv.", "z": "很好地", "n": "幸運的", "L": 4, "g": "I didn’t sleep ___ because I had a bad dream.", "o": ["well", "quite", "most", "abroad"]}, {"w": "loudly", "p": "adv.", "z": "大聲地", "n": "野餐", "L": 4, "g": "Sorry, I can’t hear you clearly. Please speak ___.", "o": ["loudly", "ever", "abroad", "already"]}, {"w": "slowly", "p": "adv.", "z": "緩慢地", "n": "月亮", "L": 4, "g": "The sun went down ___ behind the mountains.", "o": ["slowly", "perhaps", "actually", "most"]}, {"w": "gently", "p": "adv.", "z": "輕柔地", "n": "緩慢地", "L": 4, "g": "Emily closed the door ___ because Tim was sleeping.", "o": ["gently", "actually", "somewhere", "most"]}, {"w": "smile", "p": "v. n.", "z": "微笑", "n": "成功地", "L": 4, "g": "The old woman ___ at me after I helped her.", "o": ["smiled", "ordered", "claped", "joged"]}, {"w": "hop", "p": "v.", "z": "單腳跳躍", "n": "蟲", "L": 4, "g": "The boy didn’t walk but ___ along the sidewalk.", "o": ["hopped", "carryed", "raised", "tasted"]}, {"w": "dancing queen", "p": "n.", "z": "舞后", "n": "燒焦", "L": 4, "g": "Ann is a ___. She dances the best at school.", "o": ["dancing queen", "straw", "lamp", "pants"]}, {"w": "hard", "p": "adv.", "z": "努力地", "n": "舉辦", "L": 4, "g": "Tim studies ___ and plays hard.", "o": ["hard", "most", "already", "abroad"]}, {"w": "trip", "p": "v.", "z": "絆倒", "n": "煮沸", "L": 4, "g": "Andy ran too fast and ___.", "o": ["tripped", "smelled", "sounded", "noticed"]}, {"w": "experience", "p": "n. v.", "z": "經歷", "n": "舞后", "L": 4, "g": "I took a trip to the USA last month. It was a great ___ for me.", "o": ["experience", "deal", "wish", "word"]}, {"w": "diary", "p": "n.", "z": "日記", "n": "圓圈", "L": 4, "g": "Ben keeps a ___ about his school life.", "o": ["diary", "shorts", "weight", "shirt"]}, {"w": "arrive", "p": "v.", "z": "抵達", "n": "拍手", "L": 4, "g": "Ann: What time will the train ___ in Taipei? Ben: At five.", "o": ["arrive", "flood", "trick", "notice"]}, {"w": "area", "p": "n.", "z": "區域；地區", "n": "愛心", "L": 4, "g": "It will rain in all ___ of this country this afternoon.", "o": ["areas", "pizzas", "hams", "caps"]}, {"w": "successfully", "p": "adv.", "z": "成功地", "n": "搭（帳篷）", "L": 4, "g": "Paula played the piano ___ at the show.", "o": ["successfully", "already", "abroad", "actually"]}, {"w": "pot", "p": "n.", "z": "鍋子；壺", "n": "列", "L": 4, "g": "There is a ___ of chicken soup in the kitchen.", "o": ["pot", "screen", "shorts", "meat"]}, {"w": "burn", "p": "v.", "z": "燒焦；燃燒", "n": "抵達", "L": 4, "g": "Sam didn’t enjoy his dinner because his steak ___.", "o": ["burned", "stayed", "invited", "raised"]}, {"w": "unhappy", "p": "adj.", "z": "不開心的", "n": "單腳跳躍", "L": 4, "g": "The workers are ___ because they have to work on the weekend.", "o": ["unhappy", "possible", "excellent", "strange"]}, {"w": "hold / held", "p": "v.", "z": "舉辦；握住", "n": "拍手", "L": 4, "g": "The teacher will ___ a meeting with the parents next week. It is about the school trip.", "o": ["hold", "notice", "trick", "cover"]}, {"w": "circle", "p": "n.", "z": "圓圈", "n": "搭（帳篷）", "L": 4, "g": "The sun looks like a big yellow ___ in the sky.", "o": ["circle", "belt", "medium", "billion"]}, {"w": "shy", "p": "adj.", "z": "害羞的", "n": "任何人", "L": 4, "g": "Harry is so ___. He seldom talks in class.", "o": ["shy", "useful", "fashionable", "fake"]}, {"w": "line", "p": "n.", "z": "列；線條", "n": "很好地", "L": 4, "g": "Many people waited in ___ outside the bakery.", "o": ["line", "cap", "scam", "bread"]}, {"w": "laugh", "p": "v.", "z": "笑", "n": "大聲地", "L": 4, "g": "Ivan ___ at the end of Eva’s funny story.", "o": ["laughed", "agreed", "sounded", "covered"]}, {"w": "anyone (anybody)", "p": "pron.", "z": "任何人", "n": "數數", "L": 4, "g": "There isn’t ___ in the classroom. Where are the students?", "o": ["anyone", "nothing", "string lights", "knife"]}, {"w": "else", "p": "adv.", "z": "其他", "n": "圓圈", "L": 4, "g": "You ordered the soup and the sandwich. Anything ___?", "o": ["else", "perhaps", "quite", "gladly"]}, {"w": "clap", "p": "v. n.", "z": "拍手；鼓掌", "n": "笑", "L": 4, "g": "At the end of the show, one man began to ___, and the others joined in.", "o": ["clap", "order", "smile", "gray"]}, {"w": "cheer", "p": "v.", "z": "歡呼；鼓舞", "n": "數數", "L": 4, "g": "Let’s ___ for Lisa! She won first place in the race.", "o": ["cheer", "sound", "agree", "flood"]}, {"w": "festival", "p": "n.", "z": "節慶；節日", "n": "煮沸", "L": 4, "g": "Many people went to the movie ___ last night.", "o": ["festival", "screen", "wall", "turtle"]}, {"w": "heart", "p": "n.", "z": "愛心；內心", "n": "鍋子", "L": 4, "g": "Andrew drew a big ___ on the card to show his love for his wife.", "o": ["heart", "baby", "seller", "bite"]}, {"w": "shape", "p": "n.", "z": "形狀", "n": "舞后", "L": 4, "g": "Jim’s birthday cake is in the ___ of a bear.", "o": ["shape", "wall", "medium", "bun"]}, {"w": "lucky", "p": "adj.", "z": "幸運的", "n": "晾（掛）", "L": 4, "g": "Amber: Did you find a parking space? Janet: Yes, I did! I was so ___.", "o": ["lucky", "strange", "angry", "scary"]}, {"w": "earthquake", "p": "n.", "z": "地震", "n": "舉起", "L": 5, "g": "No one was hurt in the ___ this morning.", "o": ["earthquake", "cheese", "customer", "bun"]}, {"w": "cover", "p": "v.", "z": "遮蓋；遮蔽；n. 封面", "n": "灰色的", "L": 5, "g": "The boy ___ his body with a blanket.", "o": ["covered", "smelled", "packed", "mattered"]}, {"w": "typhoon", "p": "n.", "z": "颱風", "n": "在國外", "L": 5, "g": "The road signs fell in the street during the big ___ last night.", "o": ["typhoon", "bun", "cheese", "garbage"]}, {"w": "candle", "p": "n.", "z": "蠟燭", "n": "傻瓜", "L": 5, "g": "Please light the ___ on the birthday cake.", "o": ["candle", "straw", "screen", "pot"]}, {"w": "smoke alarm", "p": "n.", "z": "煙霧警報器", "n": "陸地", "L": 5, "g": "The loud sound of the ___ woke up everyone in the house.", "o": ["smoke alarm", "pot", "envelope", "medium"]}, {"w": "elevator", "p": "n.", "z": "電梯", "n": "餅乾", "L": 5, "g": "My leg hurts, so I’m going to take the ___.", "o": ["elevator", "postcard", "lamp", "spoon"]}, {"w": "raise", "p": "v.", "z": "舉起；增加", "n": "生氣的", "L": 5, "g": "___ your hand when you have any questions.", "o": ["Raise", "hop", "pack", "jog"]}, {"w": "pull", "p": "v.", "z": "拉；抽出", "n": "蠟燭", "L": 5, "g": "Jeff ___ a pen out of his pocket.", "o": ["pulled", "sounded", "mattered", "recycled"]}, {"w": "push", "p": "v.", "z": "推；按", "n": "成長", "L": 5, "g": "Lily ___ the door open and walked out.", "o": ["pushed", "died", "tasted", "smelled"]}, {"w": "rich", "p": "adj.", "z": "富有的；豐富的", "n": "抽屜", "L": 5, "g": "Mr. Smith is very ___. He has 12 big houses.", "o": ["rich", "excellent", "shy", "fashionable"]}, {"w": "deep", "p": "adj.", "z": "深的", "n": "灰色的", "L": 5, "g": "Be careful. The water is very ___ here.", "o": ["deep", "unhappy", "comfortable", "lucky"]}, {"w": "hold / held on", "p": "", "z": "緊緊抓牢；堅持下去", "n": "聽到", "L": 5, "g": "The boy ___ to his mom’s arm when they crossed the street.", "o": ["held on", "washing machine", "diary", "possible"]}, {"w": "abroad", "p": "adv.", "z": "在國外", "n": "舉起", "L": 5, "g": "Helen and her family always go ___ in the summer.", "o": ["abroad", "else", "gently", "somewhere"]}, {"w": "dangerous", "p": "adj.", "z": "危險的", "n": "真實生活中的", "L": 5, "g": "It’s ___ for you to walk by yourself at night.", "o": ["dangerous", "strange", "shy", "excellent"]}, {"w": "moment", "p": "n.", "z": "時刻", "n": "聽到", "L": 5, "g": "My mom made me a sandwich, but I wasn’t hungry at that ___.", "o": ["moment", "diary", "choice", "jellyfish"]}, {"w": "hear / heard", "p": "v.", "z": "聽到", "n": "颱風", "L": 5, "g": "I ___ my dad singing in the shower last night.", "o": ["heard", "joged", "arrived", "mattered"]}, {"w": "someone (somebody)", "p": "pron.", "z": "某人", "n": "深的", "L": 5, "g": "Can you ask ___ else to help you? I’m busy now.", "o": ["someone", "nothing", "fake", "ever"]}, {"w": "scary", "p": "adj.", "z": "嚇人的", "n": "成長", "L": 5, "g": "The story was ___. Tim couldn’t sleep after he heard it.", "o": ["scary", "lucky", "light", "fresh"]}, {"w": "fall / fell off", "p": "", "z": "（ 從……）掉下", "n": "除了……之外", "L": 5, "g": "Doris ___ her bike and got hurt.", "o": ["fell off", "postcard", "ocean", "scared"]}, {"w": "cut / cut", "p": "v.", "z": "割傷；切", "n": "真實生活中的", "L": 5, "g": "I ___ my finger last night when I was making dinner.", "o": ["cut", "trick", "agree", "laugh"]}, {"w": "nothing", "p": "pron.", "z": "沒有事情；沒有東西", "n": "窗戶", "L": 5, "g": "I know ___ about Ivan. In fact, he just moved here last week.", "o": ["nothing", "choice", "most", "abroad"]}, {"w": "scene", "p": "n.", "z": "場景", "n": "主要的", "L": 5, "g": "In the first ___ of the movie, the actress walked past the room slowly.", "o": ["scene", "metal", "workbook", "meal"]}, {"w": "leading", "p": "adj.", "z": "主要的", "n": "窗戶", "L": 5, "g": "Jay: Who is the ___ actress in this movie? Betty: Jennifer Lawrence.", "o": ["leading", "excellent", "fashionable", "shy"]}, {"w": "real-life", "p": "adj.", "z": "真實生活中的", "n": "沒有事情", "L": 5, "g": "The teacher used some ___ examples to explain the idea.", "o": ["real-life", "excellent", "fresh", "fashionable"]}, {"w": "ever", "p": "adv.", "z": "在任何時候", "n": "危險的", "L": 5, "g": "The food at that restaurant was terrible, so I don’t want to eat there ___ again.", "o": ["ever", "successfully", "anymore", "gladly"]}, {"w": "go / went out", "p": "", "z": "（ 燈、火）熄滅", "n": "景象", "L": 5, "g": "I couldn’t see anything when the lights ___.", "o": ["went out", "bite", "crazy about", "festival"]}, {"w": "lesson", "p": "n.", "z": "教訓；（一節）課", "n": "蠟燭", "L": 5, "g": "That mistake taught us a ___. We’ll never forget about it.", "o": ["lesson", "dress", "postcard", "moon"]}, {"w": "land", "p": "n.", "z": "陸地；v. 降落", "n": "教訓", "L": 5, "g": "Frogs live both in water and on ___.", "o": ["land", "shirt", "weight", "salad"]}, {"w": "several", "p": "adj.", "z": "數個的", "n": "割傷", "L": 5, "g": "Carl has ___ pets. He has two cats and a dog.", "o": ["several", "comfortable", "fake", "friendly"]}, {"w": "grow / grew", "p": "v.", "z": "成長；增加", "n": "割傷", "L": 5, "g": "Mike is ___ so fast. These clothes are too small for him.", "o": ["growing", "sounding", "recycling", "smelling"]}, {"w": "gray", "p": "adj.", "z": "灰色的；n. 灰色", "n": "緊緊抓牢", "L": 5, "g": "Anton: What’s that big ___ animal over there? Leah: It’s an elephant.", "o": ["gray", "sweet", "shy", "fashionable"]}, {"w": "dozen", "p": "n.", "z": "一打", "n": "餅乾", "L": 5, "g": "Remember to buy a ___ eggs on your way home.", "o": ["dozen", "bow", "stair", "bread"]}, {"w": "scared", "p": "adj.", "z": "感到害怕的", "n": "陸地", "L": 5, "g": "Hank is ___ of speaking in front of people.", "o": ["scared", "fashionable", "lucky", "light"]}, {"w": "window", "p": "n.", "z": "窗戶", "n": "感到害怕的", "L": 5, "g": "Could you close the ___? I feel cold.", "o": ["windows", "lamps", "rings", "dresses"]}, {"w": "sight", "p": "n.", "z": "景象", "n": "傻瓜", "L": 5, "g": "Look at all the fireflies in the dark. It’s a beautiful ___.", "o": ["sight", "lamp", "bite", "billion"]}, {"w": "surprise", "p": "n.", "z": "驚訝；v. 使……驚訝", "n": "某人", "L": 5, "g": "Daisy’s friends planned a birthday ___ for her.", "o": ["surprise", "dress", "metal", "cheese"]}, {"w": "flood", "p": "v.", "z": "淹沒；n. 洪水", "n": "時刻", "L": 5, "g": "The heavy rain ___ some roads.", "o": ["flooded", "mattered", "smelled", "counted"]}, {"w": "apartment", "p": "n.", "z": "公寓", "n": "景象", "L": 5, "g": "The ___ building has many floors, and each floor has eight different homes.", "o": ["apartment", "spoon", "postcard", "belt"]}, {"w": "except", "p": "prep.", "z": "除了……之外", "n": "淹沒", "L": 5, "g": "The museum is open every day ___ Mondays.", "o": ["except", "than", "power bank", "a pair of"]}, {"w": "cookie", "p": "n.", "z": "餅乾", "n": "沒有事情", "L": 5, "g": "My grandma always makes delicious ___ for us when we visit her.", "o": ["cookies", "wallies", "jacketies", "selleries"]}, {"w": "drawer", "p": "n.", "z": "抽屜", "n": "真實生活中的", "L": 5, "g": "Linda put her books in the desk ___.", "o": ["drawer", "steak", "salad", "fork"]}, {"w": "quite", "p": "adv.", "z": "相當地", "n": "時刻", "L": 5, "g": "The movie was ___ interesting, and I liked the story very much.", "o": ["quite", "probably", "gently", "well"]}, {"w": "angry", "p": "adj.", "z": "生氣的", "n": "割傷", "L": 5, "g": "Mr. Stark was ___ about the broken plates.", "o": ["angry", "useful", "unhappy", "comfortable"]}, {"w": "fool", "p": "n.", "z": "傻瓜；v. 愚弄", "n": "公寓", "L": 5, "g": "Don’t be a ___ and play outside during a typhoon.", "o": ["fool", "pants", "part", "grass"]}, {"w": "straw", "p": "n.", "z": "吸管；稻草", "n": "服務", "L": 6, "g": "Linda drank her juice through a ___.", "o": ["straw", "business", "glove", "cheese"]}, {"w": "carry", "p": "v.", "z": "攜帶", "n": "不再", "L": 6, "g": "Gina helped her grandma ___ the heavy bag.", "o": ["carry", "notice", "boil", "raise"]}, {"w": "metal", "p": "n.", "z": "金屬", "n": "如果", "L": 6, "g": "You can use a ___ bowl over and over again.", "o": ["metal", "skirt", "part", "scene"]}, {"w": "spoon", "p": "n.", "z": "湯匙", "n": "願望", "L": 6, "g": "Adam is eating the soup with a ___.", "o": ["spoon", "lamp", "vegetable", "business"]}, {"w": "chopsticks", "p": "n.", "z": "筷子", "n": "優秀的", "L": 6, "g": "In Taiwan, many people use ___ to eat.", "o": ["chopsticks", "jeans", "sofa", "scene"]}, {"w": "paper", "p": "n.", "z": "紙", "n": "樓梯", "L": 6, "g": "I need a piece of ___ to write down your phone number.", "o": ["paper", "skirt", "land", "business"]}, {"w": "stair", "p": "n.", "z": "樓梯", "n": "商人", "L": 6, "g": "Ted lives on the third floor, and he usually takes the ___.", "o": ["stairs", "customers", "envelopes", "bites"]}, {"w": "instead of", "p": "prep.", "z": "作為……替代", "n": "筷子", "L": 6, "g": "Mandy brought fruit ___ flowers as a gift for her friend in the hospital.", "o": ["instead of", "than", "except", "go / went out"]}, {"w": "jog", "p": "v.", "z": "慢跑", "n": "樂意地", "L": 6, "g": "Don’t ___ right after dinner. It’s not good for you.", "o": ["jog", "flood", "agree", "laugh"]}, {"w": "newspaper", "p": "n.", "z": "報紙", "n": "費心", "L": 6, "g": "I read about the sad news in the ___.", "o": ["newspaper", "scene", "meal", "owner"]}, {"w": "postcard", "p": "n.", "z": "明信片", "n": "垃圾", "L": 6, "g": "I’ll send you a ___ when I arrive in London.", "o": ["postcard", "cheese", "medium", "cookie"]}, {"w": "businessman", "p": "n.", "z": "商人", "n": "樓梯", "L": 6, "g": "Mr. Smith is a ___. He sells shoes.", "o": ["businessman", "item", "lesson", "scene"]}, {"w": "workbook", "p": "n.", "z": "習作", "n": "海洋", "L": 6, "g": "Class, remember to bring your ___ to school tomorrow.", "o": ["workbooks", "sentences", "circles", "earthquakes"]}, {"w": "bother", "p": "v.", "z": "費心", "n": "明信片", "L": 6, "g": "Leo: Do you need me to wait for you? Ally: No, don’t ___.", "o": ["bother", "trip", "hop", "smell"]}, {"w": "end up", "p": "", "z": "最後成為", "n": "採取行動", "L": 6, "g": "We planned to just have drinks, but we ___ having a meal together.", "o": ["ended up", "notice", "cover", "moment"]}, {"w": "ocean", "p": "n.", "z": "海洋", "n": "可能的", "L": 6, "g": "Many people are swimming in the ___ although the water is cold.", "o": ["ocean", "elevator", "sight", "circle"]}, {"w": "turtle", "p": "n.", "z": "海龜；龜", "n": "海洋", "L": 6, "g": "The fisherman saw two ___ swimming in the sea.", "o": ["turtles", "jackets", "cheeses", "strangers"]}, {"w": "perhaps", "p": "adv.", "z": "也許", "n": "水母", "L": 6, "g": "The sky is getting dark. ___ it will rain soon.", "o": ["Perhaps", "most", "gently", "slowly"]}, {"w": "if", "p": "conj.", "z": "如果", "n": "紙", "L": 6, "g": "Rick will stay home ___ it rains tomorrow.", "o": ["if", "apartment", "lucky", "hamburger (burger)"]}, {"w": "take / took action", "p": "", "z": "採取行動", "n": "費心", "L": 6, "g": "We must ___ action if we don’t want the team to lose.", "o": ["take", "fool", "agree", "customer"]}, {"w": "though / although", "p": "conj.", "z": "雖然", "n": "水母", "L": 6, "g": "Eric went to school yesterday though / ___ he was sick.", "o": ["although", "if", "hang / hung out", "moon"]}, {"w": "break / broke down", "p": "", "z": "分解", "n": "選擇", "L": 6, "g": "Plastic bags don’t ___ down easily.", "o": ["break", "sock", "owner", "invite"]}, {"w": "correct", "p": "adj.", "z": "正確的；v. 更正", "n": "採取行動", "L": 6, "g": "Tom got eight ___ answers on the test.", "o": ["correct", "strange", "real-life", "deep"]}, {"w": "feed / fed", "p": "v.", "z": "餵", "n": "死亡", "L": 6, "g": "Ian ___ the dogs twice a day.", "o": ["feeds", "arrives", "recycles", "tricks"]}, {"w": "baby", "p": "n.", "z": "幼鳥；嬰兒", "n": "報紙", "L": 6, "g": "The birds are feeding their ___ in the trees.", "o": ["babies", "dozenies", "radioies", "draweries"]}, {"w": "jellyfish", "p": "n.", "z": "水母", "n": "湯匙", "L": 6, "g": "You can see a lot of beautiful ___ in this lake.", "o": ["jellyfish", "pizza", "bread", "bun"]}, {"w": "die", "p": "v.", "z": "死亡", "n": "如果", "L": 6, "g": "At the end of the story, the bad guy ___ and the good people lived happily.", "o": ["died", "raiseied", "soundied", "floodied"]}, {"w": "crazy about", "p": "", "z": "非常喜歡……", "n": "在某處", "L": 6, "g": "Pete is ___ that new song. He listens to it all the time.", "o": ["crazy about", "festival", "fork", "unhappy"]}, {"w": "service", "p": "n.", "z": "服務", "n": "可能的", "L": 6, "g": "The ___ at this restaurant is very good. The waiters are always friendly.", "o": ["service", "business", "pork", "circle"]}, {"w": "excellent", "p": "adj.", "z": "優秀的", "n": "可能的", "L": 6, "g": "Our new teacher is ___. She explains things in a clear way.", "o": ["excellent", "rich", "fresh", "perfect"]}, {"w": "wish", "p": "n. v.", "z": "願望；希望", "n": "如果", "L": 6, "g": "Lily’s birthday ___ this year is a family trip to Penghu in the summer.", "o": ["wish", "deal", "experience", "wallet"]}, {"w": "garbage", "p": "n.", "z": "垃圾", "n": "最後成為", "L": 6, "g": "Please take out the ___ when you leave.", "o": ["garbage", "bow", "dozen", "fashion"]}, {"w": "somewhere", "p": "adv.", "z": "在某處", "n": "海洋", "L": 6, "g": "This place is too noisy. Can we go ___ else?", "o": ["somewhere", "besides", "ever", "already"]}, {"w": "enter", "p": "v.", "z": "進入；輸入", "n": "非常喜歡……", "L": 6, "g": "The police ___ the building through the back door.", "o": ["entered", "stayed", "hoped", "counted"]}, {"w": "knife", "p": "n.", "z": "刀子", "n": "選擇", "L": 6, "g": "I need a ___ to cut my steak.", "o": ["knife", "tie", "apartment", "scam"]}, {"w": "fork", "p": "n.", "z": "叉子", "n": "海龜", "L": 6, "g": "The little boy is learning to eat with a ___.", "o": ["fork", "wallet", "shirt", "jacket"]}, {"w": "choice", "p": "n.", "z": "選擇", "n": "攜帶", "L": 6, "g": "You have a ___ of noodles or rice for dinner.", "o": ["choice", "wallet", "jacket", "planet"]}, {"w": "possible", "p": "adj.", "z": "可能的", "n": "採取行動", "L": 6, "g": "We can’t win the game. It’s not ___.", "o": ["possible", "real-life", "scared", "leading"]}, {"w": "no longer", "p": "", "z": "不再", "n": "叉子", "L": 6, "g": "The Simpsons moved away. They ___ live here.", "o": ["no longer", "owner", "washing machine", "steak"]}, {"w": "gladly", "p": "adv.", "z": "樂意地", "n": "餵", "L": 6, "g": "I will ___ show you around the city when you visit next month.", "o": ["gladly", "hard", "else", "besides"]}];
+
+/* =======================================================
+   設定區
+   ======================================================= */
+const BOOK_NAME = "第四冊（國二下）";
+const LESSON = "單字庫";
+const ROUND = 20;                 // 每回合出幾題
+
+/* 班級名單 */
+const CLASSES = {
+  a: { name:"國三班", seats:[
+    {n:"01", s:"靜"}, {n:"02", s:"若"}, {n:"03", s:"慧"}, {n:"04", s:"欣"},
+    {n:"05", s:"衫"}, {n:"06", s:"睿"}, {n:"07", s:"芸"}, {n:"08", s:"蓁"},
+    {n:"09", s:"亘"}, {n:"10", s:"晏"}, {n:"11", s:"裕"}, {n:"12", s:"瑋"},
+    {n:"00", s:"訪客", guest:true}
+  ]}
+};
+let _cid = ((new URLSearchParams(location.search).get("c")) || "a").toLowerCase();
+if(!CLASSES[_cid]) _cid = "a";
+const CLASS_ID = _cid;
+const CLS = CLASSES[CLASS_ID];
+const ROSTER = CLS.seats;
+const ALL_SEATS = ROSTER.map(function(p){ return p.n; });
+const SEAT_IDS  = ROSTER.filter(function(p){ return !p.guest; }).map(function(p){ return p.n; });
+function isGuest(n){
+  for(var i=0;i<ROSTER.length;i++){ if(String(ROSTER[i].n)===String(n)) return !!ROSTER[i].guest; }
+  return false;
+}
+function sname(n){
+  for(var i=0;i<ROSTER.length;i++){
+    if(String(ROSTER[i].n)===String(n)) return ROSTER[i].n + (ROSTER[i].s ? " " + ROSTER[i].s : "");
+  }
+  return String(n);
+}
+const TEACHER_CODE = "2026";
+
+const HOMEWORK = {
+  on: false,                      // 隨時練預設不綁作業；要指定範圍時改成 true
+  title: "本週作業",
+  due: "",
+  range: "all",                   // all 或 L1…L6
+  tasks: [ {stage:0, pass:18}, {stage:1, pass:14} ],
+  note: "可以重複練很多次，算你最好的那一次。"
+};
+
+const GFORM = {
+  url: "https://docs.google.com/forms/d/e/1FAIpQLSdG6ajrZXfG2LdjAXqsxCTwHrKhBo3aPA4U56Ug8ex0WMRMGw/formResponse",
+  f: { seat:"entry.113402022", lesson:"entry.770464151", stage:"entry.1305707477",
+       right:"entry.629191504", total:"entry.193167403", wrong:"entry.1924439157",
+       hw:"entry.952655181" }
+};
+/* ======================================================= */
+
+const KEY = "vocab_b4_" + CLASS_ID;
+const STAGES = [
+  {n:"第一階", t:"看得懂", d:"看英文，選中文"},
+  {n:"第二階", t:"想得起來", d:"看中文，把單字拼出來"},
+  {n:"第三階", t:"放進句子", d:"課本例句填空"}
+];
+WORDS.forEach(function(x,i){ x.id="w"+i; });
+const LESSONS = [];
+WORDS.forEach(function(x){ if(LESSONS.indexOf(x.L)<0) LESSONS.push(x.L); });
+LESSONS.sort(function(a,b){ return a-b; });
+
+let store=load(), seat=null, stage=0, range="all", mode="all", queue=[], idx=0, right=0;
+
+function load(){
+  try{ const o=JSON.parse(localStorage.getItem(KEY)); if(o&&o.logs&&o.wrong) return o; }catch(e){}
+  return {logs:[], wrong:{}};
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+function wrongOf(s){ if(!store.wrong[s]) store.wrong[s]={}; return store.wrong[s]; }
+function logsOf(s){ return store.logs.filter(function(l){ return String(l.seat)===String(s); }); }
+function bestOf(s,st,rg){
+  const a=logsOf(s).filter(function(l){ return l.stage===st && (!rg||rg==="all"||l.range===rg); })
+                   .map(function(l){ return l.right; });
+  return a.length ? Math.max.apply(null,a) : null;
+}
+function ymd(ts){ const d=new Date(ts); return (d.getMonth()+1)+"/"+d.getDate(); }
+function ymdhm(ts){ const d=new Date(ts);
+  return (d.getMonth()+1)+"/"+d.getDate()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function norm(s){ return String(s).toLowerCase().replace(/[‘’'`]/g,"").replace(/\s+/g," ").trim(); }
+function answersOf(w){
+  const m=w.match(/^(.+?)\s*\((.+?)\)\s*$/);
+  let list = m ? [m[1],m[2]] : [w];
+  const out=[];
+  list.forEach(function(x){ x.split("/").forEach(function(y){ y=y.trim(); if(y) out.push(y); }); });
+  return out;
+}
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+document.getElementById("sub").textContent =
+  BOOK_NAME + "　共 " + WORDS.length + " 字　·　" + LESSONS.length + " 課";
+
+function show(v){
+  ["Seat","Practice","Teacher","Report"].forEach(function(n){
+    document.getElementById("view"+n).classList.toggle("hide", n.toLowerCase()!==v); });
+  document.getElementById("who").classList.toggle("hide", v==="seat");
+  document.getElementById("foot").classList.toggle("hide", v!=="practice" && v!=="seat");
+  window.scrollTo(0,0);
+}
+
+/* ---------- 座號 ---------- */
+function drawSeats(){
+  document.getElementById("seatTitle").textContent = CLS.name + "　先選你的座號";
+  const g=document.getElementById("seatgrid"); g.innerHTML="";
+  for(const i of ALL_SEATS){
+    const b=document.createElement("button");
+    b.className="seat"+(isGuest(i)?" guest":"");
+    b.innerHTML=sname(i);
+    b.onclick=function(){ seat=i; startSeat(); };
+    g.appendChild(b);
+  }
+}
+function updateWho(){
+  const n=logsOf(seat).length;
+  document.getElementById("who").innerHTML =
+    CLS.name + "　" + sname(seat) + (n ? "　·　練過 " + n + " 次" : "")
+    + "<button onclick=\"show('seat');drawSeats()\">換人</button>";
+}
+function startSeat(){
+  updateWho(); show("practice");
+  stage=0; mode="all"; range = HOMEWORK.on ? HOMEWORK.range : "all";
+  drawModes(); drawRanges(); drawTabs(); start(); drawHw();
+}
+
+/* ---------- 作業 ---------- */
+function hwStatus(s){
+  if(!HOMEWORK.on) return null;
+  const items=HOMEWORK.tasks.map(function(t){
+    const b=bestOf(s,t.stage,HOMEWORK.range);
+    return {stage:t.stage,pass:t.pass,best:b,ok:(b!=null&&b>=t.pass)};
+  });
+  const done=items.filter(function(x){return x.ok;}).length;
+  return {items:items,done:done,all:items.length,complete:(done===items.length)};
+}
+function drawHw(){
+  const box=document.getElementById("hwPractice"), st=hwStatus(seat);
+  if(!st){ box.innerHTML=""; return; }
+  const li=st.items.map(function(x){
+    return "<li>"+(x.ok?"<span class='ok'>✅":"<span class='wait'>⬜")
+      +" "+STAGES[x.stage].n+"　"+STAGES[x.stage].t+"　至少 "+x.pass+" 題"
+      +(x.best==null?"（還沒做）":"（目前最好 "+x.best+" 題）")+"</span></li>"; }).join("");
+  box.innerHTML="<div class='hw"+(st.complete?" done":"")+"'><div class='t'>"+HOMEWORK.title
+    +"　·　"+(HOMEWORK.range==="all"?"全部":"Lesson "+HOMEWORK.range.slice(1))+"</div>"
+    +(HOMEWORK.due?"<div style='font-size:16px'>繳交："+HOMEWORK.due+"</div>":"")
+    +"<ul>"+li+"</ul><p class='n'>"+(st.complete?"🎉 本週作業完成了！":HOMEWORK.note)+"</p></div>";
+}
+
+/* ---------- 模式與範圍 ---------- */
+function inRange(x){ return range==="all" || ("L"+x.L)===range; }
+function notPassed(x){ const w=wrongOf(seat); return !!w[x.id]; }
+function todoCount(){ return WORDS.filter(function(x){ return inRange(x) && notPassed(x); }).length; }
+
+function drawModes(){
+  const box=document.getElementById("modes"); const n=todoCount();
+  box.innerHTML="";
+  [["all","練全部的字", WORDS.filter(inRange).length+" 個字"],
+   ["todo","只練我還沒過的", n?n+" 個字":"目前沒有，先練全部"]].forEach(function(m){
+    const b=document.createElement("button");
+    b.className="mode"+(mode===m[0]?" on":"")+(m[0]==="todo"&&n?" hot":"");
+    b.innerHTML="<b>"+m[1]+"</b><small>"+m[2]+"</small>";
+    b.onclick=function(){ if(m[0]==="todo"&&!n) return; mode=m[0]; drawModes(); start(); };
+    box.appendChild(b);
+  });
+}
+function drawRanges(){
+  const box=document.getElementById("gs"); box.innerHTML="";
+  const list=[{id:"all",name:"全部"}].concat(LESSONS.map(function(L){ return {id:"L"+L,name:"Lesson "+L}; }));
+  list.forEach(function(g){
+    const cnt=WORDS.filter(function(x){ return g.id==="all" || ("L"+x.L)===g.id; }).length;
+    const b=document.createElement("button");
+    b.className="gchip"+(g.id===range?" on":"");
+    b.innerHTML=g.name+" <i>"+cnt+"</i>";
+    b.onclick=function(){ range=g.id; drawRanges(); drawModes(); drawTabs(); start(); };
+    box.appendChild(b);
+  });
+}
+
+/* ---------- 動態分頁（只顯示有題目的階） ---------- */
+function bankOf(st){
+  let list=WORDS.filter(inRange);
+  if(mode==="todo") list=list.filter(notPassed);
+  if(st===1) list=list.filter(function(x){ return x.w.indexOf("...")<0; });   // 句型類打不出來，不進拼字階
+  if(st===2) list=list.filter(function(x){ return x.g; });
+  return list;
+}
+function liveStages(){
+  const out=[];
+  for(let i=0;i<STAGES.length;i++){ if(bankOf(i).length) out.push(i); }
+  return out;
+}
+function drawTabs(){
+  const live=liveStages();
+  if(live.indexOf(stage)<0 && live.length) stage=live[0];
+  const box=document.getElementById("tabs");
+  box.style.gridTemplateColumns="repeat("+Math.max(live.length,1)+",1fr)";
+  box.innerHTML="";
+  live.forEach(function(i){
+    const d=document.createElement("div");
+    d.className="tab"+(i===stage?" on":"");
+    d.innerHTML="<b>"+STAGES[i].n+"</b>"+STAGES[i].t;
+    d.onclick=function(){ stage=i; drawTabs(); start(); };
+    box.appendChild(d);
+  });
+}
+
+/* ---------- 出題 ---------- */
+function start(){
+  drawTabs();
+  const all=shuffle(bankOf(stage));
+  queue=all.slice(0, Math.min(ROUND, all.length));
+  idx=0; right=0;
+  document.getElementById("stageName").textContent=STAGES[stage].n+"　"+STAGES[stage].d;
+  const b=bestOf(seat,stage,range);
+  document.getElementById("best").textContent=b==null?"最佳 —":"最佳 "+b+" 題";
+  if(!queue.length){
+    document.getElementById("card").innerHTML=
+      "<div class='done'><p class='msg'>這個範圍目前沒有題目。<br>換一個範圍，或按上面的「練全部的字」。</p></div>";
+    drawChips(); return;
+  }
+  render(); drawChips();
+}
+function bar(){
+  document.getElementById("count").textContent=idx+" / "+queue.length;
+  document.getElementById("fill").style.width=(idx/queue.length*100)+"%";
+}
+function say(t){
+  try{ const u=new SpeechSynthesisUtterance(t); u.lang="en-US"; u.rate=.85;
+       speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+function render(){
+  bar();
+  if(idx>=queue.length) return finish();
+  const q=queue[idx], card=document.getElementById("card");
+  const head="<div class='stage'><span>"+STAGES[stage].n+"　"+STAGES[stage].t+"</span>"
+    +"<span class='gtag'>Lesson "+q.L+"</span></div>";
+  const spoken=answersOf(q.w)[0].replace(/'/g,"\\'");
+
+  if(stage===0){
+    card.innerHTML=head
+      +"<div class='word'>"+esc(q.w)+"<button class='say' onclick=\"say('"+spoken+"')\">🔊</button></div>"
+      +"<div class='zh'>"+esc(q.p||"")+"</div>"
+      +"<div class='opts two' id='opts'></div><div class='fb' id='fb'></div>";
+    shuffle([q.z,q.n]).forEach(function(x){
+      const b=document.createElement("button"); b.className="opt"; b.textContent=x;
+      b.onclick=function(){ answer(x===q.z,q,q.z,b); };
+      document.getElementById("opts").appendChild(b);
+    });
+  }else if(stage===1){
+    const a0=answersOf(q.w)[0];
+    const hint=a0[0]+a0.slice(1).replace(/[a-zA-Z]/g,"_");
+    card.innerHTML=head
+      +"<div class='word' style='font-size:34px'>"+esc(q.z)
+      +"<button class='say' onclick=\"say('"+spoken+"')\">🔊</button></div>"
+      +"<div class='zh'>"+esc(q.p||"")+"</div>"
+      +"<div class='hint'>"+esc(hint)+"</div>"
+      +"<div class='typebox'><input type='text' id='inp' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='把單字打出來'>"
+      +"<button class='go' onclick='checkType()'>看看對不對</button></div>"
+      +"<div class='fb' id='fb'></div>";
+    const inp=document.getElementById("inp"); inp.focus();
+    inp.onkeydown=function(e){ if(e.key==="Enter") checkType(); };
+  }else{
+    card.innerHTML=head
+      +"<div class='sent'>"+esc(q.g).replace("___","<span class='gap'></span>")+"</div>"
+      +"<div class='opts' id='opts'></div><div class='fb' id='fb'></div>";
+    shuffle(q.o).forEach(function(x){
+      const b=document.createElement("button"); b.className="opt"; b.textContent=x;
+      b.onclick=function(){ answer(x===q.o[0],q,q.o[0],b); };
+      document.getElementById("opts").appendChild(b);
+    });
+  }
+}
+function checkType(){
+  const q=queue[idx], inp=document.getElementById("inp");
+  const v=norm(inp.value);
+  const ok=answersOf(q.w).some(function(a){ return norm(a)===v; });
+  inp.disabled=true; answer(ok,q,answersOf(q.w)[0],null);
+}
+function answer(ok,q,correct,btn){
+  document.querySelectorAll(".opt").forEach(function(b){
+    b.disabled=true; if(b.textContent===correct) b.classList.add("right"); });
+  if(btn&&!ok) btn.classList.add("wrong");
+  const fb=document.getElementById("fb"), w=wrongOf(seat);
+  fb.className="fb show "+(ok?"good":"bad");
+  if(ok){ right++; w[q.id]=false;
+    fb.innerHTML="<span class='big'>✓ 答對了</span>"+esc(q.w)+"　"+esc(q.z); }
+  else{ w[q.id]=true;
+    fb.innerHTML="<span class='big'>再看一次就好</span>正確答案是 <b>"+esc(correct)+"</b>　（"+esc(q.w)+"　"+esc(q.z)+"）"; }
+  save(); drawChips(); drawModes(); say(answersOf(q.w)[0]);
+  const next=document.createElement("button");
+  next.className="go"; next.style.marginTop="16px";
+  next.textContent=idx+1>=queue.length?"看結果":"下一題 →";
+  next.onclick=function(){ idx++; render(); };
+  fb.appendChild(document.createElement("br")); fb.appendChild(next); next.focus();
+}
+function finish(){
+  const prevBest=bestOf(seat,stage,range), before=hwStatus(seat);
+  store.logs.push({seat:seat,stage:stage,range:range,mode:mode,right:right,total:queue.length,ts:Date.now()});
+  save(); drawHw(); updateWho(); drawModes();
+  const after=hwStatus(seat);
+  const justDone=after&&after.complete&&before&&!before.complete;
+  sendOut(seat,stage,right,queue.length,after);
+
+  const nowBest=bestOf(seat,stage,range), isBest=prevBest==null||right>prevBest;
+  document.getElementById("count").textContent=queue.length+" / "+queue.length;
+  document.getElementById("fill").style.width="100%";
+  document.getElementById("best").textContent="最佳 "+nowBest+" 題";
+
+  const left=todoCount();
+  let msg; const rate=right/queue.length;
+  if(justDone) msg="🎉 本週作業完成了！";
+  else if(mode==="todo") msg = left ? "還沒過的字剩下 "+left+" 個。再跑一次會更少。"
+                                    : "太厲害了，這個範圍的字你全部都過了！";
+  else if(isBest&&prevBest!=null) msg="破紀錄了！上次 "+prevBest+" 題，這次 "+right+" 題。";
+  else if(rate===1) msg="全對。往上一階試試看。";
+  else msg="按上面的「只練我還沒過的」再跑一次，第二次一定會比第一次好。";
+
+  const live=liveStages(), pos=live.indexOf(stage);
+  document.getElementById("card").innerHTML=
+    "<div class='done'><div class='score'>"+right+"</div>"
+    +"<div class='of'>答對 "+right+" 題 / 共 "+queue.length+" 題</div>"
+    +"<div class='best'>你的最佳紀錄："+nowBest+" 題</div><br>"
+    +"<p class='msg'>"+msg+"</p><div class='btnrow'>"
+    +"<button class='go' onclick='start()'>再練一次</button>"
+    +(pos>=0&&pos<live.length-1
+       ? "<button class='go ghost' onclick='stage="+live[pos+1]+";start()'>進到"+STAGES[live[pos+1]].n+" →</button>" : "")
+    +"</div></div>";
+  drawChips();
+}
+function drawChips(){
+  const w=wrongOf(seat);
+  const ks=WORDS.filter(function(x){ return w[x.id]; });
+  const box=document.getElementById("chips"), mini=document.getElementById("mini");
+  box.innerHTML="";
+  if(!ks.length){
+    box.innerHTML="<span class='chip clear'>目前沒有還沒過的字</span>";
+    mini.textContent="答錯的字會自動留在這裡，答對之後就會消失。"; return;
+  }
+  ks.slice(0,40).forEach(function(x){
+    const s=document.createElement("span"); s.className="chip"; s.textContent=x.w; box.appendChild(s); });
+  mini.textContent="共 "+ks.length+" 個字"+(ks.length>40?"（只列前 40 個）":"")
+    +"。按上面的「只練我還沒過的」就會只出這些。";
+}
+
+/* ---------- 送出 ---------- */
+function sendOut(seat,stage,right,total,hw){
+  if(!GFORM.url || isGuest(seat)) return;
+  const w=store.wrong[seat]||{};
+  const left=WORDS.filter(function(x){ return w[x.id]; });
+  const row={};
+  row[GFORM.f.seat]=CLASS_ID.toUpperCase()+"-"+sname(seat);
+  row[GFORM.f.lesson]=LESSON+"-B4"+(range==="all"?"":range);
+  row[GFORM.f.stage]=STAGES[stage].n+" "+STAGES[stage].t+(mode==="todo"?"（只練沒過的）":"");
+  row[GFORM.f.right]=right;
+  row[GFORM.f.total]=total;
+  row[GFORM.f.wrong]="還沒過 "+left.length+" 字：" + left.slice(0,12).map(function(x){return x.w;}).join(" ");
+  row[GFORM.f.hw]=hw?(hw.complete?"已完成":"進行中 "+hw.done+"/"+hw.all):"";
+  post(row);
+}
+function post(row){
+  const body=new URLSearchParams();
+  for(const k in row) body.append(k,row[k]);
+  fetch(GFORM.url,{method:"POST",mode:"no-cors",body:body}).catch(function(){ queueRow(row); });
+}
+function queueRow(row){
+  if(!store.pending) store.pending=[];
+  store.pending.push(row);
+  if(store.pending.length>200) store.pending=store.pending.slice(-200);
+  save();
+}
+function flushPending(){
+  if(!GFORM.url||!store.pending||!store.pending.length) return;
+  const rows=store.pending.slice(); store.pending=[]; save();
+  rows.forEach(function(r){ post(r); });
+}
+
+/* ---------- 老師檢視 ---------- */
+function teacherGate(){
+  const f=document.getElementById("foot");
+  f.innerHTML="<div style='display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center'>"
+    +"<input type='password' id='tcode' placeholder='老師密碼' autocomplete='off' "
+    +  "style='font-size:17px;padding:9px 14px;border:2px solid #E2DDD0;border-radius:10px;width:150px;font-family:inherit'>"
+    +"<button id='tgo' style='background:#1F6B58;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:16px;cursor:pointer;font-family:inherit;text-decoration:none'>進入</button>"
+    +"<button id='tno' style='background:none;border:2px solid #E2DDD0;color:#5A554C;border-radius:10px;padding:9px 16px;font-size:16px;cursor:pointer;font-family:inherit;text-decoration:none'>取消</button>"
+    +"<span id='tmsg' style='color:#B23A32;font-size:15px'></span></div>";
+  const i=document.getElementById("tcode");
+  document.getElementById("tgo").onclick=tryCode;
+  document.getElementById("tno").onclick=resetFoot;
+  i.onkeydown=function(e){ if(e.key==="Enter") tryCode(); };
+  i.focus();
+}
+function tryCode(){
+  if(document.getElementById("tcode").value!==TEACHER_CODE){
+    document.getElementById("tmsg").textContent="密碼不對"; return; }
+  resetFoot(); drawTeacher(); show("teacher");
+}
+function resetFoot(){
+  const f=document.getElementById("foot");
+  f.innerHTML="<button>老師檢視</button>";
+  f.firstChild.onclick=teacherGate;
+}
+function leftOf(s){
+  const w=store.wrong[s]||{};
+  return WORDS.filter(function(x){ return w[x.id]; }).length;
+}
+function drawTeacher(){
+  let doneN=0, hwDone=0;
+  for(const i of SEAT_IDS){ if(logsOf(i).length) doneN++;
+    const st=hwStatus(i); if(st&&st.complete) hwDone++; }
+  document.getElementById("tSub").textContent=
+    "全班 "+SEAT_IDS.length+" 人，已經練過的有 "+doneN+" 人"
+    +(HOMEWORK.on?"，本週作業完成 "+hwDone+" 人":"")
+    +"，總共 "+store.logs.filter(function(l){ return !isGuest(l.seat); }).length+" 次練習紀錄。";
+
+  let h="<tr><th>座號</th><th class='num'>練習次數</th><th>最近一次</th>"
+    +STAGES.map(function(s){ return "<th class='num'>"+s.t+"</th>"; }).join("")
+    +"<th class='num'>還沒過</th></tr>";
+  for(const i of SEAT_IDS){
+    const ls=logsOf(i);
+    if(!ls.length){
+      h+="<tr class='none'><td>"+sname(i)+"</td><td class='num'>—</td><td>還沒做</td>"
+        +STAGES.map(function(){ return "<td class='num'>—</td>"; }).join("")+"<td class='num'>—</td></tr>";
+      continue;
+    }
+    const last=ls[ls.length-1];
+    h+="<tr><td><span class='seatlink' onclick='drawReport(\""+i+"\")'>"+sname(i)+"</span></td>"
+      +"<td class='num'>"+ls.length+"</td><td>"+ymdhm(last.ts)+"</td>"
+      +STAGES.map(function(s,si){ const b=bestOf(i,si,"all"); return "<td class='num'>"+(b==null?"—":b)+"</td>"; }).join("")
+      +"<td class='num'>"+leftOf(i)+"</td></tr>";
+  }
+  document.getElementById("tClass").innerHTML=h;
+
+  const tally={};
+  for(const i of SEAT_IDS){
+    const w=store.wrong[i]||{};
+    WORDS.forEach(function(x){ if(w[x.id]) tally[x.id]=(tally[x.id]||0)+1; });
+  }
+  const rank=Object.keys(tally).sort(function(a,b){ return tally[b]-tally[a]; });
+  let h2="<tr><th>單字</th><th>中文</th><th class='num'>幾個人還沒過</th><th></th></tr>";
+  if(!rank.length) h2+="<tr class='none'><td colspan='4'>還沒有資料</td></tr>";
+  const maxN=rank.length?tally[rank[0]]:1;
+  rank.slice(0,20).forEach(function(k){
+    const wd=WORDS.filter(function(x){ return x.id===k; })[0];
+    h2+="<tr><td><b>"+esc(wd.w)+"</b></td><td>"+esc(wd.z)+"</td><td class='num'>"+tally[k]+"</td>"
+      +"<td><span class='barcell'><i style='width:"+(tally[k]/maxN*140)+"px'></i></span></td></tr>";
+  });
+  document.getElementById("tWrong").innerHTML=h2;
+}
+
+/* ---------- 個人報告 ---------- */
+function drawReport(s){
+  const ls=logsOf(s);
+  document.getElementById("rTitle").textContent="座號 "+sname(s)+"　單字庫學習報告";
+  if(!ls.length){ document.getElementById("rRange").textContent="還沒有練習紀錄。"; show("report"); return; }
+  const first=ls[0], last=ls[ls.length-1];
+  document.getElementById("rRange").textContent=
+    "統計期間："+ymd(first.ts)+" ～ "+ymd(last.ts)+"　（"+BOOK_NAME+"，共 "+WORDS.length+" 字）";
+  const days={}; ls.forEach(function(l){ days[ymd(l.ts)]=1; });
+  const w=store.wrong[s]||{};
+  const left=WORDS.filter(function(x){ return w[x.id]; });
+  const seen=WORDS.filter(function(x){ return w[x.id]!==undefined; });
+  document.getElementById("rKpis").innerHTML=
+    kpi("練習次數",ls.length+" 次")+kpi("練習天數",Object.keys(days).length+" 天")
+    +kpi("碰過的字",seen.length+" / "+WORDS.length)
+    +kpi("還沒過",left.length+" 字");
+  document.getElementById("rMsg").textContent =
+    ls.length>=3 ? "已經主動練了 "+ls.length+" 次。單字最需要的是反覆接觸，次數比分數重要。"
+                 : "才剛開始，先看練習次數就好，分數會慢慢跟上來。";
+  let h="<tr><th>日期</th><th>範圍</th><th>階段</th><th class='num'>答對</th><th class='num'>題數</th></tr>";
+  ls.slice().reverse().forEach(function(l){
+    h+="<tr><td>"+ymdhm(l.ts)+"</td><td>"+(l.range==="all"?"全部":"Lesson "+l.range.slice(1))+"</td>"
+      +"<td>"+STAGES[l.stage].n+"　"+STAGES[l.stage].t+(l.mode==="todo"?"（只練沒過的）":"")+"</td>"
+      +"<td class='num'>"+l.right+"</td><td class='num'>"+l.total+"</td></tr>"; });
+  document.getElementById("rLogs").innerHTML=h;
+  const box=document.getElementById("rChips"); box.innerHTML="";
+  if(!left.length) box.innerHTML="<span class='chip clear'>目前沒有還沒過的字</span>";
+  else left.slice(0,60).forEach(function(x){
+    const e=document.createElement("span"); e.className="chip";
+    e.textContent=x.w+"（"+x.z.split("；")[0]+"）"; box.appendChild(e); });
+  show("report");
+}
+function kpi(l,v){ return "<div class='kpi'><span>"+l+"</span><b class='big2'>"+v+"</b></div>"; }
+
+function exportCSV(){
+  const rows=[["座號","日期時間","範圍","階段","模式","答對","題數"]];
+  store.logs.filter(function(l){ return !isGuest(l.seat); })
+    .sort(function(a,b){ return String(a.seat).localeCompare(String(b.seat))||a.ts-b.ts; })
+    .forEach(function(l){
+      rows.push([sname(l.seat),ymdhm(l.ts),(l.range==="all"?"全部":"Lesson "+l.range.slice(1)),
+                 STAGES[l.stage].n+" "+STAGES[l.stage].t,(l.mode==="todo"?"只練沒過的":"全部"),l.right,l.total]); });
+  const csv="﻿"+rows.map(function(r){
+    return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(","); }).join("\r\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download="單字庫練習紀錄_"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function wipe(){
+  if(!confirm("要清空全班所有紀錄嗎？這個動作無法復原。")) return;
+  if(!confirm("再確認一次：所有座號的練習紀錄都會不見。")) return;
+  store={logs:[],wrong:{}}; save(); drawTeacher(); drawSeats();
+}
+
+resetFoot(); drawSeats(); show("seat"); flushPending();
+</script>
+</body>
+</html>
