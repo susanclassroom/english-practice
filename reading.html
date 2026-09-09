@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>國三上 閱讀四階練習</title>
+<style>
+  :root{
+    --bg:#F7F5EF; --card:#fff; --ink:#26241F; --sub:#5A554C;
+    --line:#E2DDD0; --brand:#1F6B58; --brand-soft:#E6F1ED;
+    --gold:#C98A17; --gold-soft:#FDF3DE;
+    --ok:#1F7A44; --ok-soft:#E4F3E9;
+    --no:#B23A32; --no-soft:#FBE9E7; --r:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Hiragino Sans TC",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:19px;line-height:1.75;-webkit-text-size-adjust:100%}
+  .wrap{max-width:860px;margin:0 auto;padding:20px 16px 72px}
+  .hide{display:none!important}
+
+  header{background:var(--brand);color:#fff;border-radius:var(--r);padding:20px 22px;margin-bottom:18px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  header h1{margin:0 0 6px;font-size:26px;letter-spacing:.5px}
+  header p{margin:0;font-size:16px;opacity:.92}
+  .who{background:rgba(255,255,255,.16);border-radius:99px;padding:6px 16px;font-size:17px;white-space:nowrap}
+  .who button{background:none;border:none;color:#fff;font-size:15px;cursor:pointer;
+    text-decoration:underline;font-family:inherit;padding:0 0 0 8px;opacity:.85}
+
+  .seatgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:10px;margin-top:18px}
+  .seat{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:16px 0;
+    font-size:24px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .seat:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .seat .dot{display:block;font-size:12px;color:var(--ok);font-weight:400;line-height:1}
+
+  a.rcard,.rcard{display:block;background:var(--card);border:2px solid var(--line);border-radius:var(--r);
+    padding:20px 22px;margin-bottom:14px;text-decoration:none;color:inherit;cursor:pointer;
+    transition:.15s;text-align:left;width:100%;font-family:inherit;font-size:19px}
+  .rcard:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .rcard .no{display:inline-block;background:var(--brand);color:#fff;border-radius:99px;
+    padding:3px 14px;font-size:15px;margin-bottom:8px}
+  .rcard .t{font-size:22px;font-weight:700;margin-bottom:2px}
+  .rcard .z{font-size:17px;color:var(--sub);margin-bottom:6px}
+  .rcard .m{font-size:15px;color:var(--sub)}
+  .rcard .m b{color:var(--ok)}
+
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+  .tab{background:var(--card);border:2px solid var(--line);border-radius:12px;
+    padding:12px 6px;text-align:center;cursor:pointer;font-size:15px;line-height:1.4;
+    color:var(--sub);transition:.15s}
+  .tab b{display:block;font-size:19px;color:var(--ink);font-weight:600;margin-bottom:2px}
+  .tab:hover{border-color:var(--brand)}
+  .tab.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .tab.on b{color:#fff}
+
+  .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:12px 16px;margin-bottom:14px;font-size:16px;color:var(--sub)}
+  .bar .grow{flex:1;min-width:100px}
+  .track{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+  .fill{height:100%;background:var(--brand);width:0;transition:width .25s}
+  .pill{background:var(--gold-soft);color:var(--gold);border-radius:99px;
+    padding:3px 12px;font-size:15px;white-space:nowrap}
+
+  /* 中文背景導讀 */
+  .bgbox{background:#EFF4FB;border:2px solid #CFDCEF;border-radius:var(--r);
+    padding:20px 22px;margin-bottom:16px;color:#22405F}
+  .bgbox h3{margin:0 0 10px;font-size:20px}
+  .bgbox p{margin:0 0 10px;font-size:18px;line-height:1.9}
+  .bgbox p:last-child{margin-bottom:0}
+  .bgbox b{color:#123A63}
+
+  /* 文章 */
+  .art{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:0;margin-bottom:16px;overflow:hidden}
+  .art .h{display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:14px 20px;background:var(--brand-soft);cursor:pointer;font-size:17px;color:var(--brand);font-weight:600}
+  .art .h span.sm{font-weight:400;color:var(--sub);font-size:15px}
+  .art .b{padding:18px 22px 22px}
+  .art .b.closed{display:none}
+  .para{display:flex;gap:12px;margin-bottom:14px}
+  .para .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--gold-soft);
+    color:var(--gold);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:5px}
+  .para .x{font-size:19px;line-height:2}
+  .line{display:flex;gap:10px;margin-bottom:10px;font-size:19px;line-height:1.95}
+  .line .w{flex:none;color:var(--brand);font-weight:700;min-width:56px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:26px 24px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .stage{font-size:15px;color:var(--sub);margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .exam{background:var(--gold-soft);color:var(--gold);border-radius:99px;padding:2px 12px;font-size:14px}
+
+  .qz{font-size:23px;line-height:1.9;margin:6px 0 20px}
+  .word{font-size:42px;font-weight:700;margin:6px 0 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .say{background:var(--brand-soft);border:none;border-radius:50%;width:44px;height:44px;
+    font-size:20px;cursor:pointer;color:var(--brand);flex:none}
+  .say:hover{background:#D5E7E1}
+
+  .opts{display:grid;gap:12px}
+  .opts.two{grid-template-columns:1fr 1fr}
+  @media(max-width:560px){.opts.two{grid-template-columns:1fr}}
+  .opt{background:var(--card);border:2px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-size:20px;text-align:left;cursor:pointer;
+    font-family:inherit;color:var(--ink);transition:.12s;line-height:1.6}
+  .opt:hover:not(:disabled){border-color:var(--brand);background:var(--brand-soft)}
+  .opt:disabled{cursor:default}
+  .opt.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok);font-weight:600}
+  .opt.wrong{border-color:var(--no);background:var(--no-soft);color:var(--no)}
+
+  button.go{background:var(--brand);color:#fff;border:none;border-radius:12px;
+    padding:14px 26px;font-size:19px;cursor:pointer;font-family:inherit}
+  button.go:hover{background:#17553f}
+  button.ghost{background:transparent;color:var(--brand);border:2px solid var(--brand)}
+  button.ghost:hover{background:var(--brand-soft)}
+
+  .fb{margin-top:20px;padding:16px 18px;border-radius:12px;font-size:19px;display:none}
+  .fb.show{display:block}
+  .fb.good{background:var(--ok-soft);color:var(--ok)}
+  .fb.bad{background:var(--no-soft);color:var(--no)}
+  .fb .big{font-size:22px;font-weight:700;display:block;margin-bottom:4px}
+
+  .done{text-align:center;padding:20px 0}
+  .done .score{font-size:64px;font-weight:700;color:var(--brand);line-height:1.1}
+  .done .of{font-size:20px;color:var(--sub);margin-bottom:16px}
+  .done .best{display:inline-block;background:var(--gold-soft);color:var(--gold);
+    border-radius:99px;padding:8px 20px;font-size:17px;margin-bottom:22px}
+  .done .msg{font-size:21px;margin-bottom:24px}
+  .btnrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  .review{margin-top:26px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r);padding:18px 20px}
+  .review h3{margin:0 0 10px;font-size:18px;color:var(--sub);font-weight:600}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--no-soft);color:var(--no);border-radius:99px;padding:5px 14px;font-size:16px}
+  .chip.clear{background:var(--ok-soft);color:var(--ok)}
+  .mini{font-size:15px;color:var(--sub);margin-top:10px}
+  .tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .tools button{font-size:15px;padding:9px 16px;border-radius:10px;cursor:pointer;
+    font-family:inherit;border:2px solid var(--line);background:var(--card);color:var(--sub)}
+  .tools button:hover{border-color:var(--brand);color:var(--brand)}
+
+  .hw{background:var(--gold-soft);border:2px solid #EBD9AE;border-radius:var(--r);
+    padding:16px 20px;margin-bottom:16px;color:#6B4A0E}
+  .hw.done{background:var(--ok-soft);border-color:#B9DCC6;color:var(--ok)}
+  .hw .t{font-size:20px;font-weight:700}
+  .hw ul{margin:10px 0 0;padding:0;list-style:none;font-size:17px}
+  .hw li{margin:5px 0}
+  .hw .n{margin:10px 0 0;font-size:15px;opacity:.85}
+  .ok{color:var(--ok);font-weight:600}
+  .wait{color:var(--sub)}
+
+  .foot{margin-top:30px;text-align:center}
+  .foot button{background:none;border:none;color:var(--sub);font-size:15px;
+    cursor:pointer;font-family:inherit;text-decoration:underline;opacity:.7}
+  h2.sec{font-size:22px;margin:0 0 4px}
+  p.secsub{margin:0 0 18px;color:var(--sub);font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:17px}
+  th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-size:15px;color:var(--sub);font-weight:600;white-space:nowrap}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.none td{color:var(--sub)}
+  .seatlink{color:var(--brand);cursor:pointer;text-decoration:underline;font-weight:600}
+  .barcell{display:flex;align-items:center;gap:8px}
+  .barcell i{display:block;height:12px;background:var(--no);border-radius:3px;opacity:.75}
+  .scroll{overflow-x:auto}
+  .note{background:var(--gold-soft);border-radius:12px;padding:14px 16px;font-size:16px;color:#7A5410;margin:16px 0}
+  .big2{font-size:34px;font-weight:700;color:var(--brand);line-height:1.2}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:6px 0 20px}
+  .kpi{background:var(--brand-soft);border-radius:12px;padding:14px 16px}
+  .kpi span{display:block;font-size:15px;color:var(--sub)}
+  @media print{ body{background:#fff} .noprint{display:none!important} .card{box-shadow:none;border:1px solid #ccc} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>國三上　閱讀四階練習</h1>
+    <p>先補背景，再讀文章　·　三篇由淺入深</p>
+  </div>
+  <div class="who hide" id="who"></div>
+</header>
+
+<div id="viewSeat">
+  <div id="hwSeat"></div>
+  <div class="card">
+    <h2 class="sec">先選你的座號</h2>
+    <p class="secsub">選了以後，你的練習紀錄就會分開存，不會跟別人混在一起。</p>
+    <div class="seatgrid" id="seatgrid"></div>
+  </div>
+</div>
+
+<div id="viewPick" class="hide">
+  <div id="hwPick"></div>
+  <h2 class="sec">選一篇來讀</h2>
+  <p class="secsub">建議照順序讀，從最短、最貼近生活的開始。</p>
+  <div id="rlist"></div>
+  <div class="foot noprint"><button onclick="show('seat');drawSeats()">換座號</button></div>
+</div>
+
+<div id="viewPractice" class="hide">
+  <div id="hwPractice"></div>
+  <div id="bgbox"></div>
+  <div id="artbox"></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="bar">
+    <span id="stageName">第一階</span>
+    <span class="grow"><span class="track"><span class="fill" id="fill"></span></span></span>
+    <span id="count">0 / 0</span>
+    <span class="pill" id="best">最佳 —</span>
+  </div>
+  <div class="card" id="card"></div>
+  <div class="review">
+    <h3>我還要再看的題目</h3>
+    <div class="chips" id="chips"></div>
+    <p class="mini" id="mini"></p>
+    <div class="tools">
+      <button onclick="onlyWrong()">只練錯過的題目</button>
+      <button onclick="allItems()">練全部的題目</button>
+      <button onclick="show('pick');drawList()">換一篇文章</button>
+    </div>
+  </div>
+</div>
+
+<div id="viewTeacher" class="hide">
+  <div class="card">
+    <h2 class="sec">全班作答狀況</h2>
+    <p class="secsub" id="tSub"></p>
+    <div class="scroll"><table id="tClass"></table></div>
+    <h2 class="sec" style="margin-top:32px">全班最卡的地方</h2>
+    <p class="secsub">看是卡在生字、卡在找不到，還是卡在讀不懂。</p>
+    <div class="scroll"><table id="tWrong"></table></div>
+    <div class="tools noprint">
+      <button onclick="exportCSV()">匯出 CSV（給家長／存檔用）</button>
+      <button onclick="show('seat')">回到練習</button>
+      <button onclick="wipe()">清空全部紀錄</button>
+    </div>
+  </div>
+</div>
+
+<div id="viewReport" class="hide">
+  <div class="card">
+    <h2 class="sec" id="rTitle">學習報告</h2>
+    <p class="secsub" id="rRange"></p>
+    <div class="kpis" id="rKpis"></div>
+    <div class="note" id="rMsg"></div>
+    <h2 class="sec" style="margin-top:26px;font-size:19px">每次練習紀錄</h2>
+    <div class="scroll"><table id="rLogs"></table></div>
+    <div class="tools noprint">
+      <button onclick="window.print()">列印 / 存成 PDF</button>
+      <button onclick="show('teacher')">回到全班</button>
+    </div>
+  </div>
+</div>
+
+<div class="foot noprint" id="foot"><button onclick="teacherGate()">老師檢視</button></div>
+
+</div>
+<script>
+const READINGS = [
+{
+ id:"costco", order:1,
+ title:"A Costco Card Is NOT a Passport",
+ zh:"好市多會員卡不能當護照",
+ words:226, kind:"對話",
+ bg:"好市多（Costco）是會員制的大賣場，要辦一張會員卡才能進去買東西。這篇對話裡，Kathy 在網路上看到有人說「出國時拿好市多會員卡就能過機場安檢，不用帶護照」——這是假的。\n\nTSA 是美國的運輸安全管理局，負責機場安檢，他們規定一定要看有照片的官方證件，像護照或駕照。\n\n所以這篇表面上在講旅行，其實在講一件更重要的事：**網路上很多人在傳的事，不一定是真的**。",
+ body:[
+  {w:"Mike",  t:"I checked the list you made for our trip to New York, and I have a question. Why did you cross out “passport”?"},
+  {w:"Kathy", t:"Well, we always keep our Costco cards in our wallets, don’t we?"},
+  {w:"Mike",  t:"OK... so?"},
+  {w:"Kathy", t:"I read on the Internet that you can use a Costco card at the airport as your ID. It’s more convenient."},
+  {w:"Mike",  t:"Actually, no. That’s not true. I saw that post, too, but it’s only a rumor."},
+  {w:"Kathy", t:"Really? But many people said it worked."},
+  {w:"Mike",  t:"I know why people believed it. The posts said it’s easier — just show your Costco card when you fly, and the TSA will accept it. But both Costco and the TSA said that’s not true. You still need a real ID, like a driver’s license or a passport."},
+  {w:"Kathy", t:"Oh, OK. I thought it would help me carry fewer cards."},
+  {w:"Mike",  t:"I get it. But airport security has to be serious about checking who people really are carefully."},
+  {w:"Kathy", t:"All right. Thanks for clearing that up. I’ll fix the list later. How’s your plan for Day 3 coming along?"},
+  {w:"Mike",  t:"I’ve almost finished it. I’ll show you tonight."},
+  {w:"Kathy", t:"Sounds good. I think planning this trip with you is safer and nicer!"}
+ ],
+ s1:[
+  {w:"passport", zh:"護照", no:"駕照"},
+  {w:"ID", zh:"身分證件", no:"網路貼文"},
+  {w:"rumor", zh:"謠言", no:"行李"},
+  {w:"accept", zh:"接受", no:"拒絕"},
+  {w:"driver's license", zh:"駕照", no:"護照"},
+  {w:"security", zh:"安檢", no:"折扣"},
+  {w:"convenient", zh:"方便的", no:"危險的"},
+  {w:"cross out", zh:"劃掉", no:"加上去"},
+  {w:"post", zh:"（網路）貼文", no:"郵局"}
+ ],
+ s2:[
+  {q:"「我在網路上看到，好市多會員卡可以在機場當身分證件。」", o:["Kathy","Mike"]},
+  {q:"「那不是真的，那只是個謠言。」", o:["Mike","Kathy"]},
+  {q:"「你為什麼把『護照』劃掉？」", o:["Mike","Kathy"]},
+  {q:"「我以為那樣可以少帶幾張卡。」", o:["Kathy","Mike"]},
+  {q:"「好市多和 TSA 都說那不是真的。」", o:["Mike","Kathy"]},
+  {q:"「我等一下會把清單改好。」", o:["Kathy","Mike"]}
+ ],
+ s3:[
+  {q:"Kathy 為什麼把 passport 從清單上劃掉？", o:["她以為好市多會員卡可以當身分證件","她把護照弄丟了","Mike 叫她不要帶","護照太重要，不能帶出門"]},
+  {q:"文章裡的 rumor 最接近下面哪一個意思？", o:["很多人在傳、但不是真的事","一則讓大家驚訝的新聞","需要被更正的新聞","一個大家相信很久的老故事"]},
+  {q:"TSA 是什麼？", o:["美國負責機場安檢的單位","一家賣東西的大賣場","一種身分證件","一間旅行社"]},
+  {q:"Mike 說機場安檢必須怎麼做？", o:["仔細確認人的真實身分","讓大家帶越少卡越好","相信網路上的貼文","只檢查好市多會員卡"]},
+  {q:"這段對話結束後，Kathy 最可能會做什麼？", o:["把護照加回清單","只帶好市多卡出國","取消這趟旅行","再去網路上找那則貼文"]}
+ ],
+ s4:[
+  {q:"Why DIDN'T Kathy think they needed passports?", o:["She believed their Costco cards could be used as ID.","Passports are too important to carry around.","Mike told her to leave it at home.","She saw people use store cards as ID at the airport."], t:"精選試題 37"},
+  {q:"What is a “rumor”?", o:["A story that is widely passed on but not true.","A piece of news that surprises everyone.","A piece of news that needs to be fixed.","An old story that people have believed for a long time."], t:"精選試題 38"},
+  {q:"What can we learn from the dialogue?", o:["Kathy will put “passport” back on the list.","Kathy finished all the trip planning by herself.","Kathy and Mike will only bring Costco cards for the trip.","Mike once tried using a Costco card as ID but failed."], t:"精選試題 39"}
+ ]
+},
+{
+ id:"mona", order:2,
+ title:"Does the Mona Lisa’s Eyes Follow You?",
+ zh:"蒙娜麗莎才沒在看你",
+ words:252, kind:"說明文",
+ bg:"《蒙娜麗莎》是達文西（Leonardo da Vinci）畫的一幅名畫，現在放在法國的羅浮宮，是全世界最有名的畫之一。\n\n很多人說「不管你站在哪個位置看，畫裡的人眼睛都會跟著你」——這個現象被叫做「蒙娜麗莎效應」。\n\n但 2019 年科學家做了實驗，發現**蒙娜麗莎本人其實沒有這個效果**，因為她的眼睛是看向旁邊的。這篇文章講的就是這個「大家都以為是這樣，但其實不是」的故事。",
+ body:[
+  {t:"Have you ever noticed that some pictures appear to follow you with their eyes? This illusion is called the “Mona Lisa effect.” It happens when the person in an image looks straight ahead, at an angle between 0 and 5 degrees."},
+  {t:"Many people believe this effect is named after Leonardo da Vinci’s famous painting, the Mona Lisa, because they think she watches people who look at her. However, a 2019 study showed that this is not true. In the study, 24 people were asked to look at the Mona Lisa on a computer. They stood at different distances and angles. After more than 2,000 tests, not one person felt that the Mona Lisa was looking straight at them. In fact, her eyes are turned to the side, at an angle of about 15 degrees."},
+  {t:"The Mona Lisa effect is real, but it only works when the person in the picture looks straight ahead. This illusion works at any angle or distance from which someone looks at the image."},
+  {t:"So, how did the illusion get its name? No one knows for sure. What we do know is that this effect can be useful in many ways. For example, it is used in video games to help people feel closer to the virtual world. People can also use this trick to make their pictures or photos more interesting. Even though the Mona Lisa does not show this effect, people are still drawn to her eyes and smile."}
+ ],
+ s1:[
+  {w:"illusion", zh:"錯覺", no:"事實"},
+  {w:"effect", zh:"效應", no:"缺點"},
+  {w:"image", zh:"圖像", no:"想像力"},
+  {w:"degree", zh:"（角）度", no:"距離"},
+  {w:"distance", zh:"距離", no:"角度"},
+  {w:"virtual", zh:"虛擬的", no:"真實的"},
+  {w:"angle", zh:"角度", no:"年齡"},
+  {w:"painting", zh:"畫作", no:"油漆工"},
+  {w:"study", zh:"研究", no:"學校"}
+ ],
+ s2:[
+  {q:"說明什麼是「蒙娜麗莎效應」，以及它在什麼情況下會發生", o:["第 1 段","第 2 段","第 3 段","第 4 段"]},
+  {q:"2019 年的研究找了 24 個人做實驗", o:["第 2 段","第 1 段","第 3 段","第 4 段"]},
+  {q:"蒙娜麗莎的眼睛其實看向旁邊約 15 度", o:["第 2 段","第 1 段","第 3 段","第 4 段"]},
+  {q:"這個效應被用在電玩遊戲裡", o:["第 4 段","第 1 段","第 2 段","第 3 段"]},
+  {q:"這個效應只有在畫中的人看向正前方時才會發生", o:["第 3 段","第 1 段","第 2 段","第 4 段"]}
+ ],
+ s3:[
+  {q:"「蒙娜麗莎效應」要在什麼角度才會發生？", o:["0 到 5 度","15 度","30 度","任何角度都可以"]},
+  {q:"2019 年那個研究的結果是什麼？", o:["沒有任何一個人覺得蒙娜麗莎在看自己","所有人都覺得被看著","只有少數幾個人覺得被看著","研究沒有得到結論"]},
+  {q:"蒙娜麗莎本人為什麼沒有這個效應？", o:["她的眼睛看向旁邊太多了","她不是真人","那幅畫太舊了","她在微笑"]},
+  {q:"第 3 段的 This illusion 指的是什麼？", o:["蒙娜麗莎效應","那幅畫","那個研究","電玩遊戲"]},
+  {q:"這個效應可以拿來做什麼？", o:["讓玩遊戲的人覺得更接近虛擬世界","讓照片看起來變舊","幫助人了解藝術史","讓人不會被錯覺騙"]}
+ ],
+ s4:[
+  {q:"Does the Mona Lisa show the Mona Lisa effect, and why?", o:["No, because her eyes are turned to the side too much.","Yes, because her eyes are looking straight ahead.","No, because she is not a real person.","Yes, because she looks different when people stand at different angles."], t:"精選試題 34"},
+  {q:"How can the Mona Lisa effect be useful?", o:["To make game players feel closer to the virtual world.","To make pictures look more modern.","To help people not be fooled by illusion.","To help people understand art history."], t:"精選試題 35"},
+  {q:"According to the reading, which is true about the Mona Lisa effect?", o:["The effect doesn’t work if the person in the picture looks at an angle of 30 degrees.","The Mona Lisa is famous because it interestingly shows the effect.","Only a few people in the study felt they were followed by the Mona Lisa’s eyes.","People can only feel the effect when looking at an image at an angle of 5 degrees."], t:"精選試題 36"}
+ ]
+},
+{
+ id:"fukushima", order:3,
+ title:"Japan’s Nuclear Wastewater",
+ zh:"日本福島核廢水",
+ words:268, kind:"長文閱讀",
+ bg:"2011 年日本發生大地震和海嘯，福島的核能發電廠受損。\n\n核電廠的燃料棒會一直發熱，必須不停用水去降溫，這些用過的水就變成「核廢水」，日本一共存了 130 萬噸。2023 年 8 月開始，日本把處理過的廢水排到海裡，預計要排 30 到 40 年。台灣、中國、韓國的漁民都很擔心海裡的魚會受影響。\n\n（順帶一提：2011 年那場地震發生的時候，你們才剛出生，所以對這件事沒印象是很正常的。）",
+ body:[
+  {t:"In August 2023, Japan started to release wastewater from the Fukushima Daiichi Nuclear Power Plant into the sea, and they will be releasing it for 30 to 40 years. Although this action has worried many people, Japan still decided to do it. Why is that? In 2011, a terrible earthquake broke part of the plant. After that, it had to use water to cool down the fuel rods. Since then, it has stored 1.3 million tons of wastewater. Japan can’t simply throw the water away in the mountains or any other places. However, the country really needs space to build new plants or factories to help share the old plant’s work. This is important because more terrible things might happen if another earthquake hits the area."},
+  {t:"Japan tells the world that the water is already treated and not dangerous. There is still tritium in it, but the level of it is low. It does not hurt people directly because very few people swim in the sea or drink the seawater. But what about food? Many fishermen in Japan and Taiwan worry that the wastewater will hurt the health of fish. Also, people might say no to their fish and in turn, make their lives harder. Other countries like China and South Korea are also worried."},
+  {t:"Sadly, it looks like it is not possible to come up with a way that everyone is happy with. What the world can do now is to do careful checks and tests to make sure fish in that sea area are safe to eat."}
+ ],
+ s1:[
+  {w:"release", zh:"釋放；排放", no:"回收"},
+  {w:"wastewater", zh:"廢水", no:"海水"},
+  {w:"nuclear power plant", zh:"核電廠", no:"自來水廠"},
+  {w:"fuel rod", zh:"燃料棒", no:"釣魚竿"},
+  {w:"earthquake", zh:"地震", no:"颱風"},
+  {w:"store", zh:"儲存", no:"丟棄"},
+  {w:"treated", zh:"處理過的", no:"全新的"},
+  {w:"fisherman", zh:"漁夫", no:"農夫"},
+  {w:"dangerous", zh:"危險的", no:"方便的"}
+ ],
+ s2:[
+  {q:"日本從 2023 年 8 月開始把廢水排到海裡", o:["第 1 段","第 2 段","第 3 段"]},
+  {q:"2011 年的大地震破壞了核電廠的一部分", o:["第 1 段","第 2 段","第 3 段"]},
+  {q:"日本說水已經處理過、沒有危險", o:["第 2 段","第 1 段","第 3 段"]},
+  {q:"日本和台灣的漁民擔心魚的健康", o:["第 2 段","第 1 段","第 3 段"]},
+  {q:"現在世界能做的是仔細檢查和檢驗", o:["第 3 段","第 1 段","第 2 段"]}
+ ],
+ s3:[
+  {q:"這些廢水是怎麼來的？", o:["用來幫燃料棒降溫的水","從海裡打上來的水","工廠洗東西用的水","下雨積起來的水"]},
+  {q:"日本為什麼說廢水不會直接傷害人？", o:["因為很少人會在海裡游泳或喝海水","因為水裡完全沒有氚","因為魚不會吃到","因為海很大會稀釋掉"]},
+  {q:"第 2 段 There is still tritium in it 的 it 指的是什麼？", o:["廢水","氚","燃料棒","魚"]},
+  {q:"漁民擔心的是什麼？", o:["廢水影響魚的健康，人們不敢買他們的魚","海水會愈來愈少","漁船會壞掉","政府不給補助"]},
+  {q:"文章最後認為世界現在能做的是什麼？", o:["仔細檢查和檢驗那片海域的魚","想辦法阻止日本排水","以後都不要再吃魚","蓋更多的核電廠"]}
+ ],
+ s4:[
+  {q:"According to the reading, what is the wastewater used for?", o:["Cooling down fuel rods.","Cleaning the nuclear power plant.","Washing tritium away.","Washing fuel rods."], t:"精選試題 31"},
+  {q:"What do the two uses of “it” refer to?", o:["Wastewater; tritium.","Fuel rod; tritium.","Wastewater; fuel rod.","Fish; wastewater."], t:"精選試題 32"},
+  {q:"What can we learn from the reading?", o:["It will take Japan 30–40 years to release the wastewater they’ve stored.","The fish around Japan and Taiwan are not as healthy as before.","It is OK to drink the wastewater released from Japan’s nuclear power plant.","Most countries that are far from Japan agree on their water-releasing plan."], t:"精選試題 33"}
+ ]
+}
+];
+
+
+/* =======================================================
+   設定區　—　老師每週改這裡
+   ======================================================= */
+const SEATS = 15;
+const TEACHER_CODE = "2026";
+const LESSON = "閱讀";
+
+const HOMEWORK = {
+  on: true,
+  title: "本週作業",
+  due: "9/29（週一）上課前",     // 改成實際的繳交日
+  reading: "costco",             // 這週讀哪一篇：costco／mona／fukushima／all
+  tasks: [
+    { stage:0, pass:8 },         // 第一階 讀之前：9 個生字要對 8 個
+    { stage:3, pass:2 }          // 第四階 會考式：3 題要對 2 題
+  ],
+  note: "第一階的中文背景一定要先看完再作答。可以重複練，算你最好的那一次。"
+};
+
+const GFORM = {
+  url: "https://docs.google.com/forms/d/e/1FAIpQLSdG6ajrZXfG2LdjAXqsxCTwHrKhBo3aPA4U56Ug8ex0WMRMGw/formResponse",
+  f: { seat:"entry.113402022", lesson:"entry.770464151", stage:"entry.1305707477",
+       right:"entry.629191504", total:"entry.193167403", wrong:"entry.1924439157",
+       hw:"entry.952655181" }
+};
+/* ======================================================= */
+
+const KEY = "read_v1";
+const STAGES = [
+  {n:"第一階", t:"讀之前", d:"先看背景，再認生字"},
+  {n:"第二階", t:"找得到", d:"回文章裡找出處"},
+  {n:"第三階", t:"讀得懂", d:"讀懂句子在說什麼"},
+  {n:"第四階", t:"會考式", d:"書上原題，英文作答"}
+];
+READINGS.sort(function(a,b){ return a.order-b.order; });
+READINGS.forEach(function(r){
+  [r.s1,r.s2,r.s3,r.s4].forEach(function(arr,si){
+    arr.forEach(function(it,i){ it.id = r.id+":"+si+":"+i; });
+  });
+});
+function R(id){ for(var i=0;i<READINGS.length;i++){ if(READINGS[i].id===id) return READINGS[i]; } return null; }
+
+let store = load(), seat = null, cur = null, stage = 0, queue = [], idx = 0, right = 0, poolMode = "all";
+
+function load(){
+  try{ const o=JSON.parse(localStorage.getItem(KEY)); if(o&&o.logs&&o.wrong) return o; }catch(e){}
+  return {logs:[], wrong:{}};
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+function wrongOf(s){ if(!store.wrong[s]) store.wrong[s]={}; return store.wrong[s]; }
+function logsOf(s){ return store.logs.filter(function(l){ return String(l.seat)===String(s); }); }
+function bestOf(s, st, rid){
+  const a=logsOf(s).filter(function(l){ return l.stage===st && (!rid||rid==="all"||l.reading===rid); })
+                   .map(function(l){ return l.right; });
+  return a.length ? Math.max.apply(null,a) : null;
+}
+function ymd(ts){ const d=new Date(ts); return (d.getMonth()+1)+"/"+d.getDate(); }
+function ymdhm(ts){ const d=new Date(ts);
+  return (d.getMonth()+1)+"/"+d.getDate()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function show(v){
+  ["Seat","Pick","Practice","Teacher","Report"].forEach(function(n){
+    document.getElementById("view"+n).classList.toggle("hide", n.toLowerCase()!==v); });
+  document.getElementById("who").classList.toggle("hide", v==="seat");
+  document.getElementById("foot").classList.toggle("hide", v!=="practice" && v!=="seat");
+  window.scrollTo(0,0);
+}
+
+/* ---------- 作業 ---------- */
+function hwStatus(s){
+  if(!HOMEWORK.on) return null;
+  const items=HOMEWORK.tasks.map(function(t){
+    const b=bestOf(s,t.stage,HOMEWORK.reading);
+    return {stage:t.stage,pass:t.pass,best:b,ok:(b!=null&&b>=t.pass)};
+  });
+  const done=items.filter(function(x){return x.ok;}).length;
+  return {items:items,done:done,all:items.length,complete:(done===items.length)};
+}
+function hwHead(){
+  if(!HOMEWORK.on) return "";
+  const r=R(HOMEWORK.reading);
+  return "<div class='t'>"+HOMEWORK.title+"　·　"+(r?r.zh:"全部文章")+"</div>"
+       + (HOMEWORK.due?"<div style='font-size:16px'>繳交："+HOMEWORK.due+"</div>":"");
+}
+function hwList(s){
+  const st=hwStatus(s);
+  if(!st) return "";
+  return st.items.map(function(x){
+    return "<li>"+(x.ok?"<span class='ok'>✅":"<span class='wait'>⬜")
+      +" "+STAGES[x.stage].n+"　"+STAGES[x.stage].t+"　至少 "+x.pass+" 題"
+      +(x.best==null?"（還沒做）":"（目前最好 "+x.best+" 題）")+"</span></li>";
+  }).join("");
+}
+function drawHw(boxId, s){
+  const box=document.getElementById(boxId);
+  if(!HOMEWORK.on){ box.innerHTML=""; return; }
+  if(s==null){
+    const li=HOMEWORK.tasks.map(function(t){
+      return "<li>⬜ "+STAGES[t.stage].n+"　"+STAGES[t.stage].t+"　至少答對 <b>"+t.pass+"</b> 題</li>"; }).join("");
+    box.innerHTML="<div class='hw'>"+hwHead()+"<ul>"+li+"</ul><p class='n'>"+HOMEWORK.note+"</p></div>";
+    return;
+  }
+  const st=hwStatus(s);
+  box.innerHTML="<div class='hw"+(st.complete?" done":"")+"'>"+hwHead()+"<ul>"+hwList(s)+"</ul>"
+    +"<p class='n'>"+(st.complete
+      ? "🎉 本週作業完成了，老師那邊會看到。想再讀就繼續，紀錄一樣會算。"
+      : HOMEWORK.note)+"</p></div>";
+}
+
+/* ---------- 座號 ---------- */
+function drawSeats(){
+  const g=document.getElementById("seatgrid"); g.innerHTML="";
+  for(let i=1;i<=SEATS;i++){
+    const n=logsOf(i).length, b=document.createElement("button");
+    b.className="seat";
+    b.innerHTML=i+(n?"<span class='dot'>練過 "+n+" 次</span>":"<span class='dot'>&nbsp;</span>");
+    b.onclick=function(){ seat=i; startSeat(); };
+    g.appendChild(b);
+  }
+}
+function startSeat(){
+  document.getElementById("who").innerHTML =
+    "座號 "+seat+"<button onclick=\"show('seat');drawSeats()\">換人</button>";
+  drawHw("hwPick", seat); drawList(); show("pick");
+}
+
+/* ---------- 選文章 ---------- */
+function drawList(){
+  const box=document.getElementById("rlist"); box.innerHTML="";
+  READINGS.forEach(function(r){
+    const b=document.createElement("button"); b.className="rcard";
+    const b4=bestOf(seat,3,r.id);
+    b.innerHTML="<span class='no'>第 "+r.order+" 篇</span>"
+      +"<div class='t'>"+esc(r.title)+"</div>"
+      +"<div class='z'>"+esc(r.zh)+"</div>"
+      +"<div class='m'>"+r.words+" 字　·　"+r.kind
+      +(b4!=null?"　·　<b>會考式最好 "+b4+" / "+r.s4.length+" 題</b>":"")+"</div>";
+    b.onclick=function(){ cur=r; stage=0; poolMode="all"; openReading(); };
+    box.appendChild(b);
+  });
+}
+function openReading(){
+  drawHw("hwPractice", seat);
+  show("practice"); start();
+}
+
+/* ---------- 背景與文章 ---------- */
+function drawBg(){
+  const box=document.getElementById("bgbox");
+  if(stage!==0){ box.innerHTML=""; return; }
+  const ps=cur.bg.split("\n\n").map(function(p){
+    return "<p>"+esc(p).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")+"</p>"; }).join("");
+  box.innerHTML="<div class='bgbox'><h3>讀之前，先知道這些事</h3>"+ps+"</div>";
+}
+let artOpen = true;
+function drawArt(){
+  const box=document.getElementById("artbox");
+  if(stage===0){ box.innerHTML=""; return; }
+  let inner="";
+  if(cur.body[0].w){
+    inner=cur.body.map(function(l){
+      return "<div class='line'><span class='w'>"+esc(l.w)+":</span><span>"+esc(l.t)+"</span></div>"; }).join("");
+  }else{
+    inner=cur.body.map(function(p,i){
+      return "<div class='para'><span class='n'>"+(i+1)+"</span><span class='x'>"+esc(p.t)+"</span></div>"; }).join("");
+  }
+  box.innerHTML="<div class='art'>"
+    + "<div class='h' onclick='toggleArt()'><span>📄 "+esc(cur.title)+"</span>"
+    + "<span class='sm'>"+(artOpen?"點一下收起來":"點一下打開")+"</span></div>"
+    + "<div class='b"+(artOpen?"":" closed")+"'>"+inner+"</div></div>";
+}
+function toggleArt(){ artOpen=!artOpen; drawArt(); }
+
+/* ---------- 分頁 ---------- */
+const tabsEl=document.getElementById("tabs");
+STAGES.forEach(function(s,i){
+  const d=document.createElement("div");
+  d.className="tab"+(i===0?" on":"");
+  d.innerHTML="<b>"+s.n+"</b>"+s.t;
+  d.onclick=function(){ stage=i; start(); };
+  tabsEl.appendChild(d);
+});
+
+/* ---------- 出題 ---------- */
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+function bankOf(r,st){ return [r.s1,r.s2,r.s3,r.s4][st]; }
+function pool(){
+  let list=bankOf(cur,stage);
+  if(poolMode==="wrong"){
+    const w=wrongOf(seat);
+    const hit=list.filter(function(x){ return w[x.id]; });
+    if(hit.length) list=hit;
+  }
+  return list;
+}
+function start(){
+  document.querySelectorAll(".tab").forEach(function(t,i){ t.classList.toggle("on", i===stage); });
+  artOpen = true;
+  drawBg(); drawArt();
+  queue=shuffle(pool()); idx=0; right=0;
+  document.getElementById("stageName").textContent=STAGES[stage].n+"　"+STAGES[stage].d;
+  const b=bestOf(seat,stage,cur.id);
+  document.getElementById("best").textContent = b==null?"最佳 —":"最佳 "+b+" 題";
+  if(!queue.length){
+    document.getElementById("card").innerHTML="<div class='done'><p class='msg'>這一階目前沒有題目。</p></div>";
+    drawChips(); return;
+  }
+  render(); drawChips();
+}
+function bar(){
+  document.getElementById("count").textContent=idx+" / "+queue.length;
+  document.getElementById("fill").style.width=(idx/queue.length*100)+"%";
+}
+function say(t){
+  try{ const u=new SpeechSynthesisUtterance(t); u.lang="en-US"; u.rate=.85;
+       speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+function render(){
+  bar();
+  if(idx>=queue.length) return finish();
+  const q=queue[idx], card=document.getElementById("card");
+  const head="<div class='stage'><span>"+STAGES[stage].n+"　"+STAGES[stage].t+"</span>"
+    +(q.t?"<span class='exam'>"+esc(q.t)+"</span>":"")+"</div>";
+
+  if(stage===0){
+    card.innerHTML=head
+      +"<div class='word'>"+esc(q.w)+"<button class='say' onclick=\"say('"+q.w.replace(/'/g,"\\'")+"')\">🔊</button></div>"
+      +"<div class='opts two' id='opts'></div><div class='fb' id='fb'></div>";
+    shuffle([q.zh,q.no]).forEach(function(x){
+      const b=document.createElement("button"); b.className="opt"; b.textContent=x;
+      b.onclick=function(){ answer(x===q.zh,q,q.zh,b); };
+      document.getElementById("opts").appendChild(b);
+    });
+  }else{
+    const lead = stage===1 ? "這句話出現在哪裡？" : "";
+    card.innerHTML=head
+      +(lead?"<div class='stage'>"+lead+"</div>":"")
+      +"<div class='qz'>"+esc(q.q)+"</div>"
+      +"<div class='opts"+(q.o.length===2?" two":"")+"' id='opts'></div><div class='fb' id='fb'></div>";
+    shuffle(q.o).forEach(function(x){
+      const b=document.createElement("button"); b.className="opt"; b.textContent=x;
+      b.onclick=function(){ answer(x===q.o[0],q,q.o[0],b); };
+      document.getElementById("opts").appendChild(b);
+    });
+  }
+}
+function answer(ok,q,correct,btn){
+  document.querySelectorAll(".opt").forEach(function(b){
+    b.disabled=true; if(b.textContent===correct) b.classList.add("right"); });
+  if(btn&&!ok) btn.classList.add("wrong");
+  const fb=document.getElementById("fb"), w=wrongOf(seat);
+  fb.className="fb show "+(ok?"good":"bad");
+  if(ok){ right++; w[q.id]=false; fb.innerHTML="<span class='big'>✓ 答對了</span>"+STAGES[stage].t; }
+  else{
+    w[q.id]=true;
+    fb.innerHTML="<span class='big'>再看一次就好</span>正確答案是 <b>"+esc(correct)+"</b>"
+      + (stage===1?"　（回文章上面找找看）":"");
+  }
+  save(); drawChips();
+  if(stage===0) say(q.w);
+  const next=document.createElement("button");
+  next.className="go"; next.style.marginTop="16px";
+  next.textContent=idx+1>=queue.length?"看結果":"下一題 →";
+  next.onclick=function(){ idx++; render(); };
+  fb.appendChild(document.createElement("br")); fb.appendChild(next); next.focus();
+}
+function finish(){
+  const prevBest=bestOf(seat,stage,cur.id), before=hwStatus(seat);
+  store.logs.push({seat:seat,stage:stage,reading:cur.id,right:right,total:queue.length,ts:Date.now(),mode:poolMode});
+  save(); drawHw("hwPractice", seat);
+  const after=hwStatus(seat);
+  const justDone = after && after.complete && before && !before.complete;
+  sendOut(seat,stage,right,queue.length,after);
+
+  const nowBest=bestOf(seat,stage,cur.id), isBest=prevBest==null||right>prevBest;
+  document.getElementById("count").textContent=queue.length+" / "+queue.length;
+  document.getElementById("fill").style.width="100%";
+  document.getElementById("best").textContent="最佳 "+nowBest+" 題";
+
+  let msg; const rate=right/queue.length;
+  if(justDone) msg="🎉 本週作業完成了！老師那邊會看到你做完了。";
+  else if(isBest&&prevBest!=null) msg="破紀錄了！上次 "+prevBest+" 題，這次 "+right+" 題。";
+  else if(rate===1) msg="全對。往上一階試試看。";
+  else if(stage===1&&rate<.7) msg="沒關係，把文章打開，一句一句對照著找，第二次就會快很多。";
+  else if(rate>=.7) msg="大部分都對了。錯的題目再練一次就好。";
+  else msg="按下面的「只練錯過的題目」再跑一次，第二次一定會比第一次好。";
+
+  document.getElementById("card").innerHTML=
+    "<div class='done'><div class='score'>"+right+"</div>"
+    +"<div class='of'>答對 "+right+" 題 / 共 "+queue.length+" 題（"+esc(cur.zh)+"）</div>"
+    +"<div class='best'>你的最佳紀錄："+nowBest+" 題</div><br>"
+    +"<p class='msg'>"+msg+"</p><div class='btnrow'>"
+    +"<button class='go' onclick='start()'>再練一次</button>"
+    +(stage<3?"<button class='go ghost' onclick='stage="+(stage+1)+";start()'>進到"+STAGES[stage+1].n+" →</button>":"")
+    +"</div></div>";
+  drawChips();
+}
+function wrongByStage(s){
+  const w=store.wrong[s]||{}, c=[0,0,0,0];
+  READINGS.forEach(function(r){
+    [r.s1,r.s2,r.s3,r.s4].forEach(function(arr,si){
+      arr.forEach(function(it){ if(w[it.id]) c[si]++; }); }); });
+  return c;
+}
+function drawChips(){
+  const c=wrongByStage(seat);
+  const box=document.getElementById("chips"), mini=document.getElementById("mini");
+  box.innerHTML=""; let total=0;
+  c.forEach(function(n,i){ if(n){ total+=n;
+    const s=document.createElement("span"); s.className="chip";
+    s.textContent=STAGES[i].t+" "+n; box.appendChild(s); } });
+  if(!total){
+    box.innerHTML="<span class='chip clear'>目前沒有要再看的題目</span>";
+    mini.textContent="答錯的題目會自動留在這裡，答對之後就會消失。"; return;
+  }
+  mini.textContent="共 "+total+" 題。按「只練錯過的題目」可以只練它們。";
+}
+function onlyWrong(){ poolMode="wrong"; start(); }
+function allItems(){ poolMode="all"; start(); }
+
+/* ---------- 送出 ---------- */
+function sendOut(seat,stage,right,total,hw){
+  if(!GFORM.url) return;
+  const c=wrongByStage(seat), row={};
+  row[GFORM.f.seat]=seat;
+  row[GFORM.f.lesson]=LESSON+"-"+cur.zh;
+  row[GFORM.f.stage]=STAGES[stage].n+" "+STAGES[stage].t;
+  row[GFORM.f.right]=right;
+  row[GFORM.f.total]=total;
+  row[GFORM.f.wrong]=c.map(function(n,i){ return n?STAGES[i].t+n:""; }).filter(Boolean).join(" ");
+  row[GFORM.f.hw]=hw?(hw.complete?"已完成":"進行中 "+hw.done+"/"+hw.all):"";
+  post(row);
+}
+function post(row){
+  const body=new URLSearchParams();
+  for(const k in row) body.append(k,row[k]);
+  fetch(GFORM.url,{method:"POST",mode:"no-cors",body:body}).catch(function(){ queueRow(row); });
+}
+function queueRow(row){
+  if(!store.pending) store.pending=[];
+  store.pending.push(row);
+  if(store.pending.length>200) store.pending=store.pending.slice(-200);
+  save();
+}
+function flushPending(){
+  if(!GFORM.url||!store.pending||!store.pending.length) return;
+  const rows=store.pending.slice(); store.pending=[]; save();
+  rows.forEach(function(r){ post(r); });
+}
+
+/* ---------- 老師檢視 ---------- */
+function teacherGate(){
+  const c=prompt("請輸入老師密碼"); if(c===null) return;
+  if(c!==TEACHER_CODE){ alert("密碼不對"); return; }
+  drawTeacher(); show("teacher");
+}
+function drawTeacher(){
+  let doneN=0, hwDone=0;
+  for(let i=1;i<=SEATS;i++){ if(logsOf(i).length) doneN++;
+    const st=hwStatus(i); if(st&&st.complete) hwDone++; }
+  document.getElementById("tSub").textContent=
+    "全班 "+SEATS+" 人，已經練過的有 "+doneN+" 人"
+    +(HOMEWORK.on?"，本週作業完成 "+hwDone+" 人":"")
+    +"，總共 "+store.logs.length+" 次練習紀錄。";
+
+  let h="<tr><th>座號</th><th>本週作業</th><th class='num'>練習次數</th><th>最近一次</th>"
+    +STAGES.map(function(s){ return "<th class='num'>"+s.t+"</th>"; }).join("")
+    +"<th class='num'>還要再看</th></tr>";
+  for(let i=1;i<=SEATS;i++){
+    const ls=logsOf(i), st=hwStatus(i);
+    const c=wrongByStage(i); let wn=0; c.forEach(function(n){ wn+=n; });
+    const hwCell=!st?"—":(st.complete?"<span class='ok'>✅ 已完成</span>"
+      :(ls.length?"<span class='wait'>進行中 "+st.done+"/"+st.all+"</span>":"<span class='wait'>未開始</span>"));
+    if(!ls.length){
+      h+="<tr class='none'><td>"+i+"</td><td>"+hwCell+"</td><td class='num'>—</td><td>還沒做</td>"
+        +STAGES.map(function(){ return "<td class='num'>—</td>"; }).join("")+"<td class='num'>—</td></tr>";
+      continue;
+    }
+    const last=ls[ls.length-1];
+    h+="<tr><td><span class='seatlink' onclick='drawReport("+i+")'>"+i+"</span></td>"
+      +"<td>"+hwCell+"</td><td class='num'>"+ls.length+"</td><td>"+ymdhm(last.ts)+"</td>"
+      +STAGES.map(function(s,si){ const b=bestOf(i,si,HOMEWORK.reading);
+          return "<td class='num'>"+(b==null?"—":b)+"</td>"; }).join("")
+      +"<td class='num'>"+wn+"</td></tr>";
+  }
+  document.getElementById("tClass").innerHTML=h;
+
+  const tot=[0,0,0,0];
+  for(let i=1;i<=SEATS;i++){ const c=wrongByStage(i); c.forEach(function(n,si){ tot[si]+=n; }); }
+  const maxN=Math.max.apply(null,tot)||1;
+  let h2="<tr><th>階段</th><th>能力</th><th class='num'>全班還沒過的題數</th><th></th></tr>";
+  const skills=["生字不夠","找不到出處","讀不懂句子","會考題型不熟"];
+  STAGES.forEach(function(s,si){
+    h2+="<tr><td><b>"+s.n+"　"+s.t+"</b></td><td>"+skills[si]+"</td>"
+      +"<td class='num'>"+tot[si]+"</td>"
+      +"<td><span class='barcell'><i style='width:"+(tot[si]/maxN*160)+"px'></i></span></td></tr>";
+  });
+  document.getElementById("tWrong").innerHTML=h2;
+}
+
+/* ---------- 個人報告 ---------- */
+function drawReport(s){
+  const ls=logsOf(s);
+  document.getElementById("rTitle").textContent="座號 "+s+"　閱讀練習報告";
+  if(!ls.length){ document.getElementById("rRange").textContent="還沒有練習紀錄。"; show("report"); return; }
+  const first=ls[0], last=ls[ls.length-1];
+  document.getElementById("rRange").textContent="統計期間："+ymd(first.ts)+" ～ "+ymd(last.ts);
+  const days={}; ls.forEach(function(l){ days[ymd(l.ts)]=1; });
+  const reads={}; ls.forEach(function(l){ reads[l.reading]=1; });
+  const c=wrongByStage(s); let wn=0; c.forEach(function(n){ wn+=n; });
+  const st=hwStatus(s);
+  document.getElementById("rKpis").innerHTML=
+    kpi("練習次數",ls.length+" 次")+kpi("練習天數",Object.keys(days).length+" 天")
+    +kpi("讀過的文章",Object.keys(reads).length+" / "+READINGS.length+" 篇")
+    +kpi("還要再看",wn+" 題")
+    +(st?kpi("本週作業",st.complete?"已完成":"進行中 "+st.done+"/"+st.all):"");
+  document.getElementById("rMsg").textContent =
+    ls.length>=3 ? "已經主動練了 "+ls.length+" 次。閱讀最需要的就是一直讀下去，次數比分數重要。"
+                 : "才剛開始，先看練習次數就好，分數會慢慢跟上來。";
+  let h="<tr><th>日期</th><th>文章</th><th>階段</th><th class='num'>答對</th><th class='num'>題數</th><th>備註</th></tr>";
+  ls.slice().reverse().forEach(function(l){
+    const r=R(l.reading);
+    h+="<tr><td>"+ymdhm(l.ts)+"</td><td>"+(r?esc(r.zh):l.reading)+"</td>"
+      +"<td>"+STAGES[l.stage].n+"　"+STAGES[l.stage].t+"</td>"
+      +"<td class='num'>"+l.right+"</td><td class='num'>"+l.total+"</td>"
+      +"<td>"+(l.mode==="wrong"?"只練錯過的":"")+"</td></tr>";
+  });
+  document.getElementById("rLogs").innerHTML=h;
+  show("report");
+}
+function kpi(l,v){ return "<div class='kpi'><span>"+l+"</span><b class='big2'>"+v+"</b></div>"; }
+
+function exportCSV(){
+  const rows=[["座號","日期時間","文章","階段","答對","題數","模式"]];
+  store.logs.slice().sort(function(a,b){ return a.seat-b.seat||a.ts-b.ts; }).forEach(function(l){
+    const r=R(l.reading);
+    rows.push([l.seat,ymdhm(l.ts),(r?r.zh:l.reading),STAGES[l.stage].n+" "+STAGES[l.stage].t,
+               l.right,l.total,l.mode==="wrong"?"只練錯的":"全部"]);
+  });
+  const csv="\ufeff"+rows.map(function(r){
+    return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(","); }).join("\r\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download="閱讀練習紀錄_"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function wipe(){
+  if(!confirm("要清空全班所有紀錄嗎？這個動作無法復原。")) return;
+  if(!confirm("再確認一次：所有座號的練習紀錄都會不見。")) return;
+  store={logs:[],wrong:{}}; save(); drawTeacher(); drawSeats();
+}
+
+drawHw("hwSeat", null); drawSeats(); show("seat"); flushPending();
+</script>
+</body>
+</html>
