@@ -10,10 +10,11 @@
 |---|---|
 | `index.html` | 首頁，列出所有練習 |
 | `l1-vocab.html` | 第五冊 Lesson 1 單字四階練習（28 字） |
+| `l2-vocab.html` | 第五冊 Lesson 2 單字四階練習（29 字） |
 
 ## 每週要改的地方
 
-打開 `l1-vocab.html`，找到最上面的設定區：
+打開 `l1-vocab.html` 或 `l2-vocab.html`，找到最上面的設定區：
 
 ```js
 const SEATS = 15;              // 班上座號到幾號
