@@ -15,31 +15,39 @@
     font-family:"PingFang TC","Noto Sans TC","Hiragino Sans TC",system-ui,-apple-system,"Segoe UI",sans-serif;
     font-size:19px;line-height:1.75;-webkit-text-size-adjust:100%}
   .wrap{max-width:760px;margin:0 auto;padding:24px 16px 72px}
-  header{background:var(--brand);color:#fff;border-radius:var(--r);padding:26px 24px;margin-bottom:20px}
+
+  header{background:var(--brand);color:#fff;border-radius:var(--r);padding:26px 24px;margin-bottom:18px}
   header h1{margin:0 0 6px;font-size:30px;letter-spacing:1px}
   header p{margin:0;font-size:17px;opacity:.92}
 
-  .tip{background:var(--gold-soft);border:2px solid #EBD9AE;border-radius:var(--r);
-    padding:16px 20px;margin-bottom:22px;color:#6B4A0E;font-size:17px}
-  .tip b{font-size:19px}
-  .tip ol{margin:10px 0 0;padding-left:22px}
-  .tip li{margin:4px 0}
+  .due{background:var(--gold-soft);border:2px solid #EBD9AE;border-radius:var(--r);
+    padding:18px 22px;margin-bottom:26px;color:#6B4A0E}
+  .due .t{font-size:21px;font-weight:700;margin-bottom:4px}
+  .due .d{font-size:17px}
+  .due .n{font-size:15px;opacity:.85;margin-top:8px}
 
-  h2{font-size:17px;color:var(--sub);font-weight:600;margin:0 0 12px;letter-spacing:1px}
+  h2.grp{font-size:16px;color:var(--sub);font-weight:600;margin:26px 0 12px;letter-spacing:1px}
+  h2.grp:first-of-type{margin-top:0}
 
   a.item{display:block;background:var(--card);border:2px solid var(--line);
-    border-radius:var(--r);padding:22px 24px;margin-bottom:14px;
-    text-decoration:none;color:inherit;transition:.15s}
+    border-radius:var(--r);padding:20px 22px;margin-bottom:12px;
+    text-decoration:none;color:inherit;transition:.15s;position:relative}
   a.item:hover{border-color:var(--brand);background:var(--brand-soft)}
-  a.item .k{display:inline-block;background:var(--brand);color:#fff;border-radius:99px;
-    padding:3px 14px;font-size:15px;margin-bottom:8px}
-  a.item .t{font-size:23px;font-weight:700;margin-bottom:4px}
+  a.item .t{font-size:22px;font-weight:700;margin-bottom:3px}
   a.item .d{font-size:16px;color:var(--sub)}
   a.item .go{margin-top:10px;color:var(--brand);font-weight:600;font-size:17px}
 
-  .soon{background:var(--card);border:2px dashed var(--line);border-radius:var(--r);
-    padding:20px 24px;color:var(--sub);font-size:17px}
-  footer{margin-top:34px;text-align:center;color:var(--sub);font-size:15px}
+  a.item.now{border-color:var(--gold);background:#FFFCF5;box-shadow:0 2px 10px rgba(201,138,23,.13)}
+  a.item.now .flag{display:inline-block;background:var(--gold);color:#fff;border-radius:99px;
+    padding:3px 14px;font-size:15px;font-weight:600;margin-bottom:8px}
+  a.item.later{opacity:.62}
+  a.item.later .go{color:var(--sub);font-weight:400}
+  a.item.later .note{font-size:15px;color:var(--sub);margin-top:8px}
+
+  .tip{background:var(--card);border:1px dashed var(--line);border-radius:var(--r);
+    padding:16px 20px;margin-top:26px;font-size:16px;color:var(--sub)}
+  .tip b{color:var(--ink)}
+  footer{margin-top:32px;text-align:center;color:var(--sub);font-size:15px}
 </style>
 </head>
 <body>
@@ -50,53 +58,72 @@
   <p>國三　第五冊（Book 5）</p>
 </header>
 
+<div class="due" id="due"></div>
+<div id="list"></div>
+
 <div class="tip">
-  <b>怎麼用</b>
-  <ol>
-    <li>點下面的練習</li>
-    <li>選你的<b>座號</b>（每次都要選同一個）</li>
-    <li>照著「本週作業」上面寫的做</li>
-  </ol>
+  <b>怎麼用</b>：點下面的練習 → 選你的<b>座號</b>（每次都選同一個）→ 照著頁面上的「本週作業」做。
+  沒被指定的練習隨時都可以點，想多練就練，紀錄一樣算。
 </div>
-
-<h2>目前的練習</h2>
-
-<a class="item" href="l1-vocab.html">
-  <span class="k">Lesson 1</span>
-  <div class="t">L1 單字四階練習</div>
-  <div class="d">Have You Ever Tried These Dishes?　共 28 個單字，從最簡單的一階開始，一階一階往上。</div>
-  <div class="go">開始練習 →</div>
-</a>
-
-<a class="item" href="l2-vocab.html">
-  <span class="k">Lesson 2</span>
-  <div class="t">L2 單字四階練習</div>
-  <div class="d">Are You Interested in Trying Food Delivery Apps?　共 29 個單字，一樣從最簡單的一階開始。</div>
-  <div class="go">開始練習 →</div>
-</a>
-
-<h2 style="margin-top:26px">文法</h2>
-
-<a class="item" href="grammar.html">
-  <span class="k">L1–L2 文法</span>
-  <div class="t">文法四階練習</div>
-  <div class="d">現在完成式・附加問句・that 名詞子句・it 虛主詞・情緒動詞。可以只練老師這週指定的那一個。</div>
-  <div class="go">開始練習 →</div>
-</a>
-
-<h2 style="margin-top:26px">閱讀</h2>
-
-<a class="item" href="reading.html">
-  <span class="k">會考長文</span>
-  <div class="t">閱讀四階練習</div>
-  <div class="d">三篇由淺入深。每篇都先用中文把背景講清楚，再開始讀英文——看不懂常常不是英文的問題，是不知道這篇在講什麼世界。</div>
-  <div class="go">開始練習 →</div>
-</a>
-
-<div class="soon">Lesson 3 的練習準備中，很快就會放上來。</div>
 
 <footer>淑媛老師的英文課</footer>
 
 </div>
+<script>
+/* =========================================================
+   每週上課前，改這兩行就好
+   ========================================================= */
+const THIS_WEEK = "grammar";          // 這週要做的：l1 ／ l2 ／ grammar ／ reading ／ all
+const DUE       = "9/22（週二）上課前";  // 繳交時間
+/* ========================================================= */
+
+const GROUPS = [
+  { name:"單字練習", items:[
+    { id:"l1", href:"l1-vocab.html", t:"L1 單字四階練習",
+      d:"Have You Ever Tried These Dishes?　28 個單字，從最簡單的一階開始。" },
+    { id:"l2", href:"l2-vocab.html", t:"L2 單字四階練習",
+      d:"Are You Interested in Trying Food Delivery Apps?　29 個單字。" }
+  ]},
+  { name:"文法練習", items:[
+    { id:"grammar", href:"grammar.html", t:"文法四階練習",
+      d:"現在完成式・附加問句・that 名詞子句・it 虛主詞・情緒動詞。可以只練老師指定的那一個。" }
+  ]},
+  { name:"閱讀練習", items:[
+    { id:"reading", href:"reading.html", t:"閱讀四階練習",
+      d:"三篇由淺入深。每篇都先用中文把背景講清楚，再開始讀英文。" }
+  ]}
+];
+
+function label(id){
+  for(const g of GROUPS) for(const it of g.items) if(it.id===id) return it.t;
+  return "";
+}
+
+const due=document.getElementById("due");
+if(THIS_WEEK==="all"){
+  due.innerHTML="<div class='t'>本週作業</div><div class='d'>下面的練習都要做。</div>"
+    + (DUE?"<div class='n'>繳交："+DUE+"</div>":"");
+}else{
+  due.innerHTML="<div class='t'>這週只要做這一個</div>"
+    + "<div class='d'>👉　"+label(THIS_WEEK)+"</div>"
+    + (DUE?"<div class='n'>繳交："+DUE+"　·　其他練習這週不用做</div>":"");
+}
+
+const list=document.getElementById("list");
+GROUPS.forEach(function(g){
+  const h=document.createElement("h2"); h.className="grp"; h.textContent=g.name; list.appendChild(h);
+  g.items.forEach(function(it){
+    const now = (THIS_WEEK==="all" || THIS_WEEK===it.id);
+    const a=document.createElement("a");
+    a.className="item "+(now?"now":"later");
+    a.href=it.href;
+    a.innerHTML=(now && THIS_WEEK!=="all" ? "<span class='flag'>本週作業</span>" : "")
+      + "<div class='t'>"+it.t+"</div><div class='d'>"+it.d+"</div>"
+      + (now ? "<div class='go'>開始練習 →</div>"
+             : "<div class='note'>這週不用做，想多練可以點 →</div>");
+    list.appendChild(a);
+  });
+});
+</script>
 </body>
 </html>

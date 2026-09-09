@@ -776,7 +776,7 @@ function allItems(){ poolMode="all"; start(); }
 function sendOut(seat, stage, right, total, hw){
   if(!GFORM.url) return;
   const row={};
-  row[GFORM.f.seat] = CLASS_ID.toUpperCase() + "-" + seat;
+  row[GFORM.f.seat] = CLASS_ID.toUpperCase() + "-" + sname(seat);
   row[GFORM.f.lesson]=LESSON+"-"+(group==="all"?"全部":gname(group));
   row[GFORM.f.stage]=STAGES[stage].n+" "+STAGES[stage].t;
   row[GFORM.f.right]=right;

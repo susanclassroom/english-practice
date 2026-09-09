@@ -366,7 +366,7 @@ const HOMEWORK = {
   note: "可以重複練很多次，算你最好的那一次。兩項都達到就算完成。"
 };
 /* 這一課的代號，會一起寫進紀錄，方便在試算表裡篩選 */
-const LESSON = "L1";
+const LESSON = "L1單字";
 
 /* Google 表單「K5-國三英文練習紀錄」的收件位址與欄位代號（已接好，不用改） */
 const GFORM = {
@@ -638,7 +638,7 @@ function allWords(){ poolMode="all"; start(); }
 function sendOut(seat, stage, right, total, wrong, hw){
   if(!GFORM.url) return;
   const row = {};
-  row[GFORM.f.seat] = CLASS_ID.toUpperCase() + "-" + seat;
+  row[GFORM.f.seat] = CLASS_ID.toUpperCase() + "-" + sname(seat);
   row[GFORM.f.lesson] = LESSON;
   row[GFORM.f.stage]  = STAGES[stage].n + " " + STAGES[stage].t;
   row[GFORM.f.right]  = right;

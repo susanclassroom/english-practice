@@ -260,7 +260,7 @@
 <script>
 const READINGS = [
 {
- id:"costco", order:1,
+ id:"costco", short:"好市多", order:1,
  title:"A Costco Card Is NOT a Passport",
  zh:"好市多會員卡不能當護照",
  words:226, kind:"對話",
@@ -312,7 +312,7 @@ const READINGS = [
  ]
 },
 {
- id:"mona", order:2,
+ id:"mona", short:"蒙娜麗莎", order:2,
  title:"Does the Mona Lisa’s Eyes Follow You?",
  zh:"蒙娜麗莎才沒在看你",
  words:252, kind:"說明文",
@@ -355,7 +355,7 @@ const READINGS = [
  ]
 },
 {
- id:"fukushima", order:3,
+ id:"fukushima", short:"福島", order:3,
  title:"Japan’s Nuclear Wastewater",
  zh:"日本福島核廢水",
  words:268, kind:"長文閱讀",
@@ -747,12 +747,12 @@ function allItems(){ poolMode="all"; start(); }
 function sendOut(seat,stage,right,total,hw){
   if(!GFORM.url) return;
   const c=wrongByStage(seat), row={};
-  row[GFORM.f.seat] = CLASS_ID.toUpperCase() + "-" + seat;
-  row[GFORM.f.lesson]=LESSON+"-"+cur.zh;
+  row[GFORM.f.seat] = CLASS_ID.toUpperCase() + "-" + sname(seat);
+  row[GFORM.f.lesson]=LESSON+"-"+cur.short;
   row[GFORM.f.stage]=STAGES[stage].n+" "+STAGES[stage].t;
   row[GFORM.f.right]=right;
   row[GFORM.f.total]=total;
-  row[GFORM.f.wrong]=c.map(function(n,i){ return n?STAGES[i].t+n:""; }).filter(Boolean).join(" ");
+  row[GFORM.f.wrong]=c.map(function(n,i){ return n?["生字","找不到","讀不懂","會考題"][i]+n:""; }).filter(Boolean).join(" ");
   row[GFORM.f.hw]=hw?(hw.complete?"已完成":"進行中 "+hw.done+"/"+hw.all):"";
   post(row);
 }

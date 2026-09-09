@@ -42,6 +42,18 @@ const CLASSES = {
 所以**不用動 Google 表單**，用篩選就能分開看兩班。
 每班在裝置上的練習紀錄也是分開存的，共用電腦不會混到。
 
+## 每週指定作業（首頁）
+
+打開 `index.html`，最下面的 script 只有兩行要改：
+
+```js
+const THIS_WEEK = "grammar";          // 這週要做的：l1／l2／grammar／reading／all
+const DUE       = "9/22（週二）上課前";
+```
+
+被指定的那一份會在首頁標成「本週作業」並highlight，其他三份會淡化成
+「這週不用做，想多練可以點」。學生只要記首頁一個網址就好。
+
 ## 每週要改的地方
 
 打開 `l1-vocab.html` 或 `l2-vocab.html`，找到最上面的設定區：
