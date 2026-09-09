@@ -185,7 +185,7 @@
 <div id="viewSeat">
   <div id="hwSeat"></div>
   <div class="card">
-    <h2 class="sec">先選你的座號</h2>
+    <h2 class="sec" id="seatTitle">先選你的座號</h2>
     <p class="secsub">選了以後，你的練習紀錄就會分開存，不會跟別人混在一起。</p>
     <div class="seatgrid" id="seatgrid"></div>
   </div>
@@ -402,7 +402,29 @@ const READINGS = [
 /* =======================================================
    設定區　—　老師每週改這裡
    ======================================================= */
-const SEATS = 15;
+/* 班級名單　—　要加新班級，在這裡多加一組就好 */
+const CLASSES = {
+  a: { name:"國三班", seats:[
+    {n:"01", s:"靜"}, {n:"02", s:"若"}, {n:"03", s:"慧"}, {n:"04", s:"欣"},
+    {n:"05", s:"衫"}, {n:"06", s:"睿"}, {n:"07", s:"芸"}, {n:"08", s:"蓁"},
+    {n:"09", s:"亘"}, {n:"10", s:"晏"}, {n:"11", s:"裕"}, {n:"12", s:"瑋"}
+  ]}
+  /* 加第二班：在上面那個 } 後面補一個逗號，再貼一組，例如
+     , b: { name:"週四班", seats:[ {n:"01", s:"○"}, {n:"02", s:"○"} ] }
+     然後把連結改成 ...?c=b 發給那一班就好 */
+};
+let _cid = ((new URLSearchParams(location.search).get("c")) || "a").toLowerCase();
+if(!CLASSES[_cid]) _cid = "a";      // 網址代號打錯就退回第一班，紀錄不會被標錯班
+const CLASS_ID = _cid;
+const CLS = CLASSES[CLASS_ID];
+const ROSTER = CLS.seats;
+const SEAT_IDS = ROSTER.map(function(p){ return p.n; });
+function sname(n){
+  for(var i=0;i<ROSTER.length;i++){
+    if(String(ROSTER[i].n)===String(n)) return ROSTER[i].n + (ROSTER[i].s ? " " + ROSTER[i].s : "");
+  }
+  return String(n);
+}
 const TEACHER_CODE = "2026";
 const LESSON = "閱讀";
 
@@ -426,7 +448,7 @@ const GFORM = {
 };
 /* ======================================================= */
 
-const KEY = "read_v1";
+const KEY = "read_v1_" + CLASS_ID;
 const STAGES = [
   {n:"第一階", t:"讀之前", d:"先看背景，再認生字"},
   {n:"第二階", t:"找得到", d:"回文章裡找出處"},
@@ -512,17 +534,18 @@ function drawHw(boxId, s){
 /* ---------- 座號 ---------- */
 function drawSeats(){
   const g=document.getElementById("seatgrid"); g.innerHTML="";
-  for(let i=1;i<=SEATS;i++){
+  document.getElementById("seatTitle").textContent = CLS.name + "　先選你的座號";
+  for(const i of SEAT_IDS){
     const n=logsOf(i).length, b=document.createElement("button");
     b.className="seat";
-    b.innerHTML=i+(n?"<span class='dot'>練過 "+n+" 次</span>":"<span class='dot'>&nbsp;</span>");
+    b.innerHTML=sname(i)+(n?"<span class='dot'>練過 "+n+" 次</span>":"<span class='dot'>&nbsp;</span>");
     b.onclick=function(){ seat=i; startSeat(); };
     g.appendChild(b);
   }
 }
 function startSeat(){
   document.getElementById("who").innerHTML =
-    "座號 "+seat+"<button onclick=\"show('seat');drawSeats()\">換人</button>";
+    CLS.name + "　" + sname(seat) + "<button onclick=\"show('seat');drawSeats()\">換人</button>";
   drawHw("hwPick", seat); drawList(); show("pick");
 }
 
@@ -724,7 +747,7 @@ function allItems(){ poolMode="all"; start(); }
 function sendOut(seat,stage,right,total,hw){
   if(!GFORM.url) return;
   const c=wrongByStage(seat), row={};
-  row[GFORM.f.seat]=seat;
+  row[GFORM.f.seat] = CLASS_ID.toUpperCase() + "-" + seat;
   row[GFORM.f.lesson]=LESSON+"-"+cur.zh;
   row[GFORM.f.stage]=STAGES[stage].n+" "+STAGES[stage].t;
   row[GFORM.f.right]=right;
@@ -758,28 +781,28 @@ function teacherGate(){
 }
 function drawTeacher(){
   let doneN=0, hwDone=0;
-  for(let i=1;i<=SEATS;i++){ if(logsOf(i).length) doneN++;
+  for(const i of SEAT_IDS){ if(logsOf(i).length) doneN++;
     const st=hwStatus(i); if(st&&st.complete) hwDone++; }
   document.getElementById("tSub").textContent=
-    "全班 "+SEATS+" 人，已經練過的有 "+doneN+" 人"
+    "全班 "+SEAT_IDS.length+" 人，已經練過的有 "+doneN+" 人"
     +(HOMEWORK.on?"，本週作業完成 "+hwDone+" 人":"")
     +"，總共 "+store.logs.length+" 次練習紀錄。";
 
   let h="<tr><th>座號</th><th>本週作業</th><th class='num'>練習次數</th><th>最近一次</th>"
     +STAGES.map(function(s){ return "<th class='num'>"+s.t+"</th>"; }).join("")
     +"<th class='num'>還要再看</th></tr>";
-  for(let i=1;i<=SEATS;i++){
+  for(const i of SEAT_IDS){
     const ls=logsOf(i), st=hwStatus(i);
     const c=wrongByStage(i); let wn=0; c.forEach(function(n){ wn+=n; });
     const hwCell=!st?"—":(st.complete?"<span class='ok'>✅ 已完成</span>"
       :(ls.length?"<span class='wait'>進行中 "+st.done+"/"+st.all+"</span>":"<span class='wait'>未開始</span>"));
     if(!ls.length){
-      h+="<tr class='none'><td>"+i+"</td><td>"+hwCell+"</td><td class='num'>—</td><td>還沒做</td>"
+      h+="<tr class='none'><td>"+sname(i)+"</td><td>"+hwCell+"</td><td class='num'>—</td><td>還沒做</td>"
         +STAGES.map(function(){ return "<td class='num'>—</td>"; }).join("")+"<td class='num'>—</td></tr>";
       continue;
     }
     const last=ls[ls.length-1];
-    h+="<tr><td><span class='seatlink' onclick='drawReport("+i+")'>"+i+"</span></td>"
+    h+="<tr><td><span class='seatlink' onclick='drawReport(\""+i+"\")'>"+sname(i)+"</span></td>"
       +"<td>"+hwCell+"</td><td class='num'>"+ls.length+"</td><td>"+ymdhm(last.ts)+"</td>"
       +STAGES.map(function(s,si){ const b=bestOf(i,si,HOMEWORK.reading);
           return "<td class='num'>"+(b==null?"—":b)+"</td>"; }).join("")
@@ -788,7 +811,7 @@ function drawTeacher(){
   document.getElementById("tClass").innerHTML=h;
 
   const tot=[0,0,0,0];
-  for(let i=1;i<=SEATS;i++){ const c=wrongByStage(i); c.forEach(function(n,si){ tot[si]+=n; }); }
+  for(const i of SEAT_IDS){ const c=wrongByStage(i); c.forEach(function(n,si){ tot[si]+=n; }); }
   const maxN=Math.max.apply(null,tot)||1;
   let h2="<tr><th>階段</th><th>能力</th><th class='num'>全班還沒過的題數</th><th></th></tr>";
   const skills=["生字不夠","找不到出處","讀不懂句子","會考題型不熟"];
