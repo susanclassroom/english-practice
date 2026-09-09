@@ -33,6 +33,7 @@
   .seat{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:16px 0;
     font-size:24px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink)}
   .seat:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .seat.guest{border-style:dashed;color:var(--sub);font-size:20px}
   .seat .dot{display:block;font-size:12px;color:var(--ok);font-weight:400;line-height:1}
 
   .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
@@ -233,9 +234,7 @@
   </div>
 </div>
 
-<div class="foot noprint" id="foot">
-  <button onclick="teacherGate()">老師檢視</button>
-</div>
+<div class="foot noprint" id="foot"></div>
 
 </div>
 <script>
@@ -337,7 +336,8 @@ const CLASSES = {
   a: { name:"國三班", seats:[
     {n:"01", s:"靜"}, {n:"02", s:"若"}, {n:"03", s:"慧"}, {n:"04", s:"欣"},
     {n:"05", s:"衫"}, {n:"06", s:"睿"}, {n:"07", s:"芸"}, {n:"08", s:"蓁"},
-    {n:"09", s:"亘"}, {n:"10", s:"晏"}, {n:"11", s:"裕"}, {n:"12", s:"瑋"}
+    {n:"09", s:"亘"}, {n:"10", s:"晏"}, {n:"11", s:"裕"}, {n:"12", s:"瑋"},
+    {n:"00", s:"訪客", guest:true}   // 老師試做用，不列入全班統計、不送進試算表
   ]}
   /* 加第二班：在上面那個 } 後面補一個逗號，再貼一組，例如
      , b: { name:"週四班", seats:[ {n:"01", s:"○"}, {n:"02", s:"○"} ] }
@@ -348,7 +348,12 @@ if(!CLASSES[_cid]) _cid = "a";      // 網址代號打錯就退回第一班，�
 const CLASS_ID = _cid;
 const CLS = CLASSES[CLASS_ID];
 const ROSTER = CLS.seats;
-const SEAT_IDS = ROSTER.map(function(p){ return p.n; });
+const ALL_SEATS = ROSTER.map(function(p){ return p.n; });
+const SEAT_IDS  = ROSTER.filter(function(p){ return !p.guest; }).map(function(p){ return p.n; });
+function isGuest(n){
+  for(var i=0;i<ROSTER.length;i++){ if(String(ROSTER[i].n)===String(n)) return !!ROSTER[i].guest; }
+  return false;
+}
 function sname(n){
   for(var i=0;i<ROSTER.length;i++){
     if(String(ROSTER[i].n)===String(n)) return ROSTER[i].n + (ROSTER[i].s ? " " + ROSTER[i].s : "");
@@ -469,18 +474,24 @@ function show(v){
 function drawSeats(){
   const g = document.getElementById("seatgrid"); g.innerHTML="";
   document.getElementById("seatTitle").textContent = CLS.name + "　先選你的座號";
-  for(const i of SEAT_IDS){
+  for(const i of ALL_SEATS){
     const n = logsOf(i).length;
     const b = document.createElement("button");
-    b.className="seat";
-    b.innerHTML = sname(i) + (n ? "<span class='dot'>練過 "+n+" 次</span>" : "<span class='dot'>&nbsp;</span>");
+    b.className="seat"+(isGuest(i)?" guest":"");
+    b.innerHTML = sname(i);
     b.onclick = ()=>{ seat = i; startSeat(); };
     g.appendChild(b);
   }
 }
-function startSeat(){
+function updateWho(){
+  const n = logsOf(seat).length;
   document.getElementById("who").innerHTML =
-    CLS.name + "　" + sname(seat) + "<button onclick=\"show('seat');drawSeats()\">換人</button>";
+    CLS.name + "　" + sname(seat)
+    + (n ? "　·　練過 " + n + " 次" : "")
+    + "<button onclick=\"show('seat');drawSeats()\">換人</button>";
+}
+function startSeat(){
+  updateWho();
   show("practice"); stage = 0; poolMode = "all"; start(); drawHwPractice();
 }
 
@@ -596,7 +607,7 @@ function finish(){
   store.logs.push({seat:seat, stage:stage, right:right, total:queue.length,
                    wrong:wrongList.slice(), ts:Date.now(), mode:poolMode});
   const before = hwStatus(seat);
-  save(); drawHwPractice();
+  save(); drawHwPractice(); updateWho();
   const after = hwStatus(seat);
   const justDone = after && after.complete && before && !before.complete;
   sendOut(seat, stage, right, queue.length, wrongList, after);
@@ -639,7 +650,7 @@ function allWords(){ poolMode="all"; start(); }
 
 /* ---------- 送出到 Google 表單（填了 GFORM 才會動作） ---------- */
 function sendOut(seat, stage, right, total, wrong, hw){
-  if(!GFORM.url) return;
+  if(!GFORM.url || isGuest(seat)) return;   // 訪客只存在本機，不進試算表
   const row = {};
   row[GFORM.f.seat] = CLASS_ID.toUpperCase() + "-" + sname(seat);
   row[GFORM.f.lesson] = LESSON;
@@ -671,10 +682,30 @@ function flushPending(){
 
 /* ---------- 老師檢視 ---------- */
 function teacherGate(){
-  const c = prompt("請輸入老師密碼");
-  if(c === null) return;
-  if(c !== TEACHER_CODE){ alert("密碼不對"); return; }
-  drawTeacher(); show("teacher");
+  const f=document.getElementById("foot");
+  f.innerHTML =
+    "<div style='display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center'>"
+    + "<input type='password' id='tcode' placeholder='老師密碼' autocomplete='off' "
+    +   "style='font-size:17px;padding:9px 14px;border:2px solid #E2DDD0;border-radius:10px;width:150px;font-family:inherit'>"
+    + "<button id='tgo' style='background:#1F6B58;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:16px;cursor:pointer;font-family:inherit;text-decoration:none'>進入</button>"
+    + "<button id='tno' style='background:none;border:2px solid #E2DDD0;color:#5A554C;border-radius:10px;padding:9px 16px;font-size:16px;cursor:pointer;font-family:inherit;text-decoration:none'>取消</button>"
+    + "<span id='tmsg' style='color:#B23A32;font-size:15px'></span></div>";
+  const i=document.getElementById("tcode");
+  document.getElementById("tgo").onclick=tryCode;
+  document.getElementById("tno").onclick=resetFoot;
+  i.onkeydown=function(e){ if(e.key==="Enter") tryCode(); };
+  i.focus();
+}
+function tryCode(){
+  if(document.getElementById("tcode").value!==TEACHER_CODE){
+    document.getElementById("tmsg").textContent="密碼不對"; return;
+  }
+  resetFoot(); drawTeacher(); show("teacher");
+}
+function resetFoot(){
+  const f=document.getElementById("foot");
+  f.innerHTML="<button>老師檢視</button>";
+  f.firstChild.onclick=teacherGate;
 }
 function drawTeacher(){
   const done = [];
@@ -684,7 +715,7 @@ function drawTeacher(){
   document.getElementById("tSub").textContent =
     "全班 "+SEAT_IDS.length+" 人，已經練過的有 "+done.length+" 人"
     + (HOMEWORK.on ? "，本週作業完成 "+hwDone+" 人" : "")
-    + "，總共 "+store.logs.length+" 次練習紀錄。";
+    + "，總共 "+store.logs.filter(function(l){ return !isGuest(l.seat); }).length+" 次練習紀錄。";
 
   let h = "<tr><th>座號</th><th>本週作業</th><th class='num'>練習次數</th><th>最近一次</th>"
         + STAGES.map(s=>"<th class='num'>"+s.n+"</th>").join("")
@@ -774,7 +805,7 @@ function kpi(label, val){ return "<div class='kpi'><span>"+label+"</span><b clas
 /* ---------- 匯出 ---------- */
 function exportCSV(){
   const rows = [["座號","日期時間","階段","答對","題數","模式","當下還要再看的字"]];
-  store.logs.slice().sort((a,b)=>a.seat-b.seat || a.ts-b.ts).forEach(l=>{
+  store.logs.filter(function(l){ return !isGuest(l.seat); }).sort((a,b)=>a.seat-b.seat || a.ts-b.ts).forEach(l=>{
     rows.push([l.seat, ymdhm(l.ts), STAGES[l.stage].n+" "+STAGES[l.stage].t,
                l.right, l.total, l.mode==="wrong"?"只練錯的字":"全部", l.wrong.join(" ")]);
   });
@@ -790,7 +821,7 @@ function wipe(){
   store = {logs:[], wrong:{}}; save(); drawTeacher(); drawSeats();
 }
 
-drawHwSeat(); drawSeats(); show("seat"); flushPending();
+drawHwSeat(); resetFoot(); drawSeats(); show("seat"); flushPending();
 </script>
 </body>
 </html>
