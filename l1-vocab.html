@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>國三上 L1 單字四階練習</title>
+<style>
+  :root{
+    --bg:#F7F5EF; --card:#fff; --ink:#26241F; --sub:#5A554C;
+    --line:#E2DDD0; --brand:#1F6B58; --brand-soft:#E6F1ED;
+    --gold:#C98A17; --gold-soft:#FDF3DE;
+    --ok:#1F7A44; --ok-soft:#E4F3E9;
+    --no:#B23A32; --no-soft:#FBE9E7;
+    --r:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Hiragino Sans TC",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:19px;line-height:1.75;-webkit-text-size-adjust:100%}
+  .wrap{max-width:860px;margin:0 auto;padding:20px 16px 72px}
+  .hide{display:none!important}
+
+  header{background:var(--brand);color:#fff;border-radius:var(--r);padding:20px 22px;margin-bottom:18px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  header h1{margin:0 0 6px;font-size:26px;letter-spacing:.5px}
+  header p{margin:0;font-size:16px;opacity:.92}
+  .who{background:rgba(255,255,255,.16);border-radius:99px;padding:6px 16px;font-size:17px;white-space:nowrap}
+  .who button{background:none;border:none;color:#fff;font-size:15px;cursor:pointer;
+    text-decoration:underline;font-family:inherit;padding:0 0 0 8px;opacity:.85}
+
+  /* 選座號 */
+  .seatgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:10px;margin-top:18px}
+  .seat{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:16px 0;
+    font-size:24px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .seat:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .seat .dot{display:block;font-size:12px;color:var(--ok);font-weight:400;line-height:1}
+
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+  .tab{background:var(--card);border:2px solid var(--line);border-radius:12px;
+    padding:12px 6px;text-align:center;cursor:pointer;font-size:15px;line-height:1.4;
+    color:var(--sub);transition:.15s}
+  .tab b{display:block;font-size:19px;color:var(--ink);font-weight:600;margin-bottom:2px}
+  .tab:hover{border-color:var(--brand)}
+  .tab.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .tab.on b{color:#fff}
+
+  .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:12px 16px;margin-bottom:14px;font-size:16px;color:var(--sub)}
+  .bar .grow{flex:1;min-width:100px}
+  .track{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+  .fill{height:100%;background:var(--brand);width:0;transition:width .25s}
+  .pill{background:var(--gold-soft);color:var(--gold);border-radius:99px;
+    padding:3px 12px;font-size:15px;white-space:nowrap}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:26px 24px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .stage{font-size:15px;color:var(--sub);margin-bottom:14px}
+
+  .word{font-size:46px;font-weight:700;letter-spacing:.5px;margin:6px 0 4px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .pos{font-size:17px;color:var(--sub);font-weight:400}
+  .say{background:var(--brand-soft);border:none;border-radius:50%;width:44px;height:44px;
+    font-size:20px;cursor:pointer;color:var(--brand);flex:none}
+  .say:hover{background:#D5E7E1}
+
+  .sent{font-size:24px;line-height:2;margin:10px 0 22px}
+  .sent .gap{display:inline-block;min-width:116px;height:1.5em;vertical-align:-.3em;
+    border-bottom:4px solid var(--gold);margin:0 4px}
+  .zh{font-size:17px;color:var(--sub);margin:-8px 0 20px}
+
+  .opts{display:grid;gap:12px}
+  .opts.two{grid-template-columns:1fr 1fr}
+  @media(max-width:560px){.opts.two{grid-template-columns:1fr}}
+  .opt{background:var(--card);border:2px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-size:21px;text-align:left;cursor:pointer;
+    font-family:inherit;color:var(--ink);transition:.12s}
+  .opt:hover:not(:disabled){border-color:var(--brand);background:var(--brand-soft)}
+  .opt:disabled{cursor:default}
+  .opt.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok);font-weight:600}
+  .opt.wrong{border-color:var(--no);background:var(--no-soft);color:var(--no)}
+
+  .typebox{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+  input[type=text]{font-size:26px;padding:12px 16px;border:2px solid var(--line);
+    border-radius:12px;font-family:inherit;width:280px;max-width:100%;letter-spacing:1px}
+  input[type=text]:focus{outline:none;border-color:var(--brand)}
+  .hint{font-size:30px;letter-spacing:6px;color:var(--gold);font-weight:700}
+
+  button.go{background:var(--brand);color:#fff;border:none;border-radius:12px;
+    padding:14px 26px;font-size:19px;cursor:pointer;font-family:inherit}
+  button.go:hover{background:#17553f}
+  button.ghost{background:transparent;color:var(--brand);border:2px solid var(--brand)}
+  button.ghost:hover{background:var(--brand-soft)}
+
+  .fb{margin-top:20px;padding:16px 18px;border-radius:12px;font-size:19px;display:none}
+  .fb.show{display:block}
+  .fb.good{background:var(--ok-soft);color:var(--ok)}
+  .fb.bad{background:var(--no-soft);color:var(--no)}
+  .fb .big{font-size:22px;font-weight:700;display:block;margin-bottom:4px}
+
+  .done{text-align:center;padding:20px 0}
+  .done .score{font-size:64px;font-weight:700;color:var(--brand);line-height:1.1}
+  .done .of{font-size:20px;color:var(--sub);margin-bottom:16px}
+  .done .best{display:inline-block;background:var(--gold-soft);color:var(--gold);
+    border-radius:99px;padding:8px 20px;font-size:17px;margin-bottom:22px}
+  .done .msg{font-size:21px;margin-bottom:24px}
+  .btnrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  .review{margin-top:26px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r);padding:18px 20px}
+  .review h3{margin:0 0 10px;font-size:18px;color:var(--sub);font-weight:600}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--no-soft);color:var(--no);border-radius:99px;padding:5px 14px;font-size:16px}
+  .chip.clear{background:var(--ok-soft);color:var(--ok)}
+  .mini{font-size:15px;color:var(--sub);margin-top:10px}
+  .tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .tools button{font-size:15px;padding:9px 16px;border-radius:10px;cursor:pointer;
+    font-family:inherit;border:2px solid var(--line);background:var(--card);color:var(--sub)}
+  .tools button:hover{border-color:var(--brand);color:var(--brand)}
+
+  /* 老師 / 家長檢視 */
+  .foot{margin-top:30px;text-align:center}
+  .foot button{background:none;border:none;color:var(--sub);font-size:15px;
+    cursor:pointer;font-family:inherit;text-decoration:underline;opacity:.7}
+  h2.sec{font-size:22px;margin:0 0 4px}
+  p.secsub{margin:0 0 18px;color:var(--sub);font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:17px}
+  th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-size:15px;color:var(--sub);font-weight:600;white-space:nowrap}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.none td{color:var(--sub)}
+  .seatlink{color:var(--brand);cursor:pointer;text-decoration:underline;font-weight:600}
+  .barcell{display:flex;align-items:center;gap:8px}
+  .barcell i{display:block;height:12px;background:var(--no);border-radius:3px;opacity:.75}
+  .scroll{overflow-x:auto}
+  .note{background:var(--gold-soft);border-radius:12px;padding:14px 16px;
+    font-size:16px;color:#7A5410;margin:16px 0}
+  .big2{font-size:34px;font-weight:700;color:var(--brand);line-height:1.2}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:6px 0 20px}
+  .kpi{background:var(--brand-soft);border-radius:12px;padding:14px 16px}
+  .kpi span{display:block;font-size:15px;color:var(--sub)}
+  .hw{background:var(--gold-soft);border:2px solid #EBD9AE;border-radius:var(--r);
+    padding:16px 20px;margin-bottom:16px;color:#6B4A0E}
+  .hw.done{background:var(--ok-soft);border-color:#B9DCC6;color:var(--ok)}
+  .hw .t{font-size:20px;font-weight:700}
+  .hw ul{margin:10px 0 0;padding:0;list-style:none;font-size:17px}
+  .hw li{margin:5px 0}
+  .hw .n{margin:10px 0 0;font-size:15px;opacity:.85}
+  .ok{color:var(--ok);font-weight:600}
+  .wait{color:var(--sub)}
+  @media print{
+    body{background:#fff}
+    .noprint{display:none!important}
+    .card{box-shadow:none;border:1px solid #ccc}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>國三上 Lesson 1　單字四階練習</h1>
+    <p>Have You Ever Tried These Dishes?　共 28 字（應用字彙 23 ・ 認識字彙 5）</p>
+  </div>
+  <div class="who hide" id="who"></div>
+</header>
+
+<!-- 選座號 -->
+<div id="viewSeat">
+  <div id="hwSeat"></div>
+  <div class="card">
+    <h2 class="sec">先選你的座號</h2>
+    <p class="secsub">選了以後，你的練習紀錄就會分開存，不會跟別人混在一起。</p>
+    <div class="seatgrid" id="seatgrid"></div>
+  </div>
+</div>
+
+<!-- 練習 -->
+<div id="viewPractice" class="hide">
+  <div id="hwPractice"></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="bar">
+    <span id="stageName">第一階</span>
+    <span class="grow"><span class="track"><span class="fill" id="fill"></span></span></span>
+    <span id="count">0 / 0</span>
+    <span class="pill" id="best">最佳 —</span>
+  </div>
+  <div class="card" id="card"></div>
+  <div class="review">
+    <h3>我還要再看的字</h3>
+    <div class="chips" id="chips"></div>
+    <p class="mini" id="mini"></p>
+    <div class="tools">
+      <button onclick="onlyWrong()">只練這些字</button>
+      <button onclick="allWords()">練全部的字</button>
+    </div>
+  </div>
+</div>
+
+<!-- 老師檢視 -->
+<div id="viewTeacher" class="hide">
+  <div class="card">
+    <h2 class="sec">全班作答狀況</h2>
+    <p class="secsub" id="tSub"></p>
+    <div class="scroll"><table id="tClass"></table></div>
+    <h2 class="sec" style="margin-top:32px">全班最常錯的字</h2>
+    <p class="secsub">這是下一堂課最該花時間的地方。</p>
+    <div class="scroll"><table id="tWrong"></table></div>
+    <div class="tools noprint">
+      <button onclick="exportCSV()">匯出 CSV（給家長／存檔用）</button>
+      <button onclick="show('seat')">回到練習</button>
+      <button onclick="wipe()">清空全部紀錄</button>
+    </div>
+  </div>
+</div>
+
+<!-- 個人（家長）報告 -->
+<div id="viewReport" class="hide">
+  <div class="card">
+    <h2 class="sec" id="rTitle">學習報告</h2>
+    <p class="secsub" id="rRange"></p>
+    <div class="kpis" id="rKpis"></div>
+    <div class="note" id="rMsg"></div>
+    <h2 class="sec" style="margin-top:26px;font-size:19px">每次練習紀錄</h2>
+    <div class="scroll"><table id="rLogs"></table></div>
+    <h2 class="sec" style="margin-top:26px;font-size:19px">目前還要再看的字</h2>
+    <div class="chips" id="rChips"></div>
+    <div class="tools noprint">
+      <button onclick="window.print()">列印 / 存成 PDF</button>
+      <button onclick="show('teacher')">回到全班</button>
+    </div>
+  </div>
+</div>
+
+<div class="foot noprint" id="foot">
+  <button onclick="teacherGate()">老師檢視</button>
+</div>
+
+</div>
+<script>
+const WORDS = [
+ {w:"subject", pos:"n. 學科", tier:"A", zh:"學科", no:"糖果",
+  s3:"My favorite ___ is history.", o3:["subject","candy","king","inch"],
+  s4:"A: What ___ do you like best?　B: Math. I love numbers.", o4:["subject","topic","language","history"]},
+ {w:"history", pos:"n. 歷史", tier:"A", zh:"歷史", no:"南瓜",
+  s3:"We learn about the past in ___ class.", o3:["history","candy","inch","wave"],
+  s4:"Emily wrote a report about the ___ of French fries. She found out they were not from France.", o4:["history","language","subject","century"]},
+ {w:"topic", pos:"n. 主題", tier:"A", zh:"主題", no:"士兵",
+  s3:"The ___ of my report is French fries.", o3:["topic","king","potato","inch"],
+  s4:"Our teacher asked us to pick a ___ for the report. I chose food because I love to eat.", o4:["topic","subject","king","language"]},
+ {w:"hairdryer", pos:"n. 吹風機", tier:"A", zh:"吹風機", no:"世紀",
+  s3:"I use a ___ to dry my hair.", o3:["hairdryer","candy","soldier","language"],
+  s4:"My hair is still wet. Can I use your ___?", o4:["hairdryer","stick","candy","pumpkin"]},
+ {w:"yet", pos:"adv. 還（沒）；尚（未）", tier:"A", zh:"還沒", no:"主要的",
+  s3:"I haven't finished my homework ___.", o3:["yet","since","main","thick"],
+  s4:"A: Have you eaten dinner ___?　B: Not yet. I'm still doing my homework.", o4:["yet","since","ever","already"]},
+ {w:"century", pos:"n. 世紀", tier:"R", zh:"世紀", no:"糖果",
+  s3:"French fries were made in the 17th ___.", o3:["century","language","soldier","inch"],
+  s4:"The first French fries came out about four ___ ago, a very long time before we were born.", o4:["centuries","inches","languages","subjects"]},
+ {w:"freeze", pos:"v. 凍結；結冰（freeze / froze）", tier:"R", zh:"結冰", no:"慶祝",
+  s3:"It was so cold last night that the water ___.", o3:["froze","baked","waved","celebrated"],
+  s4:"In winter, the river ___ and people could walk on the ice.", o4:["froze","fried","baked","celebrated"]},
+ {w:"potato", pos:"n. 馬鈴薯", tier:"R", zh:"馬鈴薯", no:"語言",
+  s3:"French fries are made from ___es.", o3:["potato","candy","soldier","king"],
+  s4:"People cut ___ into long thin sticks and fry them.", o4:["potatoes","languages","soldiers","centuries"]},
+ {w:"stick", pos:"n. 枝條", tier:"R", zh:"枝條", no:"國王",
+  s3:"They cut the potatoes into long thin ___s.", o3:["stick","inch","king","topic"],
+  s4:"The dog ran after the ___ that the boy threw.", o4:["stick","candy","language","century"]},
+ {w:"American", pos:"adj. 美國的；n. 美國人", tier:"A", zh:"美國的", no:"厚的",
+  s3:"Hamburgers are a popular ___ food.", o3:["American","thick","main","national"],
+  s4:"John is ___. He was born in New York and speaks English at home.", o4:["American","national","main","thick"]},
+ {w:"soldier", pos:"n. 士兵；軍人", tier:"A", zh:"士兵", no:"巧克力",
+  s3:"The ___s gave French fries their name.", o3:["soldier","candy","topic","inch"],
+  s4:"My uncle is a ___. He works for the country and wears a uniform every day.", o4:["soldier","king","driver","subject"]},
+ {w:"main", pos:"adj. 主要的", tier:"A", zh:"主要的", no:"沒有人",
+  s3:"French was the ___ language in that area.", o3:["main","thick","American","national"],
+  s4:"Rice is the ___ food in Taiwan. Most people eat it every day.", o4:["main","thick","American","yet"]},
+ {w:"language", pos:"n. 語言", tier:"A", zh:"語言", no:"英寸",
+  s3:"English is a ___ that many people use.", o3:["language","century","stick","candy"],
+  s4:"Ted can speak three ___: Chinese, English, and Japanese.", o4:["languages","subjects","topics","inches"]},
+ {w:"since", pos:"prep.; conj. 自……以來", tier:"A", zh:"自從", no:"烘烤",
+  s3:"I have lived here ___ 2020.", o3:["since","yet","main","thick"],
+  s4:"Paul misses his parents a lot. He hasn't seen them ___ he came to Taiwan a year ago.", o4:["since","for","yet","ago"]},
+ {w:"celebrate", pos:"v. 慶祝", tier:"A", zh:"慶祝", no:"馬鈴薯",
+  s3:"We ___ the New Year with our family.", o3:["celebrate","freeze","wave","fry"],
+  s4:"People in Taiwan ___ the Moon Festival by eating moon cakes with their family.", o4:["celebrate","bake","freeze","wave"]},
+ {w:"national", pos:"adj. 國家的；國立的", tier:"A", zh:"國家的", no:"小兔子",
+  s3:"Rice is our ___ food.", o3:["national","thick","main","American"],
+  s4:"October 10 is our ___ day. There is a big show in front of the building every year.", o4:["national","main","American","thick"]},
+ {w:"thick", pos:"adj. 粗的；厚的", tier:"A", zh:"粗的；厚的", no:"學科",
+  s3:"The soup is very ___.", o3:["thick","main","national","American"],
+  s4:"These fries are too ___. I like the thin ones better.", o4:["thick","main","sweet","safe"]},
+ {w:"fry", pos:"v. 油炸；油煎", tier:"A", zh:"油炸", no:"國王",
+  s3:"Let's ___ some eggs for breakfast.", o3:["fry","wave","celebrate","freeze"],
+  s4:"People in Belgium cut potatoes into sticks and ___ them. That is how French fries started.", o4:["fry","bake","freeze","celebrate"]},
+ {w:"chocolate", pos:"n. 巧克力", tier:"A", zh:"巧克力", no:"士兵",
+  s3:"I love ___ cake.", o3:["chocolate","soldier","inch","language"],
+  s4:"This cake is made of dark ___. It tastes a little bitter but very good.", o4:["chocolate","candy","potato","pumpkin"]},
+ {w:"bunny", pos:"n. 小兔子", tier:"R", zh:"小兔子", no:"主題",
+  s3:"The ___ has long ears and likes carrots.", o3:["bunny","king","stick","inch"],
+  s4:"At Easter, children look for eggs left by the ___.", o4:["bunny","soldier","king","driver"]},
+ {w:"candy", pos:"n. 糖果", tier:"A", zh:"糖果", no:"歷史",
+  s3:"Kids ask for ___ on Halloween.", o3:["candy","soldier","language","century"],
+  s4:"On Halloween, children go from house to house and ask for ___.", o4:["candy","soup","rice","bread"]},
+ {w:"pumpkin", pos:"n. 南瓜", tier:"A", zh:"南瓜", no:"吹風機",
+  s3:"We make a face on a ___ for Halloween.", o3:["pumpkin","candy","stick","king"],
+  s4:"Before Halloween, people cut faces on ___ and put lights inside them.", o4:["pumpkins","potatoes","candies","sticks"]},
+ {w:"bake", pos:"v. 烘烤", tier:"A", zh:"烘烤", no:"世紀",
+  s3:"My mother likes to ___ bread on Sunday.", o3:["bake","freeze","wave","celebrate"],
+  s4:"We ___ a cake for Mom's birthday. The whole house smelled great.", o4:["baked","fried","froze","waved"]},
+ {w:"Christmas Eve", pos:"聖誕節前夕；平安夜", tier:"A", zh:"平安夜", no:"馬鈴薯",
+  s3:"We eat a big dinner on ___.", o3:["Christmas Eve","Halloween","New Year","Easter"],
+  s4:"Many families get together on ___, the night before December 25.", o4:["Christmas Eve","Halloween","Moon Festival","National Day"]},
+ {w:"nobody", pos:"pron. 沒有人", tier:"A", zh:"沒有人", no:"南瓜",
+  s3:"___ was at home, so the house was very quiet.", o3:["Nobody","Candy","Soldier","Language"],
+  s4:"I called Amy many times, but ___ answered the phone.", o4:["nobody","everybody","somebody","anybody"]},
+ {w:"wave", pos:"v. 揮（手）", tier:"A", zh:"揮手", no:"學科",
+  s3:"She ___d to me when the bus left.", o3:["wave","bake","fry","freeze"],
+  s4:"The little girl ___ to her mother at the door and said goodbye.", o4:["waved","baked","fried","celebrated"]},
+ {w:"inch", pos:"n. 英寸", tier:"A", zh:"英寸", no:"慶祝",
+  s3:"The fries are about three ___es long.", o3:["inch","century","language","topic"],
+  s4:"This fish is only six ___ long. It is too small to eat.", o4:["inches","centuries","languages","subjects"]},
+ {w:"king", pos:"n. 國王；王者", tier:"A", zh:"國王", no:"結冰",
+  s3:"The ___ of that country is very old now.", o3:["king","stick","inch","topic"],
+  s4:"In that story, the ___ had three sons and gave his land to all of them.", o4:["king","soldier","driver","nobody"]},
+];
+
+/* =======================================================
+   設定區　—　老師可以自己改這三個地方
+   ======================================================= */
+const SEATS = 15;          // 班上座號到幾號（改成你班上的人數）
+const TEACHER_CODE = "2026";   // 老師檢視的密碼
+
+/* 本週作業　—　每週上課前改這一段就好 */
+const HOMEWORK = {
+  on: true,
+  title: "本週作業",
+  due: "9/15（週二）上課前",   // 改成實際的繳交日
+  tasks: [                     // 要做哪幾階、每階至少要對幾題
+    { stage:0, pass:26 },      // 第一階 看得懂：28 題要對 26 題以上
+    { stage:1, pass:20 }       // 第二階 想得起來：23 題要對 20 題以上
+  ],
+  note: "可以重複練很多次，算你最好的那一次。兩項都達到就算完成。"
+};
+/* 這一課的代號，會一起寫進紀錄，方便在試算表裡篩選 */
+const LESSON = "L1";
+
+/* Google 表單「K5-國三英文練習紀錄」的收件位址與欄位代號（已接好，不用改） */
+const GFORM = {
+  url: "https://docs.google.com/forms/d/e/1FAIpQLSdG6ajrZXfG2LdjAXqsxCTwHrKhBo3aPA4U56Ug8ex0WMRMGw/formResponse",
+  f: {
+    seat:   "entry.113402022",    // 1 座號
+    lesson: "entry.770464151",    // 2 課次
+    stage:  "entry.1305707477",   // 3 階段
+    right:  "entry.629191504",    // 4 答對
+    total:  "entry.193167403",    // 5 題數
+    wrong:  "entry.1924439157",   // 6 還沒過的字
+    hw:     "entry.952655181"     // 7 作業狀態
+  }
+};
+/* ======================================================= */
+
+const KEY = "l1_vocab_v2";
+const STAGES = [
+  {n:"第一階", t:"看得懂", d:"看英文，選中文"},
+  {n:"第二階", t:"想得起來", d:"看中文，把單字拼出來"},
+  {n:"第三階", t:"放進句子", d:"句子填空"},
+  {n:"第四階", t:"會考式", d:"情境題，跟會考一樣的問法"},
+];
+
+let store = load(), seat = null, stage = 0, queue = [], idx = 0, right = 0, poolMode = "all";
+
+function load(){
+  try{
+    const o = JSON.parse(localStorage.getItem(KEY));
+    if(o && o.logs && o.wrong) return o;
+  }catch(e){}
+  return {logs:[], wrong:{}};
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+function wrongOf(s){ if(!store.wrong[s]) store.wrong[s]={}; return store.wrong[s]; }
+function logsOf(s){ return store.logs.filter(l=>String(l.seat)===String(s)); }
+function bestOf(s,st){
+  const a = logsOf(s).filter(l=>l.stage===st).map(l=>l.right);
+  return a.length ? Math.max.apply(null,a) : null;
+}
+function ymd(ts){ const d=new Date(ts); return (d.getMonth()+1)+"/"+d.getDate(); }
+function ymdhm(ts){ const d=new Date(ts);
+  return (d.getMonth()+1)+"/"+d.getDate()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+
+/* ---------- 本週作業 ---------- */
+function hwStatus(s){
+  if(!HOMEWORK.on) return null;
+  const items = HOMEWORK.tasks.map(function(t){
+    const b = bestOf(s, t.stage);
+    return {stage:t.stage, pass:t.pass, best:b, ok:(b!=null && b>=t.pass)};
+  });
+  const done = items.filter(function(x){return x.ok;}).length;
+  return {items:items, done:done, all:items.length, complete:(done===items.length)};
+}
+function hwHead(){
+  if(!HOMEWORK.on) return "";
+  return "<div class='t'>" + HOMEWORK.title + "</div>"
+       + (HOMEWORK.due ? "<div style='font-size:16px'>繳交：" + HOMEWORK.due + "</div>" : "");
+}
+function drawHwSeat(){
+  const box = document.getElementById("hwSeat");
+  if(!HOMEWORK.on){ box.innerHTML=""; return; }
+  const li = HOMEWORK.tasks.map(function(t){
+    return "<li>⬜ " + STAGES[t.stage].n + "　" + STAGES[t.stage].t
+         + "　至少答對 <b>" + t.pass + "</b> 題</li>";
+  }).join("");
+  box.innerHTML = "<div class='hw'>" + hwHead() + "<ul>" + li + "</ul>"
+    + "<p class='n'>" + HOMEWORK.note + "</p></div>";
+}
+function drawHwPractice(){
+  const box = document.getElementById("hwPractice");
+  const st = hwStatus(seat);
+  if(!st){ box.innerHTML=""; return; }
+  const li = st.items.map(function(x){
+    return "<li>" + (x.ok ? "<span class='ok'>✅" : "<span class='wait'>⬜")
+      + " " + STAGES[x.stage].n + "　" + STAGES[x.stage].t
+      + "　至少 " + x.pass + " 題"
+      + (x.best==null ? "（還沒做）" : "（目前最好 " + x.best + " 題）") + "</span></li>";
+  }).join("");
+  box.innerHTML = "<div class='hw" + (st.complete ? " done" : "") + "'>"
+    + hwHead() + "<ul>" + li + "</ul>"
+    + "<p class='n'>" + (st.complete
+        ? "🎉 本週作業完成了，老師那邊會看到。想再練就繼續，紀錄一樣會算。"
+        : HOMEWORK.note) + "</p></div>";
+}
+
+/* ---------- 畫面切換 ---------- */
+function show(v){
+  ["Seat","Practice","Teacher","Report"].forEach(n=>
+    document.getElementById("view"+n).classList.toggle("hide", n.toLowerCase()!==v));
+  document.getElementById("who").classList.toggle("hide", v!=="practice");
+  document.getElementById("foot").classList.toggle("hide", v!=="practice" && v!=="seat");
+  window.scrollTo(0,0);
+}
+
+/* ---------- 選座號 ---------- */
+function drawSeats(){
+  const g = document.getElementById("seatgrid"); g.innerHTML="";
+  for(let i=1;i<=SEATS;i++){
+    const n = logsOf(i).length;
+    const b = document.createElement("button");
+    b.className="seat";
+    b.innerHTML = i + (n ? "<span class='dot'>練過 "+n+" 次</span>" : "<span class='dot'>&nbsp;</span>");
+    b.onclick = ()=>{ seat = i; startSeat(); };
+    g.appendChild(b);
+  }
+}
+function startSeat(){
+  document.getElementById("who").innerHTML =
+    "座號 " + seat + "<button onclick=\"show('seat');drawSeats()\">換人</button>";
+  show("practice"); stage = 0; poolMode = "all"; start(); drawHwPractice();
+}
+
+/* ---------- 分頁 ---------- */
+const tabsEl = document.getElementById("tabs");
+STAGES.forEach((s,i)=>{
+  const d = document.createElement("div");
+  d.className = "tab" + (i===0?" on":"");
+  d.innerHTML = "<b>"+s.n+"</b>"+s.t;
+  d.onclick = ()=>{ stage=i; start(); };
+  tabsEl.appendChild(d);
+});
+
+/* ---------- 出題 ---------- */
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+function pool(){
+  let list = WORDS;
+  if(poolMode==="wrong"){
+    const w = wrongOf(seat);
+    const keys = Object.keys(w).filter(k=>w[k]);
+    if(keys.length) list = WORDS.filter(x=>keys.indexOf(x.w)>=0);
+  }
+  if(stage===1) list = list.filter(x=>x.tier==="A");
+  return list;
+}
+function start(){
+  document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("on", i===stage));
+  queue = shuffle(pool()); idx = 0; right = 0;
+  document.getElementById("stageName").textContent = STAGES[stage].n + "　" + STAGES[stage].d;
+  const b = bestOf(seat, stage);
+  document.getElementById("best").textContent = b==null ? "最佳 —" : "最佳 " + b + " 題";
+  if(!queue.length){ document.getElementById("card").innerHTML =
+    "<div class='done'><p class='msg'>這一階目前沒有題目。<br>試試下面的「練全部的字」。</p></div>"; drawChips(); return; }
+  render(); drawChips();
+}
+function bar(){
+  document.getElementById("count").textContent = idx + " / " + queue.length;
+  document.getElementById("fill").style.width = (idx/queue.length*100) + "%";
+}
+function say(t){
+  try{ const u=new SpeechSynthesisUtterance(t); u.lang="en-US"; u.rate=.85;
+       speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+function render(){
+  bar();
+  if(idx >= queue.length) return finish();
+  const q = queue[idx], card = document.getElementById("card");
+  const head = "<div class='stage'>" + STAGES[stage].n + "　" + STAGES[stage].t
+    + (q.tier==="R" ? "　·　認識字彙（看得懂就好）" : "") + "</div>";
+
+  if(stage===0){
+    card.innerHTML = head
+      + "<div class='word'>" + q.w + "<button class='say' onclick=\"say('"+q.w+"')\">🔊</button></div>"
+      + "<div class='zh'>" + q.pos + "</div>"
+      + "<div class='opts two' id='opts'></div><div class='fb' id='fb'></div>";
+    shuffle([q.zh, q.no]).forEach(o=>{
+      const b=document.createElement("button"); b.className="opt"; b.textContent=o;
+      b.onclick=()=>answer(o===q.zh, q, q.zh, b);
+      document.getElementById("opts").appendChild(b);
+    });
+  } else if(stage===1){
+    const rest = q.w.slice(1).replace(/[a-zA-Z]/g,"_");
+    card.innerHTML = head
+      + "<div class='word' style='font-size:34px'>" + q.zh
+      + "<button class='say' onclick=\"say('"+q.w+"')\">🔊</button></div>"
+      + "<div class='zh'>" + q.pos + "</div>"
+      + "<div class='hint'>" + q.w[0] + rest + "</div>"
+      + "<div class='typebox'><input type='text' id='inp' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='把單字打出來'>"
+      + "<button class='go' onclick='checkType()'>看看對不對</button></div>"
+      + "<div class='fb' id='fb'></div>";
+    const inp=document.getElementById("inp"); inp.focus();
+    inp.onkeydown = e=>{ if(e.key==="Enter") checkType(); };
+  } else {
+    const s = stage===2 ? q.s3 : q.s4, o = stage===2 ? q.o3 : q.o4;
+    card.innerHTML = head
+      + "<div class='sent'>" + s.replace("___","<span class='gap'></span>") + "</div>"
+      + "<div class='opts' id='opts'></div><div class='fb' id='fb'></div>";
+    shuffle(o).forEach(x=>{
+      const b=document.createElement("button"); b.className="opt"; b.textContent=x;
+      b.onclick=()=>answer(x===o[0], q, o[0], b);
+      document.getElementById("opts").appendChild(b);
+    });
+  }
+}
+function checkType(){
+  const q=queue[idx], inp=document.getElementById("inp");
+  const ok = inp.value.trim().toLowerCase() === q.w.toLowerCase();
+  inp.disabled = true; answer(ok, q, q.w, null);
+}
+function answer(ok, q, correct, btn){
+  document.querySelectorAll(".opt").forEach(b=>{
+    b.disabled = true; if(b.textContent === correct) b.classList.add("right");
+  });
+  if(btn && !ok) btn.classList.add("wrong");
+  const fb = document.getElementById("fb"), w = wrongOf(seat);
+  fb.className = "fb show " + (ok?"good":"bad");
+  if(ok){ right++; w[q.w]=false;
+    fb.innerHTML = "<span class='big'>✓ 答對了</span>" + q.w + "　" + q.pos;
+  }else{ w[q.w]=true;
+    fb.innerHTML = "<span class='big'>再看一次就好</span>正確答案是 <b>"+correct+"</b>　（"+q.w+"　"+q.pos+"）";
+  }
+  save(); drawChips(); say(q.w);
+  const next=document.createElement("button");
+  next.className="go"; next.style.marginTop="16px";
+  next.textContent = idx+1 >= queue.length ? "看結果" : "下一題 →";
+  next.onclick = ()=>{ idx++; render(); };
+  fb.appendChild(document.createElement("br")); fb.appendChild(next); next.focus();
+}
+function finish(){
+  const prevBest = bestOf(seat, stage);
+  const w = wrongOf(seat);
+  const wrongList = Object.keys(w).filter(k=>w[k]);
+  store.logs.push({seat:seat, stage:stage, right:right, total:queue.length,
+                   wrong:wrongList.slice(), ts:Date.now(), mode:poolMode});
+  const before = hwStatus(seat);
+  save(); drawHwPractice();
+  const after = hwStatus(seat);
+  const justDone = after && after.complete && before && !before.complete;
+  sendOut(seat, stage, right, queue.length, wrongList, after);
+
+  const nowBest = bestOf(seat, stage), isBest = prevBest==null || right > prevBest;
+  document.getElementById("count").textContent = queue.length + " / " + queue.length;
+  document.getElementById("fill").style.width = "100%";
+  document.getElementById("best").textContent = "最佳 " + nowBest + " 題";
+
+  let msg; const rate = right/queue.length;
+  if(justDone) msg = "🎉 本週作業完成了！老師那邊會看到你做完了。";
+  else if(isBest && prevBest!=null) msg = "破紀錄了！上次 "+prevBest+" 題，這次 "+right+" 題。";
+  else if(rate===1) msg = "全對。這一階你已經過了，往上一階試試看。";
+  else if(rate>=.7) msg = "大部分都對了。錯的字在下面，再練一次就好。";
+  else msg = "把下面錯的字再練一次，第二次一定會比第一次好。";
+
+  document.getElementById("card").innerHTML =
+    "<div class='done'><div class='score'>"+right+"</div>"
+    + "<div class='of'>答對 "+right+" 題 / 共 "+queue.length+" 題</div>"
+    + "<div class='best'>你的最佳紀錄："+nowBest+" 題</div><br>"
+    + "<p class='msg'>"+msg+"</p><div class='btnrow'>"
+    + "<button class='go' onclick='start()'>再練一次</button>"
+    + (stage<3 ? "<button class='go ghost' onclick='stage="+(stage+1)+";start()'>進到"+STAGES[stage+1].n+" →</button>" : "")
+    + "</div></div>";
+  drawChips();
+}
+function drawChips(){
+  const w = wrongOf(seat), ks = Object.keys(w).filter(k=>w[k]);
+  const box=document.getElementById("chips"), mini=document.getElementById("mini");
+  box.innerHTML="";
+  if(!ks.length){
+    box.innerHTML="<span class='chip clear'>目前沒有要再看的字</span>";
+    mini.textContent="答錯的字會自動留在這裡，答對之後就會消失。"; return;
+  }
+  ks.forEach(k=>{ const s=document.createElement("span"); s.className="chip"; s.textContent=k; box.appendChild(s); });
+  mini.textContent="共 "+ks.length+" 個字。按「只練這些字」可以只練它們。";
+}
+function onlyWrong(){ poolMode="wrong"; start(); }
+function allWords(){ poolMode="all"; start(); }
+
+/* ---------- 送出到 Google 表單（填了 GFORM 才會動作） ---------- */
+function sendOut(seat, stage, right, total, wrong, hw){
+  if(!GFORM.url) return;
+  const row = {};
+  row[GFORM.f.seat]   = seat;
+  row[GFORM.f.lesson] = LESSON;
+  row[GFORM.f.stage]  = STAGES[stage].n + " " + STAGES[stage].t;
+  row[GFORM.f.right]  = right;
+  row[GFORM.f.total]  = total;
+  row[GFORM.f.wrong]  = wrong.join(" ");
+  row[GFORM.f.hw]     = hw ? (hw.complete ? "已完成" : "進行中 " + hw.done + "/" + hw.all) : "";
+  post(row);
+}
+/* 送不出去（沒網路）就先存起來，下次打開再自動補送 */
+function post(row){
+  const body = new URLSearchParams();
+  for(const k in row) body.append(k, row[k]);
+  fetch(GFORM.url, {method:"POST", mode:"no-cors", body:body})
+    .catch(function(){ queueRow(row); });
+}
+function queueRow(row){
+  if(!store.pending) store.pending = [];
+  store.pending.push(row);
+  if(store.pending.length > 200) store.pending = store.pending.slice(-200);
+  save();
+}
+function flushPending(){
+  if(!GFORM.url || !store.pending || !store.pending.length) return;
+  const rows = store.pending.slice(); store.pending = []; save();
+  rows.forEach(function(r){ post(r); });
+}
+
+/* ---------- 老師檢視 ---------- */
+function teacherGate(){
+  const c = prompt("請輸入老師密碼");
+  if(c === null) return;
+  if(c !== TEACHER_CODE){ alert("密碼不對"); return; }
+  drawTeacher(); show("teacher");
+}
+function drawTeacher(){
+  const done = [];
+  for(let i=1;i<=SEATS;i++){ if(logsOf(i).length) done.push(i); }
+  let hwDone = 0;
+  for(let i=1;i<=SEATS;i++){ const st=hwStatus(i); if(st && st.complete) hwDone++; }
+  document.getElementById("tSub").textContent =
+    "全班 "+SEATS+" 人，已經練過的有 "+done.length+" 人"
+    + (HOMEWORK.on ? "，本週作業完成 "+hwDone+" 人" : "")
+    + "，總共 "+store.logs.length+" 次練習紀錄。";
+
+  let h = "<tr><th>座號</th><th>本週作業</th><th class='num'>練習次數</th><th>最近一次</th>"
+        + STAGES.map(s=>"<th class='num'>"+s.n+"</th>").join("")
+        + "<th class='num'>還要再看</th></tr>";
+  for(let i=1;i<=SEATS;i++){
+    const ls = logsOf(i);
+    const w = store.wrong[i] ? Object.keys(store.wrong[i]).filter(k=>store.wrong[i][k]).length : 0;
+    const st = hwStatus(i);
+    const hwCell = !st ? "—" : (st.complete
+      ? "<span class='ok'>✅ 已完成</span>"
+      : (ls.length ? "<span class='wait'>進行中 "+st.done+"/"+st.all+"</span>" : "<span class='wait'>未開始</span>"));
+    if(!ls.length){ h += "<tr class='none'><td>"+i+"</td><td>"+hwCell+"</td><td class='num'>—</td><td>還沒做</td>"
+      + STAGES.map(()=>"<td class='num'>—</td>").join("") + "<td class='num'>—</td></tr>"; continue; }
+    const last = ls[ls.length-1];
+    h += "<tr><td><span class='seatlink' onclick='drawReport("+i+")'>"+i+"</span></td>"
+       + "<td>"+hwCell+"</td>"
+       + "<td class='num'>"+ls.length+"</td><td>"+ymdhm(last.ts)+"</td>"
+       + STAGES.map((s,si)=>{ const b=bestOf(i,si); return "<td class='num'>"+(b==null?"—":b)+"</td>"; }).join("")
+       + "<td class='num'>"+w+"</td></tr>";
+  }
+  document.getElementById("tClass").innerHTML = h;
+
+  const tally = {};
+  for(const s in store.wrong){
+    for(const k in store.wrong[s]){ if(store.wrong[s][k]) tally[k]=(tally[k]||0)+1; }
+  }
+  const rank = Object.keys(tally).sort((a,b)=>tally[b]-tally[a]);
+  let h2 = "<tr><th>單字</th><th>中文</th><th class='num'>幾個人還沒過</th><th></th></tr>";
+  if(!rank.length) h2 += "<tr class='none'><td colspan='4'>還沒有資料</td></tr>";
+  const maxN = rank.length ? tally[rank[0]] : 1;
+  rank.slice(0,15).forEach(k=>{
+    const wd = WORDS.filter(x=>x.w===k)[0];
+    h2 += "<tr><td><b>"+k+"</b></td><td>"+(wd?wd.zh:"")+"</td><td class='num'>"+tally[k]+"</td>"
+       + "<td><span class='barcell'><i style='width:"+(tally[k]/maxN*120)+"px'></i></span></td></tr>";
+  });
+  document.getElementById("tWrong").innerHTML = h2;
+}
+
+/* ---------- 個人（家長）報告 ---------- */
+function drawReport(s){
+  const ls = logsOf(s);
+  document.getElementById("rTitle").textContent = "座號 " + s + "　學習報告";
+  if(!ls.length){ document.getElementById("rRange").textContent = "還沒有練習紀錄。"; show("report"); return; }
+
+  const first = ls[0], last = ls[ls.length-1];
+  document.getElementById("rRange").textContent =
+    "統計期間：" + ymd(first.ts) + " ～ " + ymd(last.ts) + "　（Lesson 1 單字，共 28 字）";
+
+  const days = {}; ls.forEach(l=>days[ymd(l.ts)]=1);
+  const stagesDone = STAGES.filter((x,i)=>bestOf(s,i)!=null).length;
+  const wNow = store.wrong[s] ? Object.keys(store.wrong[s]).filter(k=>store.wrong[s][k]).length : 0;
+  const wFirst = first.wrong.length;
+
+  document.getElementById("rKpis").innerHTML =
+    kpi("練習次數", ls.length + " 次") +
+    kpi("練習天數", Object.keys(days).length + " 天") +
+    kpi("完成階數", stagesDone + " / 4 階") +
+    kpi("還要再看的字", wNow + " 個") +
+    (function(){ const st=hwStatus(s);
+      return st ? kpi("本週作業", st.complete ? "已完成" : "進行中 "+st.done+"/"+st.all) : ""; })();
+
+  let m;
+  if(wNow < wFirst) m = "第一次練完有 "+wFirst+" 個字要再看，現在剩下 "+wNow+" 個——這段時間確實有進步。";
+  else if(ls.length >= 3) m = "已經主動練了 "+ls.length+" 次。對這個階段來說，練習的次數比分數更重要。";
+  else m = "才剛開始，先看練習次數就好，分數會慢慢跟上來。";
+  document.getElementById("rMsg").textContent = m;
+
+  let h = "<tr><th>日期</th><th>階段</th><th class='num'>答對</th><th class='num'>題數</th><th>備註</th></tr>";
+  ls.slice().reverse().forEach(l=>{
+    h += "<tr><td>"+ymdhm(l.ts)+"</td><td>"+STAGES[l.stage].n+"　"+STAGES[l.stage].t+"</td>"
+       + "<td class='num'>"+l.right+"</td><td class='num'>"+l.total+"</td>"
+       + "<td>"+(l.mode==="wrong"?"只練錯過的字":"")+"</td></tr>";
+  });
+  document.getElementById("rLogs").innerHTML = h;
+
+  const ks = store.wrong[s] ? Object.keys(store.wrong[s]).filter(k=>store.wrong[s][k]) : [];
+  const box = document.getElementById("rChips"); box.innerHTML = "";
+  if(!ks.length) box.innerHTML = "<span class='chip clear'>目前沒有要再看的字</span>";
+  else ks.forEach(k=>{ const wd=WORDS.filter(x=>x.w===k)[0];
+    const e=document.createElement("span"); e.className="chip";
+    e.textContent = k + (wd? "（"+wd.zh+"）":""); box.appendChild(e); });
+
+  show("report");
+}
+function kpi(label, val){ return "<div class='kpi'><span>"+label+"</span><b class='big2'>"+val+"</b></div>"; }
+
+/* ---------- 匯出 ---------- */
+function exportCSV(){
+  const rows = [["座號","日期時間","階段","答對","題數","模式","當下還要再看的字"]];
+  store.logs.slice().sort((a,b)=>a.seat-b.seat || a.ts-b.ts).forEach(l=>{
+    rows.push([l.seat, ymdhm(l.ts), STAGES[l.stage].n+" "+STAGES[l.stage].t,
+               l.right, l.total, l.mode==="wrong"?"只練錯的字":"全部", l.wrong.join(" ")]);
+  });
+  const csv = "﻿" + rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download = "L1單字練習紀錄_" + new Date().toISOString().slice(0,10) + ".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function wipe(){
+  if(!confirm("要清空全班所有紀錄嗎？這個動作無法復原。")) return;
+  if(!confirm("再確認一次：所有座號的練習紀錄都會不見。")) return;
+  store = {logs:[], wrong:{}}; save(); drawTeacher(); drawSeats();
+}
+
+drawHwSeat(); drawSeats(); show("seat"); flushPending();
+</script>
+</body>
+</html>
