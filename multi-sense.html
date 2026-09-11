@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一字多義　這裡是哪個意思</title>
+<style>
+  :root{
+    --bg:#F7F5EF; --card:#fff; --ink:#26241F; --sub:#5A554C;
+    --line:#E2DDD0; --brand:#1F6B58; --brand-soft:#E6F1ED;
+    --gold:#C98A17; --gold-soft:#FDF3DE;
+    --ok:#1F7A44; --ok-soft:#E4F3E9;
+    --no:#B23A32; --no-soft:#FBE9E7; --r:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Hiragino Sans TC",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:19px;line-height:1.75;-webkit-text-size-adjust:100%}
+  .wrap{max-width:860px;margin:0 auto;padding:20px 16px 72px}
+  .hide{display:none!important}
+
+  header{background:var(--brand);color:#fff;border-radius:var(--r);padding:20px 22px;margin-bottom:18px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  header h1{margin:0 0 6px;font-size:26px;letter-spacing:.5px}
+  header p{margin:0;font-size:16px;opacity:.92}
+  .who{background:rgba(255,255,255,.16);border-radius:99px;padding:6px 16px;font-size:17px;white-space:nowrap}
+  .who button{background:none;border:none;color:#fff;font-size:15px;cursor:pointer;
+    text-decoration:underline;font-family:inherit;padding:0 0 0 8px;opacity:.85}
+
+  .seatgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:10px;margin-top:18px}
+  .seat{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:16px 0;
+    font-size:24px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .seat:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .seat.guest{border-style:dashed;color:var(--sub);font-size:20px}
+
+  /* 模式：練全部 / 只練沒過的 */
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  @media(max-width:520px){.modes{grid-template-columns:1fr}}
+  .mode{background:var(--card);border:2px solid var(--line);border-radius:var(--r);
+    padding:14px 18px;cursor:pointer;font-family:inherit;font-size:18px;text-align:left;color:var(--ink)}
+  .mode small{display:block;font-size:14px;color:var(--sub);font-weight:400;margin-top:2px}
+  .mode:hover{border-color:var(--brand)}
+  .mode.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .mode.on small{color:rgba(255,255,255,.85)}
+  .mode.hot{border-color:var(--gold);background:var(--gold-soft)}
+  .mode.hot.on{background:var(--gold);border-color:var(--gold);color:#fff}
+
+  .picker{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;margin-bottom:14px}
+  .picker .lb{font-size:15px;color:var(--sub);margin-bottom:10px}
+  .gs{display:flex;gap:8px;flex-wrap:wrap}
+  .gchip{background:var(--card);border:2px solid var(--line);border-radius:99px;
+    padding:7px 16px;font-size:17px;cursor:pointer;font-family:inherit;color:var(--sub)}
+  .gchip:hover{border-color:var(--brand);color:var(--brand)}
+  .gchip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .gchip i{font-style:normal;opacity:.7;font-size:14px}
+
+  .tabs{display:grid;gap:8px;margin-bottom:16px}
+  .tab{background:var(--card);border:2px solid var(--line);border-radius:12px;
+    padding:12px 6px;text-align:center;cursor:pointer;font-size:15px;line-height:1.4;
+    color:var(--sub);transition:.15s}
+  .tab b{display:block;font-size:19px;color:var(--ink);font-weight:600;margin-bottom:2px}
+  .tab:hover{border-color:var(--brand)}
+  .tab.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .tab.on b{color:#fff}
+
+  .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:12px 16px;margin-bottom:14px;font-size:16px;color:var(--sub)}
+  .bar .grow{flex:1;min-width:100px}
+  .track{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+  .fill{height:100%;background:var(--brand);width:0;transition:width .25s}
+  .pill{background:var(--gold-soft);color:var(--gold);border-radius:99px;
+    padding:3px 12px;font-size:15px;white-space:nowrap}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:26px 24px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .stage{font-size:15px;color:var(--sub);margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .gtag{background:var(--brand-soft);color:var(--brand);border-radius:99px;padding:2px 12px;font-size:14px}
+
+  .word{font-size:44px;font-weight:700;margin:6px 0 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;line-height:1.25}
+  .zh{font-size:17px;color:var(--sub);margin:-2px 0 18px}
+  .say{background:var(--brand-soft);border:none;border-radius:50%;width:44px;height:44px;
+    font-size:20px;cursor:pointer;color:var(--brand);flex:none}
+  .say:hover{background:#D5E7E1}
+  .sent{font-size:23px;line-height:2;margin:6px 0 20px}
+  .sent .gap{display:inline-block;min-width:116px;height:1.5em;vertical-align:-.3em;
+    border-bottom:4px solid var(--gold);margin:0 4px}
+  .hint{font-size:30px;letter-spacing:5px;color:var(--gold);font-weight:700;margin-bottom:4px}
+
+  .opts{display:grid;gap:12px}
+  .opts.two{grid-template-columns:1fr 1fr}
+  @media(max-width:560px){.opts.two{grid-template-columns:1fr}}
+  .opt{background:var(--card);border:2px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-size:21px;text-align:left;cursor:pointer;
+    font-family:inherit;color:var(--ink);transition:.12s}
+  .opt:hover:not(:disabled){border-color:var(--brand);background:var(--brand-soft)}
+  .opt:disabled{cursor:default}
+  .opt.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok);font-weight:600}
+  .opt.wrong{border-color:var(--no);background:var(--no-soft);color:var(--no)}
+
+  .typebox{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+  input[type=text]{font-size:26px;padding:12px 16px;border:2px solid var(--line);
+    border-radius:12px;font-family:inherit;width:300px;max-width:100%;letter-spacing:1px}
+  input[type=text]:focus{outline:none;border-color:var(--brand)}
+
+  button.go{background:var(--brand);color:#fff;border:none;border-radius:12px;
+    padding:14px 26px;font-size:19px;cursor:pointer;font-family:inherit}
+  button.go:hover{background:#17553f}
+  button.ghost{background:transparent;color:var(--brand);border:2px solid var(--brand)}
+  button.ghost:hover{background:var(--brand-soft)}
+
+  .fb{margin-top:20px;padding:16px 18px;border-radius:12px;font-size:19px;display:none}
+  .fb.show{display:block}
+  .fb.good{background:var(--ok-soft);color:var(--ok)}
+  .fb.bad{background:var(--no-soft);color:var(--no)}
+  .fb .big{font-size:22px;font-weight:700;display:block;margin-bottom:4px}
+
+  .done{text-align:center;padding:20px 0}
+  .done .score{font-size:64px;font-weight:700;color:var(--brand);line-height:1.1}
+  .done .of{font-size:20px;color:var(--sub);margin-bottom:16px}
+  .done .best{display:inline-block;background:var(--gold-soft);color:var(--gold);
+    border-radius:99px;padding:8px 20px;font-size:17px;margin-bottom:22px}
+  .done .msg{font-size:21px;margin-bottom:24px}
+  .btnrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  .review{margin-top:26px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r);padding:18px 20px}
+  .review h3{margin:0 0 10px;font-size:18px;color:var(--sub);font-weight:600}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--no-soft);color:var(--no);border-radius:99px;padding:5px 14px;font-size:16px}
+  .chip.clear{background:var(--ok-soft);color:var(--ok)}
+  .mini{font-size:15px;color:var(--sub);margin-top:10px}
+  .tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .tools button{font-size:15px;padding:9px 16px;border-radius:10px;cursor:pointer;
+    font-family:inherit;border:2px solid var(--line);background:var(--card);color:var(--sub)}
+  .tools button:hover{border-color:var(--brand);color:var(--brand)}
+
+  .hw{background:var(--gold-soft);border:2px solid #EBD9AE;border-radius:var(--r);
+    padding:16px 20px;margin-bottom:16px;color:#6B4A0E}
+  .hw.done{background:var(--ok-soft);border-color:#B9DCC6;color:var(--ok)}
+  .hw .t{font-size:20px;font-weight:700}
+  .hw ul{margin:10px 0 0;padding:0;list-style:none;font-size:17px}
+  .hw li{margin:5px 0}
+  .hw .n{margin:10px 0 0;font-size:15px;opacity:.85}
+  .ok{color:var(--ok);font-weight:600}
+  .wait{color:var(--sub)}
+
+  .foot{margin-top:30px;text-align:center}
+  .foot button{background:none;border:none;color:var(--sub);font-size:15px;
+    cursor:pointer;font-family:inherit;text-decoration:underline;opacity:.7}
+  h2.sec{font-size:22px;margin:0 0 4px}
+  p.secsub{margin:0 0 18px;color:var(--sub);font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:17px}
+  th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-size:15px;color:var(--sub);font-weight:600;white-space:nowrap}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.none td{color:var(--sub)}
+  .seatlink{color:var(--brand);cursor:pointer;text-decoration:underline;font-weight:600}
+  .barcell{display:flex;align-items:center;gap:8px}
+  .barcell i{display:block;height:12px;background:var(--no);border-radius:3px;opacity:.75}
+  .scroll{overflow-x:auto}
+  .note{background:var(--gold-soft);border-radius:12px;padding:14px 16px;font-size:16px;color:#7A5410;margin:16px 0}
+  .big2{font-size:34px;font-weight:700;color:var(--brand);line-height:1.2}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:6px 0 20px}
+  .kpi{background:var(--brand-soft);border-radius:12px;padding:14px 16px}
+  .kpi span{display:block;font-size:15px;color:var(--sub)}
+  @media print{ body{background:#fff} .noprint{display:none!important} .card{box-shadow:none;border:1px solid #ccc} }
+  .stage .exam{margin-left:8px;font-size:13px;color:#2f6b4f;background:#e8f3ec;
+    border-radius:999px;padding:2px 9px;font-weight:700}
+  .sent{font-size:21px;line-height:1.85;padding:6px 2px 2px;letter-spacing:.2px}
+  .sent .hl{text-decoration-thickness:2px;text-underline-offset:4px;font-weight:700;color:#1f6b4f}
+  .stage .exam.listen{color:#3a6fb0;background:#eaf2ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>一字多義　這裡是哪個意思</h1>
+    <p id="sub"></p>
+  </div>
+  <div class="who hide" id="who"></div>
+</header>
+
+<div id="viewSeat">
+  <div class="card">
+    <h2 class="sec" id="seatTitle">先選你的座號</h2>
+    <p class="secsub">選了以後，你的練習紀錄就會分開存，不會跟別人混在一起。</p>
+    <div class="seatgrid" id="seatgrid"></div>
+  </div>
+</div>
+
+<div id="viewPractice" class="hide">
+  <div id="hwPractice"></div>
+  <div class="modes" id="modes"></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="bar">
+    <span id="stageName"></span>
+    <span class="grow"><span class="track"><span class="fill" id="fill"></span></span></span>
+    <span id="count">0 / 0</span>
+    <span class="pill" id="best">最佳 —</span>
+  </div>
+  <div class="card" id="card"></div>
+  <div class="review">
+    <h3>我還沒過的字</h3>
+    <div class="chips" id="chips"></div>
+    <p class="mini" id="mini"></p>
+  </div>
+</div>
+
+<div id="viewTeacher" class="hide">
+  <div class="card">
+    <h2 class="sec">全班作答狀況</h2>
+    <p class="secsub" id="tSub"></p>
+    <div class="scroll"><table id="tClass"></table></div>
+    <h2 class="sec" style="margin-top:32px">全班最常錯的字</h2>
+    <p class="secsub">這是下一堂課最該花時間的地方。</p>
+    <div class="scroll"><table id="tWrong"></table></div>
+    <div class="tools noprint">
+      <button onclick="exportCSV()">匯出 CSV</button>
+      <button onclick="show('seat')">回到練習</button>
+      <button onclick="wipe()">清空全部紀錄</button>
+    </div>
+  </div>
+</div>
+
+<div id="viewReport" class="hide">
+  <div class="card">
+    <h2 class="sec" id="rTitle">學習報告</h2>
+    <p class="secsub" id="rRange"></p>
+    <div class="kpis" id="rKpis"></div>
+    <div class="note" id="rMsg"></div>
+    <h2 class="sec" style="margin-top:26px;font-size:19px">每次練習紀錄</h2>
+    <div class="scroll"><table id="rLogs"></table></div>
+    <h2 class="sec" style="margin-top:26px;font-size:19px">目前還沒過的字</h2>
+    <div class="chips" id="rChips"></div>
+    <div class="tools noprint">
+      <button onclick="window.print()">列印 / 存成 PDF</button>
+      <button onclick="show('teacher')">回到全班</button>
+    </div>
+  </div>
+</div>
+
+<div class="foot noprint" id="foot"></div>
+
+</div>
+<script>
+const WORDS = [{"w":"for","sn":["為了；給","持續（多久）","look for 尋找","對……來說"],"g":"L1","l":1,"t":"There is a reason for that.","f":"for","a":0,"r":1},{"w":"for","sn":["為了；給","持續（多久）","look for 尋找","對……來說"],"g":"L1","l":1,"t":"I'm looking for a John Smith.","f":"for","a":2,"r":1},{"w":"for","sn":["為了；給","持續（多久）","look for 尋找","對……來說"],"g":"L1","l":1,"t":"There are two types of lodging for visitors.","f":"for","a":0,"r":1},{"w":"that","sn":["那個","引導子句：……這件事","關係代名詞：……的（那個）"],"g":"L1","l":1,"t":"But that never stopped her.","f":"that","a":0,"r":1},{"w":"that","sn":["那個","引導子句：……這件事","關係代名詞：……的（那個）"],"g":"L1","l":1,"t":"He decided that his birthday.","f":"that","a":1,"r":1},{"w":"that","sn":["那個","引導子句：……這件事","關係代名詞：……的（那個）"],"g":"L1","l":1,"t":"That's a great idea.","f":"that's","a":0,"r":1},{"w":"you","sn":["你；你們","（泛指）人們"],"g":"L1","l":1,"t":"Do you need to study?","f":"you","a":0,"r":1},{"w":"you","sn":["你；你們","（泛指）人們"],"g":"L1","l":1,"t":"You feel closer to each other.","f":"you","a":0,"r":1},{"w":"you","sn":["你；你們","（泛指）人們"],"g":"L1","l":1,"t":"You said that a year ago.","f":"you","a":0,"r":1},{"w":"about","sn":["關於","大約","be about to 正要"],"g":"L1","l":1,"t":"I was thinking about my homework.","f":"about","a":0,"r":1},{"w":"about","sn":["關於","大約","be about to 正要"],"g":"L1","l":1,"t":"What is the reading mostly about?","f":"about","a":0,"r":1},{"w":"about","sn":["關於","大約","be about to 正要"],"g":"L1","l":1,"t":"What is the reading mainly about?","f":"about","a":0,"r":1},{"w":"one","sn":["一；一個","（代替前面提過的名詞）那個"],"g":"L1","l":1,"t":"But there was one thing Portland did right.","f":"one","a":0,"r":1},{"w":"one","sn":["一；一個","（代替前面提過的名詞）那個"],"g":"L1","l":1,"t":"We all see rex as one of us.","f":"one","a":0,"r":1},{"w":"one","sn":["一；一個","（代替前面提過的名詞）那個"],"g":"L1","l":1,"t":"One story is that Elise was Elisabeth r ckel.","f":"one","a":0,"r":1},{"w":"can","sn":["能夠；可以（助動詞，會考 102 次多半是這個）","（鐵、鋁）罐"],"g":"L1","l":1,"t":"Which question can the brochure answer?","f":"can","a":0,"r":1},{"w":"can","sn":["能夠；可以（助動詞，會考 102 次多半是這個）","（鐵、鋁）罐"],"g":"L1","l":1,"t":"I can't study with all that noise.","f":"can","a":0,"r":1},{"w":"can","sn":["能夠；可以（助動詞，會考 102 次多半是這個）","（鐵、鋁）罐"],"g":"L1","l":1,"t":"I'm sure you can get some ideas there.","f":"can","a":0,"r":1},{"w":"make","sn":["製造","使得","賺（錢）"],"g":"L1","l":1,"t":"I want to make fried rice.","f":"make","a":0,"r":1},{"w":"make","sn":["製造","使得","賺（錢）"],"g":"L1","l":1,"t":"How do they make you feel?","f":"make","a":1,"r":1},{"w":"make","sn":["製造","使得","賺（錢）"],"g":"L1","l":1,"t":"The browns are making so much noise again.","f":"making","a":0,"r":1},{"w":"time","sn":["時間","次數","時代"],"g":"L1","l":1,"t":"But this time, the government decided to fight.","f":"time","a":1,"r":1},{"w":"time","sn":["時間","次數","時代"],"g":"L1","l":1,"t":"It's been a long time since we last met.","f":"time","a":0,"r":1},{"w":"time","sn":["時間","次數","時代"],"g":"L1","l":1,"t":"The last trees were probably cut down at this time.","f":"time","a":0,"r":1},{"w":"work","sn":["工作","運作；行得通","作品"],"g":"L1","l":1,"t":"But how well did it work?","f":"work","a":1,"r":1},{"w":"work","sn":["工作","運作；行得通","作品"],"g":"L1","l":1,"t":"Working with your family is great.","f":"working","a":0,"r":1},{"w":"work","sn":["工作","運作；行得通","作品"],"g":"L1","l":1,"t":"But why do these people keep working?","f":"working","a":0,"r":1},{"w":"so","sn":["很；那麼","所以","so that 以便"],"g":"L1","l":1,"t":"The browns are making so much noise again.","f":"so","a":0,"r":1},{"w":"so","sn":["很；那麼","所以","so that 以便"],"g":"L1","l":1,"t":"So should we still keep going down this road?","f":"so","a":1,"r":1},{"w":"so","sn":["很；那麼","所以","so that 以便"],"g":"L1","l":1,"t":"It was so much better than getting a gift.","f":"so","a":0,"r":1},{"w":"more","sn":["更多的","更（比較級）","any more 不再"],"g":"L1","l":1,"t":"Icelandic is appearing more often in products.","f":"more","a":1,"r":1},{"w":"more","sn":["更多的","更（比較級）","any more 不再"],"g":"L1","l":1,"t":"Harrison decided that more people should hear the little singers.","f":"more","a":0,"r":1},{"w":"more","sn":["更多的","更（比較級）","any more 不再"],"g":"L1","l":1,"t":"Over the next ten years, Rose wrote more than 150 articles.","f":"more","a":0,"r":1},{"w":"give","sn":["給","give up 放棄"],"g":"L1","l":1,"t":"The two groups gave very different answers.","f":"gave","a":0,"r":1},{"w":"give","sn":["給","give up 放棄"],"g":"L1","l":1,"t":"On his birthday, he gives his mom a gift.","f":"gives","a":0,"r":1},{"w":"give","sn":["給","give up 放棄"],"g":"L1","l":1,"t":"Will Iceland one day give up Icelandic for English?","f":"give","a":1,"r":1},{"w":"see","sn":["看見","了解；明白","見面"],"g":"L1","l":1,"t":"Actually, you see English everywhere in Iceland.","f":"see","a":0,"r":1},{"w":"see","sn":["看見","了解；明白","見面"],"g":"L1","l":1,"t":"Umm, did you actually see them eat it?","f":"see","a":0,"r":1},{"w":"want","sn":["想要","缺乏；需要"],"g":"L1","l":1,"t":"I want to make fried rice.","f":"want","a":0,"r":1},{"w":"want","sn":["想要","缺乏；需要"],"g":"L1","l":1,"t":"They want to help them start a new life.","f":"want","a":0,"r":1},{"w":"want","sn":["想要","缺乏；需要"],"g":"L1","l":1,"t":"We won't want you to be tired every year.","f":"want","a":0,"r":1},{"w":"know","sn":["知道","認識"],"g":"L1","l":1,"t":"We may never know the right answer.","f":"know","a":0,"r":1},{"w":"know","sn":["知道","認識"],"g":"L1","l":1,"t":"He didn't know who the woman was.","f":"know","a":0,"r":1},{"w":"know","sn":["知道","認識"],"g":"L1","l":1,"t":"They don't know what they are missing.","f":"know","a":0,"r":1},{"w":"get","sn":["獲得；拿到","到達","變得","了解"],"g":"L1","l":1,"t":"We got the middle seats.","f":"got","a":0,"r":1},{"w":"get","sn":["獲得；拿到","到達","變得","了解"],"g":"L1","l":1,"t":"I'm sure you can get some ideas there.","f":"get","a":0,"r":1},{"w":"get","sn":["獲得；拿到","到達","變得","了解"],"g":"L1","l":1,"t":"It was so much better than getting a gift.","f":"getting","a":0,"r":1},{"w":"sea","sn":["海","大量（a sea of）"],"g":"L1","l":0,"t":"The pictures below explain how sea glass is born.","f":"sea","a":0,"r":1},{"w":"sea","sn":["海","大量（a sea of）"],"g":"L1","l":0,"t":"Glass bottles are thrown as garbage into the sea.","f":"sea","a":0,"r":1},{"w":"sea","sn":["海","大量（a sea of）"],"g":"L1","l":0,"t":"Sea glass is finally pushed up to the beach.","f":"sea","a":0,"r":1},{"w":"find","sn":["找到","發現","覺得"],"g":"L1","l":1,"t":"But Wong still didn't find anything in his.","f":"find","a":0,"r":1},{"w":"find","sn":["找到","發現","覺得"],"g":"L1","l":1,"t":"I was told I could find him here.","f":"find","a":0,"r":1},{"w":"find","sn":["找到","發現","覺得"],"g":"L1","l":1,"t":"Go and find out stories behind the art work online.","f":"find","a":1,"r":1},{"w":"think","sn":["想；思考","認為","think of 想到"],"g":"L1","l":1,"t":"I was thinking about my homework.","f":"thinking","a":0,"r":1},{"w":"think","sn":["想；思考","認為","think of 想到"],"g":"L1","l":1,"t":"Can you think of other possible anagrams of these words?","f":"think","a":2,"r":1},{"w":"think","sn":["想；思考","認為","think of 想到"],"g":"L1","l":1,"t":"Can you think of any other way to use them?","f":"think","a":2,"r":1},{"w":"by","sn":["被（被動語態）","藉由；透過","在……之前（期限）","在……旁邊","搭（交通工具）"],"g":"L1","l":1,"t":"Later, a man copied the manuscript and wrote for Elise by mistake.","f":"by","a":1,"r":1},{"w":"by","sn":["被（被動語態）","藉由；透過","在……之前（期限）","在……旁邊","搭（交通工具）"],"g":"L1","l":1,"t":"He was hit by a car last night, my classmate told me.","f":"by","a":0,"r":1},{"w":"by","sn":["被（被動語態）","藉由；透過","在……之前（期限）","在……旁邊","搭（交通工具）"],"g":"L1","l":1,"t":"Besides, the little insect is hit by a raindrop about once every 20 seconds.","f":"by","a":0,"r":1},{"w":"glass","sn":["玻璃杯","玻璃","glasses 眼鏡"],"g":"L1","l":1,"t":"The pictures below explain how sea glass is born.","f":"glass","a":1,"r":1},{"w":"glass","sn":["玻璃杯","玻璃","glasses 眼鏡"],"g":"L1","l":1,"t":"Glass bottles are thrown as garbage into the sea.","f":"glass","a":1,"r":1},{"w":"glass","sn":["玻璃杯","玻璃","glasses 眼鏡"],"g":"L1","l":1,"t":"Sea glass is finally pushed up to the beach.","f":"glass","a":1,"r":1},{"w":"like","sn":["喜歡","像；就像","例如"],"g":"L1","l":1,"t":"I feel like I'm dying.","f":"like","a":1,"r":1},{"w":"like","sn":["喜歡","像；就像","例如"],"g":"L1","l":1,"t":"How do you like your apartment?","f":"like","a":0,"r":1},{"w":"like","sn":["喜歡","像；就像","例如"],"g":"L1","l":1,"t":"What do you like to do on the weekend?","f":"like","a":0,"r":1},{"w":"take","sn":["拿；帶","花費（時間）","搭乘","拍（照）"],"g":"L1","l":1,"t":"It took Ariely hours to build his cabinet.","f":"took","a":1,"r":1},{"w":"take","sn":["拿；帶","花費（時間）","搭乘","拍（照）"],"g":"L1","l":1,"t":"Picture-taking is not allowed inside sir Archie's house.","f":"taking","a":3,"r":1},{"w":"take","sn":["拿；帶","花費（時間）","搭乘","拍（照）"],"g":"L1","l":1,"t":"So Philip decided to take Jason out for some food.","f":"take","a":0,"r":1},{"w":"some","sn":["一些","某個"],"g":"L1","l":1,"t":"I'm sure you can get some ideas there.","f":"some","a":0,"r":1},{"w":"some","sn":["一些","某個"],"g":"L1","l":1,"t":"These are just some guesses about who Elise was.","f":"some","a":0,"r":1},{"w":"some","sn":["一些","某個"],"g":"L1","l":1,"t":"In some towns, tennis shoes and sneakers become gym shoes.","f":"some","a":0,"r":1},{"w":"look","sn":["看","看起來","look for 尋找","look after 照顧"],"g":"L1","l":1,"t":"I'm looking for a John Smith.","f":"looking","a":2,"r":1},{"w":"look","sn":["看","看起來","look for 尋找","look after 照顧"],"g":"L1","l":1,"t":"The friend looked quietly at the fish.","f":"looked","a":0,"r":1},{"w":"look","sn":["看","看起來","look for 尋找","look after 照顧"],"g":"L1","l":1,"t":"The king looked seriously at the children.","f":"looked","a":0,"r":1},{"w":"learn","sn":["學習","得知"],"g":"L1","l":0,"t":"What can we learn about sugar from the infographic?","f":"learn","a":1,"r":1},{"w":"learn","sn":["學習","得知"],"g":"L1","l":0,"t":"Palindromes can be used to learn mathematics and make music.","f":"learn","a":0,"r":1},{"w":"learn","sn":["學習","得知"],"g":"L1","l":0,"t":"The moves for the 20-second exercise are not difficult to learn.","f":"learn","a":0,"r":1},{"w":"out","sn":["向外","在外面","find out 查明","出局"],"g":"L1","l":1,"t":"Why did Philip go out?","f":"out","a":0,"r":1},{"w":"out","sn":["向外","在外面","find out 查明","出局"],"g":"L1","l":1,"t":"So Philip decided to take Jason out for some food.","f":"out","a":0,"r":1},{"w":"will","sn":["將會","意志","遺囑"],"g":"L1","l":1,"t":"Will Iceland one day give up Icelandic for English?","f":"will","a":0,"r":1},{"w":"will","sn":["將會","意志","遺囑"],"g":"L1","l":1,"t":"Then it will hit the ground and meet its death.","f":"will","a":0,"r":1},{"w":"will","sn":["將會","意志","遺囑"],"g":"L1","l":1,"t":"How do you expect our kids will want to learn it?","f":"will","a":0,"r":1},{"w":"as","sn":["as…as 和……一樣","作為；當作","像；如同","隨著"],"g":"L1","l":1,"t":"To pick me as student leader.","f":"as","a":1,"r":1},{"w":"as","sn":["as…as 和……一樣","作為；當作","像；如同","隨著"],"g":"L1","l":1,"t":"We all see rex as one of us.","f":"as","a":1,"r":1},{"w":"as","sn":["as…as 和……一樣","作為；當作","像；如同","隨著"],"g":"L1","l":1,"t":"He is now as handsome and strong as before!","f":"as","a":0,"r":1},{"w":"only","sn":["只；僅僅","唯一的","not only…but also 不但……而且"],"g":"L1","l":1,"t":"There were only two people there?","f":"only","a":0,"r":1},{"w":"only","sn":["只；僅僅","唯一的","not only…but also 不但……而且"],"g":"L1","l":1,"t":"And we'll have only three days of school a week what?","f":"only","a":0,"r":1},{"w":"only","sn":["只；僅僅","唯一的","not only…but also 不但……而且"],"g":"L1","l":1,"t":"Only one thing is for sure: for Elise will always be enjoyed.","f":"only","a":1,"r":1},{"w":"home","sn":["家","回家；在家","家鄉"],"g":"L1","l":1,"t":"Every child brought their seeds home carefully.","f":"home","a":1,"r":1},{"w":"home","sn":["家","回家；在家","家鄉"],"g":"L1","l":1,"t":"Philip was at home with his little brother, Jason.","f":"home","a":1,"r":1},{"w":"home","sn":["家","回家；在家","家鄉"],"g":"L1","l":1,"t":"But how are you going to go home without it?","f":"home","a":1,"r":1},{"w":"help","sn":["幫助","can't help 忍不住"],"g":"L1","l":1,"t":"They want to help them start a new life.","f":"help","a":0,"r":1},{"w":"help","sn":["幫助","can't help 忍不住"],"g":"L1","l":1,"t":"This helped the city keep the number of deaths down.","f":"helped","a":0,"r":1},{"w":"help","sn":["幫助","can't help 忍不住"],"g":"L1","l":1,"t":"He says that books, like people, get sick and need help.","f":"help","a":0,"r":1},{"w":"after","sn":["在……之後","look after 照顧"],"g":"L1","l":1,"t":"So why don't we see many dead mosquitoes after it rains?","f":"after","a":0,"r":1},{"w":"after","sn":["在……之後","look after 照顧"],"g":"L1","l":1,"t":"After using the stars, how much did they pay for their meals?","f":"after","a":0,"r":1},{"w":"after","sn":["在……之後","look after 照顧"],"g":"L1","l":1,"t":"We went to see rex in the hospital that day after school.","f":"after","a":0,"r":1},{"w":"would","sn":["會（will 的過去式）","委婉語氣：would you 你可以……嗎"],"g":"L1","l":1,"t":"When they finished, they were asked how much they would spend on their works.","f":"would","a":0,"r":1},{"w":"would","sn":["會（will 的過去式）","委婉語氣：would you 你可以……嗎"],"g":"L1","l":1,"t":"Though buyers would pay only five cents for builders' origami, builders would spend 25 cents!","f":"would","a":0,"r":1},{"w":"all","sn":["全部","都","at all 一點也（不）"],"g":"L1","l":1,"t":"That was how it all happened.","f":"all","a":1,"r":1},{"w":"all","sn":["全部","都","at all 一點也（不）"],"g":"L1","l":1,"t":"I can't study with all that noise.","f":"all","a":0,"r":1},{"w":"all","sn":["全部","都","at all 一點也（不）"],"g":"L1","l":1,"t":"They finished it all real quick.","f":"all","a":0,"r":1},{"w":"than","sn":["比（比較級）","other than 除了"],"g":"L1","l":1,"t":"It was no bigger than a finger.","f":"than","a":0,"r":1},{"w":"than","sn":["比（比較級）","other than 除了"],"g":"L1","l":1,"t":"It was so much better than getting a gift.","f":"than","a":0,"r":1},{"w":"than","sn":["比（比較級）","other than 除了"],"g":"L1","l":1,"t":"They spend less than ten seconds on each painting.","f":"than","a":0,"r":1},{"w":"very","sn":["很；非常","正是那個（the very）"],"g":"L1","l":1,"t":"She was a very special person.","f":"very","a":0,"r":1},{"w":"very","sn":["很；非常","正是那個（the very）"],"g":"L1","l":1,"t":"The two groups gave very different answers.","f":"very","a":0,"r":1},{"w":"very","sn":["很；非常","正是那個（the very）"],"g":"L1","l":1,"t":"Rose was very excited and agreed right away.","f":"very","a":0,"r":1},{"w":"show","sn":["顯示；表現","展出","節目；表演"],"g":"L1","l":1,"t":"Let me show you the apartment.","f":"show","a":0,"r":1},{"w":"show","sn":["顯示；表現","展出","節目；表演"],"g":"L1","l":1,"t":"But in my experience, it also shows.","f":"shows","a":0,"r":1},{"w":"show","sn":["顯示；表現","展出","節目；表演"],"g":"L1","l":1,"t":"The nightingale show was popular with radio listeners.","f":"show","a":2,"r":1},{"w":"should","sn":["應該","竟然"],"g":"L1","l":1,"t":"So should we still keep going down this road?","f":"should","a":0,"r":1},{"w":"should","sn":["應該","竟然"],"g":"L1","l":1,"t":"Harrison decided that more people should hear the little singers.","f":"should","a":0,"r":1},{"w":"should","sn":["應該","竟然"],"g":"L1","l":1,"t":"So why should he get a birthday gift for doing nothing?","f":"should","a":0,"r":1},{"w":"before","sn":["在……之前","以前"],"g":"L2","l":1,"t":"She already lost an eye before.","f":"before","a":1,"r":1},{"w":"before","sn":["在……之前","以前"],"g":"L2","l":1,"t":"He is now as handsome and strong as before!","f":"before","a":1,"r":1},{"w":"before","sn":["在……之前","以前"],"g":"L2","l":1,"t":"There are still ten minutes before the movie starts.","f":"before","a":0,"r":1},{"w":"start","sn":["開始","出發","發動（車子）"],"g":"L2","l":1,"t":"They want to help them start a new life.","f":"start","a":0,"r":1},{"w":"start","sn":["開始","出發","發動（車子）"],"g":"L2","l":1,"t":"There are still ten minutes before the movie starts.","f":"starts","a":0,"r":1},{"w":"start","sn":["開始","出發","發動（車子）"],"g":"L2","l":1,"t":"Two Austrians, martin rohla and david kreytenberg, started this yummy plan from their experience of working with refugees.","f":"started","a":0,"r":1},{"w":"keep","sn":["保持；持續","保留；留著","飼養"],"g":"L2","l":1,"t":"Jason was hungry and kept crying.","f":"kept","a":0,"r":1},{"w":"keep","sn":["保持；持續","保留；留著","飼養"],"g":"L2","l":1,"t":"But why do these people keep working?","f":"keep","a":0,"r":1},{"w":"keep","sn":["保持；持續","保留；留著","飼養"],"g":"L2","l":1,"t":"All these were useful in keeping people safe.","f":"keeping","a":0,"r":1},{"w":"tell","sn":["告訴","分辨（tell A from B）"],"g":"L2","l":1,"t":"What do the comics tell us?","f":"tell","a":0,"r":1},{"w":"tell","sn":["告訴","分辨（tell A from B）"],"g":"L2","l":1,"t":"I was told I could find him here.","f":"told","a":0,"r":1},{"w":"tell","sn":["告訴","分辨（tell A from B）"],"g":"L2","l":1,"t":"Why did Darrell tell Marina to go to Pinterest?","f":"tell","a":0,"r":1},{"w":"may","sn":["可能；也許（會考 24 次多半是這個）","可以（請求許可）","五月"],"g":"L2","l":1,"t":"Things may drop from above.","f":"may","a":0,"r":1},{"w":"may","sn":["可能；也許（會考 24 次多半是這個）","可以（請求許可）","五月"],"g":"L2","l":1,"t":"We may never know the right answer.","f":"may","a":0,"r":1},{"w":"may","sn":["可能；也許（會考 24 次多半是這個）","可以（請求許可）","五月"],"g":"L2","l":1,"t":"They may miss many, perhaps better, chances in life.","f":"may","a":0,"r":1},{"w":"ask","sn":["問","要求","邀請"],"g":"L2","l":1,"t":"Then he asked Yan if he could borrow a lamp.","f":"asked","a":0,"r":1},{"w":"ask","sn":["問","要求","邀請"],"g":"L2","l":1,"t":"Then he asked Chang if he had a big knife.","f":"asked","a":0,"r":1},{"w":"ask","sn":["問","要求","邀請"],"g":"L2","l":1,"t":"A year later, the electricity workers asked for another pay rise.","f":"asked","a":1,"r":1},{"w":"play","sn":["玩","打（球）","播放","演奏","戲劇"],"g":"L2","l":1,"t":"If they only play one kind of toy, they may lose this important chance.","f":"play","a":0,"r":1},{"w":"play","sn":["玩","打（球）","播放","演奏","戲劇"],"g":"L2","l":1,"t":"At p.m., companies play the song there's always tomorrow and turn off all the lights.","f":"play","a":2,"r":1},{"w":"part","sn":["部分","角色","take part in 參加"],"g":"L2","l":1,"t":"In most parts of the US, people say tennis shoes.","f":"parts","a":0,"r":1},{"w":"part","sn":["部分","角色","take part in 參加"],"g":"L2","l":1,"t":"Trees were needed and used in every part of their life.","f":"part","a":0,"r":1},{"w":"part","sn":["部分","角色","take part in 參加"],"g":"L2","l":1,"t":"IKEA is a famous furniture store that sells boxes of furniture parts.","f":"parts","a":0,"r":1},{"w":"book","sn":["書","預訂"],"g":"L2","l":1,"t":"They bring him books with different problems.","f":"books","a":0,"r":1},{"w":"book","sn":["書","預訂"],"g":"L2","l":1,"t":"Lucia leisure I just love Josh Katz's new book!","f":"book","a":0,"r":1},{"w":"book","sn":["書","預訂"],"g":"L2","l":1,"t":"Maybe Katz can study this difference for his next book.","f":"book","a":0,"r":1},{"w":"back","sn":["回原處；回來","後面（的）","背部"],"g":"L2","l":1,"t":"He felt he was brought back to the days with his teacher.","f":"back","a":0,"r":1},{"w":"back","sn":["回原處；回來","後面（的）","背部"],"g":"L2","l":1,"t":"He also thinks we must do everything we can to bring them back.","f":"back","a":0,"r":1},{"w":"back","sn":["回原處；回來","後面（的）","背部"],"g":"L2","l":1,"t":"When he got his book back, he was very surprised at the new-old book.","f":"back","a":0,"r":1},{"w":"just","sn":["剛剛；才","只是；不過","就；儘管（去做）","正好"],"g":"L2","l":1,"t":"What did the teacher just say?","f":"just","a":0,"r":1},{"w":"just","sn":["剛剛；才","只是；不過","就；儘管（去做）","正好"],"g":"L2","l":1,"t":"These are just some guesses about who Elise was.","f":"just","a":1,"r":1},{"w":"just","sn":["剛剛；才","只是；不過","就；儘管（去做）","正好"],"g":"L2","l":1,"t":"Lucia leisure I just love Josh Katz's new book!","f":"just","a":2,"r":1},{"w":"use","sn":["使用","用途","used to 過去常常"],"g":"L2","l":1,"t":"Grandpa used to sing it to us.","f":"used","a":2,"r":1},{"w":"use","sn":["使用","用途","used to 過去常常"],"g":"L2","l":1,"t":"In fact, it was widely used in the U.S.","f":"used","a":0,"r":1},{"w":"use","sn":["使用","用途","used to 過去常常"],"g":"L2","l":1,"t":"What colors and shapes are used in the painting?","f":"used","a":0,"r":1},{"w":"first","sn":["第一（的）","首先"],"g":"L2","l":1,"t":"At first, the artist was playing alone.","f":"first","a":1,"r":1},{"w":"first","sn":["第一（的）","首先"],"g":"L2","l":1,"t":"Rose and I first met in 2.","f":"first","a":0,"r":1},{"w":"first","sn":["第一（的）","首先"],"g":"L2","l":1,"t":"First, buy a tree that is freshly cut.","f":"first","a":1,"r":1},{"w":"way","sn":["方式；方法","路","by the way 順帶一提","非常（way too big）"],"g":"L2","l":1,"t":"Anagrams are also a good way to hide something.","f":"way","a":0,"r":1},{"w":"way","sn":["方式；方法","路","by the way 順帶一提","非常（way too big）"],"g":"L2","l":1,"t":"Can you think of any other way to use them?","f":"way","a":0,"r":1},{"w":"way","sn":["方式；方法","路","by the way 順帶一提","非常（way too big）"],"g":"L2","l":1,"t":"We should think of some other way to deal with them.","f":"way","a":0,"r":1},{"w":"study","sn":["學習；研讀","研究（名詞，會考常見）"],"g":"L2","l":1,"t":"Do you need to study?","f":"study","a":0,"r":1},{"w":"study","sn":["學習；研讀","研究（名詞，會考常見）"],"g":"L2","l":1,"t":"I can't study with all that noise.","f":"study","a":0,"r":1},{"w":"study","sn":["學習；研讀","研究（名詞，會考常見）"],"g":"L2","l":1,"t":"Can I go to your house and study?","f":"study","a":0,"r":1},{"w":"most","sn":["最","最多的","大部分的"],"g":"L2","l":1,"t":"Most importantly, schools still teach Icelandic to children.","f":"most","a":0,"r":1},{"w":"most","sn":["最","最多的","大部分的"],"g":"L2","l":1,"t":"In most parts of the US, people say tennis shoes.","f":"most","a":2,"r":1},{"w":"most","sn":["最","最多的","大部分的"],"g":"L2","l":1,"t":"Most people think that some toys are for boys and some are for girls.","f":"most","a":2,"r":1},{"w":"move","sn":["移動","搬家","使感動"],"g":"L2","l":1,"t":"Move the statues around easily.","f":"move","a":0,"r":1},{"w":"move","sn":["移動","搬家","使感動"],"g":"L2","l":1,"t":"The statues were moved to fighting grounds to show their power.","f":"moved","a":0,"r":1},{"w":"little","sn":["小的","很少（不可數）","a little 一點點"],"g":"L2","l":1,"t":"Philip was at home with his little brother, Jason.","f":"little","a":0,"r":1},{"w":"little","sn":["小的","很少（不可數）","a little 一點點"],"g":"L2","l":1,"t":"Harrison decided that more people should hear the little singers.","f":"little","a":0,"r":1},{"w":"little","sn":["小的","很少（不可數）","a little 一點點"],"g":"L2","l":1,"t":"Besides, the little insect is hit by a raindrop about once every 20 seconds.","f":"little","a":0,"r":1},{"w":"story","sn":["故事","報導","（建築）樓層"],"g":"L2","l":0,"t":"However, the story didn't end there.","f":"story","a":0,"r":1},{"w":"story","sn":["故事","報導","（建築）樓層"],"g":"L2","l":0,"t":"Another story is that Elise was Therese Malfatti.","f":"story","a":0,"r":1},{"w":"story","sn":["故事","報導","（建築）樓層"],"g":"L2","l":0,"t":"One story is that Elise was Elisabeth r ckel.","f":"story","a":0,"r":1},{"w":"country","sn":["國家","鄉間"],"g":"L2","l":1,"t":"They are now a new country, Ambazonia.","f":"country","a":0,"r":1},{"w":"country","sn":["國家","鄉間"],"g":"L2","l":1,"t":"In the northeast of the country, people wear sneakers.","f":"country","a":0,"r":1},{"w":"country","sn":["國家","鄉間"],"g":"L2","l":1,"t":"Why there is no overtime day in the country d.","f":"country","a":0,"r":1},{"w":"mean","sn":["意思是；意謂","小氣的；刻薄的"],"g":"L2","l":1,"t":"What does the prevalence of English mean?","f":"mean","a":0,"r":1},{"w":"mean","sn":["意思是；意謂","小氣的；刻薄的"],"g":"L2","l":1,"t":"What does it mean when someone is an advocate of something?","f":"mean","a":0,"r":1},{"w":"mean","sn":["意思是；意謂","小氣的；刻薄的"],"g":"L2","l":1,"t":"However, for Libby, working at a family business also means making sacrifices.","f":"means","a":0,"r":1},{"w":"walk","sn":["走路","散步","遛（狗）"],"g":"L2","l":1,"t":"This way, visitors can use the bathroom without walking through your bedroom.","f":"walking","a":0,"r":1},{"w":"walk","sn":["走路","散步","遛（狗）"],"g":"L2","l":1,"t":"However, after the workers walk out of their offices, they don't go home.","f":"walk","a":0,"r":1},{"w":"walk","sn":["走路","散步","遛（狗）"],"g":"L2","l":1,"t":"But those who walk into Cotoha come to see its owner, Chen bing-hong.","f":"walk","a":0,"r":1},{"w":"visit","sn":["造訪；拜訪","參觀","一次拜訪"],"g":"L2","l":1,"t":"One day, his best friend came to visit him.","f":"visit","a":0,"r":1},{"w":"visit","sn":["造訪；拜訪","參觀","一次拜訪"],"g":"L2","l":1,"t":"What is recommended to people who are visiting the southend trail?","f":"visiting","a":1,"r":1},{"w":"visit","sn":["造訪；拜訪","參觀","一次拜訪"],"g":"L2","l":1,"t":"What is recommended to people who want to visit the festival?","f":"visit","a":1,"r":1},{"w":"live","sn":["住（讀 /lɪv/）","生活","現場的；實況的（讀 /laɪv/，發音不同要注意）"],"g":"L2","l":0,"t":"People's lives were greatly changed.","f":"lives","a":1,"r":1},{"w":"live","sn":["住（讀 /lɪv/）","生活","現場的；實況的（讀 /laɪv/，發音不同要注意）"],"g":"L2","l":0,"t":"She wrote about real people and their real lives.","f":"lives","a":1,"r":1},{"w":"school","sn":["學校","上學","一群（魚）a school of fish"],"g":"L2","l":1,"t":"Most importantly, schools still teach Icelandic to children.","f":"schools","a":0,"r":1},{"w":"school","sn":["學校","上學","一群（魚）a school of fish"],"g":"L2","l":1,"t":"And we'll have only three days of school a week what?","f":"school","a":1,"r":1},{"w":"school","sn":["學校","上學","一群（魚）a school of fish"],"g":"L2","l":1,"t":"Every morning, he stands in front of the school to welcome everybody.","f":"school","a":0,"r":1},{"w":"used","sn":["use 的過去式","used to 過去常常","be used to 習慣於"],"g":"L2","l":1,"t":"Grandpa used to sing it to us.","f":"used","a":1,"r":1},{"w":"used","sn":["use 的過去式","used to 過去常常","be used to 習慣於"],"g":"L2","l":1,"t":"In fact, it was widely used in the U.S.","f":"used","a":0,"r":1},{"w":"used","sn":["use 的過去式","used to 過去常常","be used to 習慣於"],"g":"L2","l":1,"t":"What colors and shapes are used in the painting?","f":"used","a":0,"r":1},{"w":"right","sn":["對的；正確的","右邊","剛好；正","適合的","權利"],"g":"L2","l":1,"t":"We may never know the right answer.","f":"right","a":0,"r":1},{"w":"right","sn":["對的；正確的","右邊","剛好；正","適合的","權利"],"g":"L2","l":1,"t":"I don't have the right shoes today.","f":"right","a":3,"r":1},{"w":"right","sn":["對的；正確的","右邊","剛好；正","適合的","權利"],"g":"L2","l":1,"t":"There is an earthquake happening right now.","f":"right","a":2,"r":1},{"w":"up","sn":["向上","起來","give up 放棄"],"g":"L2","l":1,"t":"Will Iceland one day give up Icelandic for English?","f":"up","a":2,"r":1},{"w":"up","sn":["向上","起來","give up 放棄"],"g":"L2","l":1,"t":"Clearly, we are not giving up our first language.","f":"up","a":2,"r":1},{"w":"up","sn":["向上","起來","give up 放棄"],"g":"L2","l":1,"t":"Sea glass is finally pushed up to the beach.","f":"up","a":0,"r":1},{"w":"save","sn":["拯救","省下","儲存"],"g":"L2","l":0,"t":"This saves its life in raindrop attacks.","f":"saves","a":0,"r":1},{"w":"save","sn":["拯救","省下","儲存"],"g":"L2","l":0,"t":"The americans' experience can tell us whether it really saved lives.","f":"saved","a":0,"r":1},{"w":"save","sn":["拯救","省下","儲存"],"g":"L2","l":0,"t":"To save electricity, it made new rules for people to follow.","f":"save","a":1,"r":1},{"w":"lose","sn":["輸掉（比賽）","失去","迷路（lose one's way）"],"g":"L2","l":0,"t":"Many people lost their jobs.","f":"lost","a":1,"r":1},{"w":"lose","sn":["輸掉（比賽）","失去","迷路（lose one's way）"],"g":"L2","l":0,"t":"She already lost an eye before.","f":"lost","a":1,"r":1},{"w":"lose","sn":["輸掉（比賽）","失去","迷路（lose one's way）"],"g":"L2","l":0,"t":"But many icelanders are worried that they're losing Icelandic.","f":"losing","a":1,"r":1},{"w":"train","sn":["火車","訓練"],"g":"L2","l":1,"t":"You can decide yourself what moves to do in your Tabata training.","f":"training","a":1,"r":1},{"w":"train","sn":["火車","訓練"],"g":"L2","l":1,"t":"The idea of Tabata training is simple: exercise for 20 seconds, rest for 10 seconds, and then repeat (at least eight times).","f":"training","a":1,"r":1},{"w":"train","sn":["火車","訓練"],"g":"L2","l":1,"t":"But for people who enjoy exercising but are too busy to go to the gym, Tabata training might just be the answer.","f":"training","a":1,"r":1},{"w":"change","sn":["改變","零錢","換（車、衣服）"],"g":"L2","l":1,"t":"People's lives were greatly changed.","f":"changed","a":0,"r":1},{"w":"change","sn":["改變","零錢","換（車、衣服）"],"g":"L2","l":1,"t":"Clearly, this must be changed before the problem gets any worse.","f":"changed","a":0,"r":1},{"w":"change","sn":["改變","零錢","換（車、衣服）"],"g":"L2","l":1,"t":"The new country changed its name to the federal republic of Cameroon.","f":"changed","a":0,"r":1},{"w":"answer","sn":["回答","答案","接（電話）"],"g":"L2","l":1,"t":"Which question can the brochure answer?","f":"answer","a":0,"r":1},{"w":"answer","sn":["回答","答案","接（電話）"],"g":"L2","l":1,"t":"We may never know the right answer.","f":"answer","a":1,"r":1},{"w":"answer","sn":["回答","答案","接（電話）"],"g":"L2","l":1,"t":"The two groups gave very different answers.","f":"answers","a":1,"r":1},{"w":"kind","sn":["種類","友善的"],"g":"L2","l":0,"t":"According to the comics, what kind of person is Hawkins?","f":"kind","a":0,"r":1},{"w":"kind","sn":["種類","友善的"],"g":"L2","l":0,"t":"If they only play one kind of toy, they may lose this important chance.","f":"kind","a":0,"r":1},{"w":"kind","sn":["種類","友善的"],"g":"L2","l":0,"t":"She has several kinds of fruit in the kitchen: apples, bananas, oranges, papayas, pears, and strawberries.","f":"kinds","a":0,"r":1},{"w":"share","sn":["分享","分擔","股份"],"g":"L2","l":1,"t":"Many people share their works on Pinterest and tell you how they made them.","f":"share","a":0,"r":1},{"w":"share","sn":["分享","分擔","股份"],"g":"L2","l":1,"t":"I'm here to share with you a few ideas for a safe Christmas tree.","f":"share","a":0,"r":1},{"w":"share","sn":["分享","分擔","股份"],"g":"L2","l":1,"t":"Ariely wanted to know if anyone shared his feelings, so he did a fun origami study.","f":"shared","a":0,"r":1},{"w":"last","sn":["最後的","前一個的；上一個","持續"],"g":"L2","l":1,"t":"It's been a long time since we last met.","f":"last","a":1,"r":1},{"w":"last","sn":["最後的","前一個的；上一個","持續"],"g":"L2","l":1,"t":"The last trees were probably cut down at this time.","f":"last","a":0,"r":1},{"w":"last","sn":["最後的","前一個的；上一個","持續"],"g":"L2","l":1,"t":"I heard you had a theater show last night.","f":"last","a":1,"r":1},{"w":"few","sn":["很少（可數）","a few 幾個"],"g":"L2","l":1,"t":"For her, war reporting was not just some quick interviews and a few photos.","f":"few","a":1,"r":1},{"w":"few","sn":["很少（可數）","a few 幾個"],"g":"L2","l":1,"t":"The picture shows that Portland and Denver did well in the first few weeks.","f":"few","a":1,"r":1},{"w":"few","sn":["很少（可數）","a few 幾個"],"g":"L2","l":1,"t":"I'm here to share with you a few ideas for a safe Christmas tree.","f":"few","a":1,"r":1},{"w":"any","sn":["任何","（疑問／否定句）一些"],"g":"L3","l":1,"t":"Can you think of any other way to use them?","f":"any","a":0,"r":1},{"w":"any","sn":["任何","（疑問／否定句）一些"],"g":"L3","l":1,"t":"Clearly, this must be changed before the problem gets any worse.","f":"any","a":0,"r":1},{"w":"any","sn":["任何","（疑問／否定句）一些"],"g":"L3","l":1,"t":"Pets are not allowed in any areas of the Marigolds' home.","f":"any","a":0,"r":1},{"w":"could","sn":["can 的過去式：能夠","委婉語民：could you 你可以……嗎","可能"],"g":"L3","l":1,"t":"And I believed I could be number.","f":"could","a":0,"r":1},{"w":"could","sn":["can 的過去式：能夠","委婉語民：could you 你可以……嗎","可能"],"g":"L3","l":1,"t":"Soon he could happily run and jump again.","f":"could","a":0,"r":1},{"w":"could","sn":["can 的過去式：能夠","委婉語民：could you 你可以……嗎","可能"],"g":"L3","l":1,"t":"I was told I could find him here.","f":"could","a":0,"r":1},{"w":"long","sn":["長的","久的","as long as 只要"],"g":"L3","l":1,"t":"It has a long history.","f":"long","a":1,"r":1},{"w":"long","sn":["長的","久的","as long as 只要"],"g":"L3","l":1,"t":"It's been a long time since we last met.","f":"long","a":1,"r":1},{"w":"long","sn":["長的","久的","as long as 只要"],"g":"L3","l":1,"t":"The problem of long working hours is a real headache in our country.","f":"long","a":1,"r":1},{"w":"well","sn":["很好地（good 的副詞）","嗯；這個嘛（對話開頭的停頓，聽力常出現）","健康的"],"g":"L3","l":1,"t":"But how well did it work?","f":"well","a":0,"r":1},{"w":"well","sn":["很好地（good 的副詞）","嗯；這個嘛（對話開頭的停頓，聽力常出現）","健康的"],"g":"L3","l":1,"t":"If you choose the truck, well, you're not alone.","f":"well","a":1,"r":1},{"w":"well","sn":["很好地（good 的副詞）","嗯；這個嘛（對話開頭的停頓，聽力常出現）","健康的"],"g":"L3","l":1,"t":"The picture shows that Portland and Denver did well in the first few weeks.","f":"well","a":0,"r":1},{"w":"try","sn":["嘗試","努力","try on 試穿"],"g":"L3","l":1,"t":"What did Ariely try to find out in the origami study?","f":"try","a":0,"r":1},{"w":"try","sn":["嘗試","努力","try on 試穿"],"g":"L3","l":1,"t":"When the police tried to stop the meeting, at least eight people were killed.","f":"tried","a":0,"r":1},{"w":"try","sn":["嘗試","努力","try on 試穿"],"g":"L3","l":1,"t":"I forgot my keys and was just trying to get into my own house!","f":"trying","a":0,"r":1},{"w":"shop","sn":["商店","購物","go shopping 去逛街"],"g":"L3","l":1,"t":"The girl looks very tired with all the shopping bags in her hands.","f":"shopping","a":1,"r":1},{"w":"shop","sn":["商店","購物","go shopping 去逛街"],"g":"L3","l":1,"t":"Restaurants and coffee shops are busier on Wednesday evenings, and they have started selling drinks and meals for these workers.","f":"shops","a":0,"r":1},{"w":"second","sn":["第二（的）","秒"],"g":"L3","l":1,"t":"They spend less than ten seconds on each painting.","f":"seconds","a":1,"r":1},{"w":"second","sn":["第二（的）","秒"],"g":"L3","l":1,"t":"Why does the title say glass bottles' second life ?","f":"second","a":0,"r":1},{"w":"second","sn":["第二（的）","秒"],"g":"L3","l":1,"t":"Are you ok with seats in the second row?","f":"second","a":0,"r":1},{"w":"call","sn":["打電話","呼喊","稱呼"],"g":"L3","l":1,"t":"Ariely called it the IKEA effect.","f":"called","a":2,"r":1},{"w":"call","sn":["打電話","呼喊","稱呼"],"g":"L3","l":1,"t":"People called her the nightingale lady.","f":"called","a":2,"r":1},{"w":"call","sn":["打電話","呼喊","稱呼"],"g":"L3","l":1,"t":"Why was Beatrice Harrison called the nightingale lady?","f":"called","a":2,"r":1},{"w":"water","sn":["水","澆水"],"g":"L3","l":1,"t":"Water under the ground, the land I'm thirsty.","f":"water","a":0,"r":1},{"w":"water","sn":["水","澆水"],"g":"L3","l":1,"t":"It usually comes from glass bottles that are thrown into the water.","f":"water","a":0,"r":1},{"w":"water","sn":["水","澆水"],"g":"L3","l":1,"t":"Pieces of glass are pushed by sea water and move along the sea floor.","f":"water","a":0,"r":1},{"w":"sure","sn":["確定的","當然（Sure!）","make sure 確認"],"g":"L3","l":1,"t":"I'm sure you can get some ideas there.","f":"sure","a":0,"r":1},{"w":"sure","sn":["確定的","當然（Sure!）","make sure 確認"],"g":"L3","l":1,"t":"Only one thing is for sure: for Elise will always be enjoyed.","f":"sure","a":0,"r":1},{"w":"sure","sn":["確定的","當然（Sure!）","make sure 確認"],"g":"L3","l":1,"t":"With much more work, I'm sure Icelandic can grow and even reach farther into the world.","f":"sure","a":0,"r":1},{"w":"leave","sn":["離開","留下；遺忘","請假"],"g":"L3","l":1,"t":"Malfatti kept the manuscript and left it to her family when she died.","f":"left","a":1,"r":1},{"w":"leave","sn":["離開","留下；遺忘","請假"],"g":"L3","l":1,"t":"On no overtime day, workers are asked to leave their offices before p.m.","f":"leave","a":0,"r":1},{"w":"stop","sn":["停止","車站（bus stop）","阻止"],"g":"L3","l":1,"t":"But that never stopped her.","f":"stopped","a":2,"r":1},{"w":"stop","sn":["停止","車站（bus stop）","阻止"],"g":"L3","l":1,"t":"When the police tried to stop the meeting, at least eight people were killed.","f":"stop","a":2,"r":1},{"w":"stop","sn":["停止","車站（bus stop）","阻止"],"g":"L3","l":1,"t":"My friends stopped inviting me on trips because I'm always busy in the summer.","f":"stopped","a":0,"r":1},{"w":"turn","sn":["轉彎","輪到","turn on／off 打開／關掉"],"g":"L3","l":0,"t":"At p.m., companies play the song there's always tomorrow and turn off all the lights.","f":"turn","a":2,"r":1},{"w":"turn","sn":["轉彎","輪到","turn on／off 打開／關掉"],"g":"L3","l":0,"t":"Some go back later, turn on their table lamps, and keep working, and others find somewhere else to work until very late at night.","f":"turn","a":2,"r":1},{"w":"turn","sn":["轉彎","輪到","turn on／off 打開／關掉"],"g":"L3","l":0,"t":"For example, each family could turn on the heat in only one room; tv stations had to stop their shows at 10:30 p.m.; businesses could open only three days a week.","f":"turn","a":2,"r":1},{"w":"still","sn":["仍然；還是","不過；話說回來"],"g":"L3","l":1,"t":"Most importantly, schools still teach Icelandic to children.","f":"still","a":0,"r":1},{"w":"still","sn":["仍然；還是","不過；話說回來"],"g":"L3","l":1,"t":"But Wong still didn't find anything in his.","f":"still","a":0,"r":1},{"w":"still","sn":["仍然；還是","不過；話說回來"],"g":"L3","l":1,"t":"So should we still keep going down this road?","f":"still","a":0,"r":1},{"w":"stay","sn":["停留","住宿","保持（stay healthy）"],"g":"L3","l":1,"t":"A more comfortable one is to stay at a hotel in one of the towns.","f":"stay","a":1,"r":1},{"w":"stay","sn":["停留","住宿","保持（stay healthy）"],"g":"L3","l":1,"t":"She still went to dangerous places that few reporters wanted to visit and stayed when others left.","f":"stayed","a":0,"r":1},{"w":"stay","sn":["停留","住宿","保持（stay healthy）"],"g":"L3","l":1,"t":"At noon, Chang told his friend that he couldn't let him stay for lunch because there wasn't much food to eat.","f":"stay","a":0,"r":1},{"w":"rule","sn":["規定","統治","as a rule 通常"],"g":"L3","l":0,"t":"However, this rule can be bad for children.","f":"rule","a":0,"r":1},{"w":"rule","sn":["規定","統治","as a rule 通常"],"g":"L3","l":0,"t":"To save electricity, it made new rules for people to follow.","f":"rules","a":0,"r":1},{"w":"rule","sn":["規定","統治","as a rule 通常"],"g":"L3","l":0,"t":"This watch and follow habit often becomes a rule for both boys and girls in choosing the right toys.","f":"rule","a":0,"r":1},{"w":"around","sn":["圍繞","到處","大約"],"g":"L3","l":1,"t":"Move the statues around easily.","f":"around","a":1,"r":1},{"w":"around","sn":["圍繞","到處","大約"],"g":"L3","l":1,"t":"They are afraid refugees may take away their jobs and they don't feel safe around them, either.","f":"around","a":0,"r":1},{"w":"fall","sn":["掉落","秋天"],"g":"L3","l":0,"t":"When the last trees fell to the ground, people on the island fell, too.","f":"fell","a":0,"r":1},{"w":"fall","sn":["掉落","秋天"],"g":"L3","l":0,"t":"A 2012 study says when a raindrop falls on a mosquito, it's like when a bus hits a person.","f":"falls","a":0,"r":1},{"w":"fall","sn":["掉落","秋天"],"g":"L3","l":0,"t":"Some have lost their covers, some are missing a few pages, and some have pages that are falling out.","f":"falling","a":0,"r":1},{"w":"plant","sn":["植物","種植","工廠"],"g":"L3","l":0,"t":"Became dry, and plants didn't grow.","f":"plants","a":0,"r":1},{"w":"plant","sn":["植物","種植","工廠"],"g":"L3","l":0,"t":"One of the children, Wong, planted his seed in a pot.","f":"planted","a":1,"r":1},{"w":"plant","sn":["植物","種植","工廠"],"g":"L3","l":0,"t":"I boiled the seeds before I gave them out, so no plants could grow from them.","f":"plants","a":0,"r":1},{"w":"even","sn":["甚至","連……也","平的；偶數的"],"g":"L3","l":1,"t":"But last time you knocked on the door, they didn't even answer it.","f":"even","a":0,"r":1},{"w":"even","sn":["甚至","連……也","平的；偶數的"],"g":"L3","l":1,"t":"I spent a lot of time studying, but sometimes I can't even understand his questions.","f":"even","a":0,"r":1},{"w":"even","sn":["甚至","連……也","平的；偶數的"],"g":"L3","l":1,"t":"With much more work, I'm sure Icelandic can grow and even reach farther into the world.","f":"even","a":0,"r":1},{"w":"rain","sn":["雨","下雨"],"g":"L3","l":1,"t":"What is the trick that the mosquito uses in rain?","f":"rain","a":0,"r":1},{"w":"rain","sn":["雨","下雨"],"g":"L3","l":1,"t":"So why don't we see many dead mosquitoes after it rains?","f":"rains","a":1,"r":1},{"w":"off","sn":["離開","關掉","折扣"],"g":"L3","l":1,"t":"After dropping about cm, it will roll off the raindrop and fly away.","f":"off","a":0,"r":1},{"w":"off","sn":["離開","關掉","折扣"],"g":"L3","l":1,"t":"At p.m., companies play the song there's always tomorrow and turn off all the lights.","f":"off","a":1,"r":1},{"w":"off","sn":["離開","關掉","折扣"],"g":"L3","l":1,"t":"But the mosquito doesn't get wet easily because it is covered with hairs which keep off water.","f":"off","a":0,"r":1},{"w":"class","sn":["班級","課程","階級"],"g":"L3","l":1,"t":"Well, I studied in a study group for this class and it helped a lot.","f":"class","a":1,"r":1},{"w":"class","sn":["班級","課程","階級"],"g":"L3","l":1,"t":"That year, during one class, he watched a video about how a baby is pushed from its mother's body.","f":"class","a":1,"r":1},{"w":"own","sn":["自己的","擁有"],"g":"L3","l":1,"t":"I forgot my keys and was just trying to get into my own house!","f":"own","a":0,"r":1},{"w":"own","sn":["自己的","擁有"],"g":"L3","l":1,"t":"For a long time, Cameroon's English speakers have felt they are not welcome in their own country.","f":"own","a":0,"r":1},{"w":"own","sn":["自己的","擁有"],"g":"L3","l":1,"t":"Her writing made you feel so strongly about these people's stories, just like they were your own.","f":"own","a":0,"r":1},{"w":"watch","sn":["觀看","手錶","小心"],"g":"L3","l":0,"t":"This watch and follow habit often becomes a rule for both boys and girls in choosing the right toys.","f":"watch","a":0,"r":1},{"w":"watch","sn":["觀看","手錶","小心"],"g":"L3","l":0,"t":"That year, during one class, he watched a video about how a baby is pushed from its mother's body.","f":"watched","a":0,"r":1},{"w":"watch","sn":["觀看","手錶","小心"],"g":"L3","l":0,"t":"Aunt Karen and Rose wanted to have it by the pond in the front yard while watching the ducks.","f":"watching","a":0,"r":1},{"w":"grow","sn":["成長","種植","變得"],"g":"L4","l":0,"t":"Became dry, and plants didn't grow.","f":"grow","a":0,"r":1},{"w":"grow","sn":["成長","種植","變得"],"g":"L4","l":0,"t":"He talks about an extinct frog that grew tadpoles in its stomach.","f":"grew","a":0,"r":1},{"w":"grow","sn":["成長","種植","變得"],"g":"L4","l":0,"t":"With much more work, I'm sure Icelandic can grow and even reach farther into the world.","f":"grow","a":0,"r":1},{"w":"hard","sn":["硬的","困難的","努力地"],"g":"L4","l":1,"t":"But to have this wonderful afterburn, you need to exercise really hard during each 20 seconds.","f":"hard","a":2,"r":1},{"w":"hard","sn":["硬的","困難的","努力地"],"g":"L4","l":1,"t":"A lot of hard work has been put into this expensive dream, but we haven't seen anything come out of it.","f":"hard","a":2,"r":1},{"w":"miss","sn":["想念","錯過；沒趕上","小姐"],"g":"L4","l":1,"t":"They don't know what they are missing.","f":"missing","a":1,"r":1},{"w":"miss","sn":["想念","錯過；沒趕上","小姐"],"g":"L4","l":1,"t":"They may miss many, perhaps better, chances in life.","f":"miss","a":1,"r":1},{"w":"miss","sn":["想念","錯過；沒趕上","小姐"],"g":"L4","l":1,"t":"If they do, they may miss something more important than just getting a chance to play with different toys.","f":"miss","a":1,"r":1},{"w":"left","sn":["左邊","leave 的過去式：離開","剩下的"],"g":"L4","l":1,"t":"The kitchen and the dining room are on your left.","f":"left","a":0,"r":1},{"w":"left","sn":["左邊","leave 的過去式：離開","剩下的"],"g":"L4","l":1,"t":"Malfatti kept the manuscript and left it to her family when she died.","f":"left","a":1,"r":1},{"w":"left","sn":["左邊","leave 的過去式：離開","剩下的"],"g":"L4","l":1,"t":"When she was reporting on the war in Sri Lanka, she lost her left eye.","f":"left","a":0,"r":1},{"w":"cook","sn":["煮；做菜","廚師"],"g":"L4","l":1,"t":"They invited refugees to meetings and found that some of them were cooks back in Syria.","f":"cooks","a":1,"r":1},{"w":"cook","sn":["煮；做菜","廚師"],"g":"L4","l":1,"t":"But Philip couldn't cook and their father was not home yet because he was working late in the office.","f":"cook","a":0,"r":1},{"w":"ground","sn":["地面","場地（playground）","理由；根據"],"g":"L4","l":1,"t":"Water under the ground, the land I'm thirsty.","f":"ground","a":0,"r":1},{"w":"ground","sn":["地面","場地（playground）","理由；根據"],"g":"L4","l":1,"t":"Then it will hit the ground and meet its death.","f":"ground","a":0,"r":1},{"w":"ground","sn":["地面","場地（playground）","理由；根據"],"g":"L4","l":1,"t":"The statues were moved to fighting grounds to show their power.","f":"grounds","a":1,"r":1},{"w":"down","sn":["向下","沿著","沮喪的"],"g":"L4","l":0,"t":"So should we still keep going down this road?","f":"down","a":1,"r":1},{"w":"down","sn":["向下","沿著","沮喪的"],"g":"L4","l":0,"t":"This helped the city keep the number of deaths down.","f":"down","a":0,"r":1},{"w":"down","sn":["向下","沿著","沮喪的"],"g":"L4","l":0,"t":"The last trees were probably cut down at this time.","f":"down","a":0,"r":1},{"w":"kid","sn":["小孩","開玩笑（Are you kidding?）"],"g":"L4","l":0,"t":"How do you expect our kids will want to learn it?","f":"kids","a":0,"r":1},{"w":"kid","sn":["小孩","開玩笑（Are you kidding?）"],"g":"L4","l":0,"t":"I'd love to sleep until noon or go to summer camp like other kids.","f":"kids","a":0,"r":1},{"w":"kid","sn":["小孩","開玩笑（Are you kidding?）"],"g":"L4","l":0,"t":"Most kids want gifts from their parents on their birthdays, but Cameron doesn't.","f":"kids","a":0,"r":1},{"w":"open","sn":["打開","營業中的","開放的"],"g":"L4","l":1,"t":"(sound of opening the door) please come in.","f":"opening","a":0,"r":1},{"w":"open","sn":["打開","營業中的","開放的"],"g":"L4","l":1,"t":"For example, each family could turn on the heat in only one room; tv stations had to stop their shows at 10:30 p.m.; businesses could open only three days a week.","f":"open","a":1,"r":1},{"w":"spend","sn":["花（錢）","花（時間）"],"g":"L4","l":1,"t":"They spend less than ten seconds on each painting.","f":"spend","a":1,"r":1},{"w":"spend","sn":["花（錢）","花（時間）"],"g":"L4","l":1,"t":"When they finished, they were asked how much they would spend on their works.","f":"spend","a":0,"r":1},{"w":"place","sn":["地方","放置","名次"],"g":"L4","l":1,"t":"This gives bird lovers some of the best places for birdwatching.","f":"places","a":0,"r":1},{"w":"place","sn":["地方","放置","名次"],"g":"L4","l":1,"t":"She still went to dangerous places that few reporters wanted to visit and stayed when others left.","f":"places","a":0,"r":1},{"w":"place","sn":["地方","放置","名次"],"g":"L4","l":1,"t":"However, I don't know how much time and money we would need to make the world a better place for them, and honestly no one knows if they could actually come back.","f":"place","a":0,"r":1},{"w":"trip","sn":["旅行","絆倒"],"g":"L4","l":1,"t":"My friends stopped inviting me on trips because I'm always busy in the summer.","f":"trips","a":0,"r":1},{"w":"trip","sn":["旅行","絆倒"],"g":"L4","l":1,"t":"The 1-day, 3-day, and 5-day cards are for trips from Monday to Friday, and the weekend card is for trips on weekends and holidays.","f":"trips","a":0,"r":1},{"w":"feel","sn":["感覺","覺得","摸起來"],"g":"L4","l":1,"t":"I feel like I'm dying.","f":"feel","a":0,"r":1},{"w":"feel","sn":["感覺","覺得","摸起來"],"g":"L4","l":1,"t":"You feel closer to each other.","f":"feel","a":0,"r":1},{"w":"feel","sn":["感覺","覺得","摸起來"],"g":"L4","l":1,"t":"How do they make you feel?","f":"feel","a":0,"r":1},{"w":"market","sn":["市場","市集","行銷"],"g":"L4","l":0,"t":"My mother goes to the market every morning to buy fresh fish.","f":"market","a":0,"r":0},{"w":"market","sn":["市場","市集","行銷"],"g":"L4","l":0,"t":"The company spent a lot of money to market its new phone.","f":"market","a":2,"r":0},{"w":"land","sn":["陸地；土地","降落","國家（英詩用法）"],"g":"L4","l":1,"t":"Water under the ground, the land I'm thirsty.","f":"land","a":0,"r":1},{"w":"land","sn":["陸地；土地","降落","國家（英詩用法）"],"g":"L4","l":1,"t":"Then, sung, the child of the richest family in the land, told people that a small plant was growing from his seed.","f":"land","a":2,"r":1},{"w":"land","sn":["陸地；土地","降落","國家（英詩用法）"],"g":"L4","l":1,"t":"The king was worried that his land would fall into the wrong hands after his death, so he decided to pick a child in his land to take the high seat.","f":"land","a":2,"r":1},{"w":"close","sn":["關閉","接近的","親密的"],"g":"L4","l":1,"t":"Please close the window; it's getting cold.","f":"close","a":0,"r":0},{"w":"close","sn":["關閉","接近的","親密的"],"g":"L4","l":1,"t":"The post office is close to my school, so I can walk there.","f":"close","a":1,"r":0},{"w":"close","sn":["關閉","接近的","親密的"],"g":"L4","l":1,"t":"Amy and I have been close friends since we were six.","f":"close","a":2,"r":0},{"w":"safe","sn":["安全的","保險箱"],"g":"L4","l":1,"t":"All these were useful in keeping people safe.","f":"safe","a":0,"r":1},{"w":"safe","sn":["安全的","保險箱"],"g":"L4","l":1,"t":"I'm here to share with you a few ideas for a safe Christmas tree.","f":"safe","a":0,"r":1},{"w":"safe","sn":["安全的","保險箱"],"g":"L4","l":1,"t":"The blue lake city fire department wishes you a very happy and safe Christmas.","f":"safe","a":0,"r":1},{"w":"while","sn":["當……的時候","然而（對比）","a while 一段時間"],"g":"L4","l":1,"t":"Can I get you something to drink while you're looking at the menu?","f":"while","a":0,"r":1},{"w":"while","sn":["當……的時候","然而（對比）","a while 一段時間"],"g":"L4","l":1,"t":"For months, people were paying the price while the electricity workers were fighting for their wish.","f":"while","a":0,"r":1},{"w":"while","sn":["當……的時候","然而（對比）","a while 一段時間"],"g":"L4","l":1,"t":"Aunt Karen and Rose wanted to have it by the pond in the front yard while watching the ducks.","f":"while","a":0,"r":1},{"w":"through","sn":["穿過","透過","從頭到尾"],"g":"L4","l":1,"t":"This way, visitors can use the bathroom without walking through your bedroom.","f":"through","a":0,"r":1},{"w":"through","sn":["穿過","透過","從頭到尾"],"g":"L4","l":1,"t":"The 120-km trail passes beautiful lakes, crosses rivers, and goes through mountains and hills.","f":"through","a":0,"r":1},{"w":"through","sn":["穿過","透過","從頭到尾"],"g":"L4","l":1,"t":"She hoped that through her work the world would understand what really happened in war, and would take action to stop the fighting.","f":"through","a":1,"r":1},{"w":"store","sn":["商店","儲存","存貨"],"g":"L4","l":1,"t":"IKEA is a famous furniture store that sells boxes of furniture parts.","f":"store","a":0,"r":1},{"w":"below","sn":["在……下面","低於","在下面"],"g":"L4","l":0,"t":"Look at the words and their anagrams below.","f":"below","a":2,"r":1},{"w":"below","sn":["在……下面","低於","在下面"],"g":"L4","l":0,"t":"The pictures below explain how sea glass is born.","f":"below","a":2,"r":1},{"w":"free","sn":["免費的","空閒的","自由的"],"g":"L5","l":1,"t":"In their free time, they loved they used trees to make fire and making statues with big rocks.","f":"free","a":1,"r":1},{"w":"since","sn":["自從","既然"],"g":"L5","l":1,"t":"It's been a long time since we last met.","f":"since","a":0,"r":1},{"w":"since","sn":["自從","既然"],"g":"L5","l":1,"t":"My family has lived in new york since my grandparents.","f":"since","a":0,"r":1},{"w":"since","sn":["自從","既然"],"g":"L5","l":1,"t":"Also, the government has been in French speakers' hands since the two parts became one country.","f":"since","a":0,"r":1},{"w":"public","sn":["公共的","大眾","in public 公開地"],"g":"L5","l":0,"t":"Yesterday, they said in a public meeting that they were not part of Cameroon anymore.","f":"public","a":0,"r":1},{"w":"side","sn":["邊；側面","立場"],"g":"L5","l":1,"t":"The bedroom and the bathroom are on the other side.","f":"side","a":0,"r":1},{"w":"side","sn":["邊；側面","立場"],"g":"L5","l":1,"t":"If you don't want to walk, you can bike, but make sure you stay on the main trail, because the side trails are not wide enough for biking.","f":"side","a":0,"r":1},{"w":"stage","sn":["舞台","階段","上演"],"g":"L5","l":0,"t":"The singer walked onto the stage and everyone started clapping.","f":"stage","a":0,"r":0},{"w":"stage","sn":["舞台","階段","上演"],"g":"L5","l":0,"t":"Learning a language takes time, and this is only the first stage.","f":"stage","a":1,"r":0},{"w":"fly","sn":["飛","搭飛機","蒼蠅"],"g":"L5","l":0,"t":"A is flying over the houses.","f":"flying","a":0,"r":1},{"w":"fly","sn":["飛","搭飛機","蒼蠅"],"g":"L5","l":0,"t":"After dropping about cm, it will roll off the raindrop and fly away.","f":"fly","a":0,"r":1},{"w":"fly","sn":["飛","搭飛機","蒼蠅"],"g":"L5","l":0,"t":"If the mosquito flies too low when it is hit by the raindrop, it won't have time to fly off.","f":"flies","a":0,"r":1},{"w":"dream","sn":["夢；夢想","夢見"],"g":"L5","l":1,"t":"A lot of hard work has been put into this expensive dream, but we haven't seen anything come out of it.","f":"dream","a":0,"r":1},{"w":"dream","sn":["夢；夢想","夢見"],"g":"L5","l":1,"t":"Its owner still wanted to keep it because it was a gift from a teacher who helped him follow his dream of studying science.","f":"dream","a":0,"r":1},{"w":"hear","sn":["聽見","聽說"],"g":"L5","l":1,"t":"Harrison decided that more people should hear the little singers.","f":"hear","a":0,"r":1},{"w":"space","sn":["空間","太空","空格"],"g":"L5","l":0,"t":"He says we have lost many animals because we made their living spaces too dirty.","f":"spaces","a":0,"r":1},{"w":"space","sn":["空間","太空","空格"],"g":"L5","l":0,"t":"It doesn't take much time or space, and it burns calories faster than other ways of exercising.","f":"space","a":0,"r":1},{"w":"space","sn":["空間","太空","空格"],"g":"L5","l":0,"t":"Since the COVID-19 pandemic started, people have begun social distancing keeping a safe space between you and anyone you don't live with.","f":"space","a":0,"r":1},{"w":"minute","sn":["分鐘（讀 /ˈmɪnɪt/）","微小的（讀 /maɪˈnjuːt/，發音不同）","一會兒（Wait a minute）"],"g":"L5","l":1,"t":"There are still ten minutes before the movie starts.","f":"minutes","a":0,"r":1},{"w":"minute","sn":["分鐘（讀 /ˈmɪnɪt/）","微小的（讀 /maɪˈnjuːt/，發音不同）","一會兒（Wait a minute）"],"g":"L5","l":1,"t":"Fifteen minutes before the end of her playing, the nightingales began to sing with the cello.","f":"minutes","a":0,"r":1},{"w":"minute","sn":["分鐘（讀 /ˈmɪnɪt/）","微小的（讀 /maɪˈnjuːt/，發音不同）","一會兒（Wait a minute）"],"g":"L5","l":1,"t":"One great thing about Tabata training is that your body will keep burning calories for at least an hour after minutes of Tabata training.","f":"minutes","a":0,"r":1},{"w":"clear","sn":["清楚的","晴朗的","清理"],"g":"L5","l":0,"t":"Her voice was clear, so everyone could hear her easily.","f":"clear","a":0,"r":0},{"w":"clear","sn":["清楚的","晴朗的","清理"],"g":"L5","l":0,"t":"The sky was clear, and we could see many stars that night.","f":"clear","a":1,"r":0},{"w":"clear","sn":["清楚的","晴朗的","清理"],"g":"L5","l":0,"t":"Please clear the table after dinner.","f":"clear","a":2,"r":0},{"w":"past","sn":["過去","經過","過去的"],"g":"L5","l":1,"t":"We should learn from the past and not make the same mistakes.","f":"past","a":0,"r":0},{"w":"past","sn":["過去","經過","過去的"],"g":"L5","l":1,"t":"She walked past my house without saying hello.","f":"past","a":1,"r":0},{"w":"past","sn":["過去","經過","過去的"],"g":"L5","l":1,"t":"Over the past ten years, the town has changed a lot.","f":"past","a":2,"r":0},{"w":"inside","sn":["在……裡面","在室內"],"g":"L5","l":1,"t":"Picture-taking is not allowed inside sir Archie's house.","f":"inside","a":0,"r":1},{"w":"inside","sn":["在……裡面","在室內"],"g":"L5","l":1,"t":"Eating and drinking are not allowed inside the buildings, except in the caf.","f":"inside","a":0,"r":1},{"w":"inside","sn":["在……裡面","在室內"],"g":"L5","l":1,"t":"According to him, by studying how the tadpoles grow inside the frog's stomach, we might be able to find new ways to help these women successfully keep their babies.","f":"inside","a":0,"r":1},{"w":"mop","sn":["拖（地）","拖把"],"g":"L5","l":0,"t":"She mops the floor, gets the mail and the newspapers, and gets ready for visitors to rolling acres.","f":"mops","a":0,"r":1},{"w":"order","sn":["點餐","命令","順序","in order to 為了"],"g":"L5","l":1,"t":"They ordered two garden sandwiches, an autumn wind, and a winter snow.","f":"ordered","a":0,"r":1},{"w":"order","sn":["點餐","命令","順序","in order to 為了"],"g":"L5","l":1,"t":"How workers deal with no overtime day order how are they ordered in the report?","f":"order","a":2,"r":1},{"w":"fire","sn":["火","開除","開槍"],"g":"L5","l":1,"t":"The blue lake city fire department wishes you a very happy and safe Christmas.","f":"fire","a":0,"r":1},{"w":"fire","sn":["火","開除","開槍"],"g":"L5","l":1,"t":"In their free time, they loved they used trees to make fire and making statues with big rocks.","f":"fire","a":0,"r":1},{"w":"area","sn":["區域","領域"],"g":"L5","l":1,"t":"Pets are not allowed in any areas of the Marigolds' home.","f":"areas","a":0,"r":1},{"w":"cover","sn":["覆蓋","封面","報導"],"g":"L5","l":0,"t":"It was very old and half of its cover was lost.","f":"cover","a":1,"r":1},{"w":"cover","sn":["覆蓋","封面","報導"],"g":"L5","l":0,"t":"But the mosquito doesn't get wet easily because it is covered with hairs which keep off water.","f":"covered","a":0,"r":1},{"w":"cover","sn":["覆蓋","封面","報導"],"g":"L5","l":0,"t":"Some have lost their covers, some are missing a few pages, and some have pages that are falling out.","f":"covers","a":1,"r":1},{"w":"drop","sn":["掉落","放棄","一滴"],"g":"L5","l":1,"t":"Things may drop from above.","f":"drop","a":0,"r":1},{"w":"drop","sn":["掉落","放棄","一滴"],"g":"L5","l":1,"t":"After dropping about cm, it will roll off the raindrop and fly away.","f":"dropping","a":0,"r":1},{"w":"under","sn":["在……下面","少於"],"g":"L5","l":1,"t":"The umbrella is lying under the window.","f":"under","a":0,"r":1},{"w":"under","sn":["在……下面","少於"],"g":"L5","l":1,"t":"Water under the ground, the land I'm thirsty.","f":"under","a":0,"r":1},{"w":"head","sn":["頭","主管；負責人","前往"],"g":"L5","l":1,"t":"He hit his head on the door and it really hurt.","f":"head","a":0,"r":0},{"w":"head","sn":["頭","主管；負責人","前往"],"g":"L5","l":1,"t":"She is the head of our English department.","f":"head","a":1,"r":0},{"w":"head","sn":["頭","主管；負責人","前往"],"g":"L5","l":1,"t":"We headed for the beach early in the morning.","f":"headed","a":2,"r":0},{"w":"outside","sn":["在……外面","在室外","外面"],"g":"L5","l":0,"t":"After tens or hundreds of years in the sea, the pieces of glass grow an ice-like white color on the outside and become sea glass.","f":"outside","a":2,"r":1},{"w":"outside","sn":["在……外面","在室外","外面"],"g":"L5","l":0,"t":"Half an hour later, when they came back home, Philip was surprised to find that their father was talking to the police and a woman outside their house.","f":"outside","a":0,"r":1},{"w":"mind","sn":["介意","心智；想法"],"g":"L5","l":0,"t":"Well, you wouldn't mind lending me one of your many ducks or chickens so I can ride it home, would you?","f":"mind","a":0,"r":1},{"w":"half","sn":["一半（的）","二分之一"],"g":"L5","l":1,"t":"It was very old and half of its cover was lost.","f":"half","a":0,"r":1},{"w":"half","sn":["一半（的）","二分之一"],"g":"L5","l":1,"t":"Half an hour later, when they came back home, Philip was surprised to find that their father was talking to the police and a woman outside their house.","f":"half","a":0,"r":1},{"w":"enter","sn":["進入","輸入","參加（比賽）"],"g":"L5","l":0,"t":"Check the map and buy the right card for the zones you'll be entering.","f":"entering","a":0,"r":1},{"w":"short","sn":["短的","矮的","缺乏的（be short of）","簡稱（for short）"],"g":"L5","l":0,"t":"In her short life of 40 years, Rose has made her mark on the world of movies with her articles for action!","f":"short","a":0,"r":1},{"w":"fan","sn":["迷；粉絲","電扇","搧"],"g":"L5","l":1,"t":"My brother is a big fan of that baseball team.","f":"fan","a":0,"r":0},{"w":"fan","sn":["迷；粉絲","電扇","搧"],"g":"L5","l":1,"t":"It was so hot that we turned on the fan.","f":"fan","a":1,"r":0},{"w":"trick","sn":["騙局；詭計","欺騙","把戲"],"g":"L5","l":0,"t":"However, this trick isn't always successful.","f":"trick","a":2,"r":1},{"w":"trick","sn":["騙局；詭計","欺騙","把戲"],"g":"L5","l":0,"t":"What is the trick that the mosquito uses in rain?","f":"trick","a":2,"r":1},{"w":"far","sn":["遙遠地","遠的","so far 到目前為止"],"g":"L5","l":1,"t":"The two worlds far away from each other meet together, kreytenberg said.","f":"far","a":0,"r":1},{"w":"sound","sn":["聲音","聽起來"],"g":"L6","l":1,"t":"(sound of alarm) attention, please.","f":"sound","a":0,"r":1},{"w":"check","sn":["檢查","查看","支票","結帳"],"g":"L6","l":1,"t":"I'll check it out later.","f":"check","a":1,"r":1},{"w":"check","sn":["檢查","查看","支票","結帳"],"g":"L6","l":1,"t":"Check all the lights before you put them on the tree.","f":"check","a":0,"r":1},{"w":"check","sn":["檢查","查看","支票","結帳"],"g":"L6","l":1,"t":"Check the map and buy the right card for the zones you'll be entering.","f":"check","a":0,"r":1},{"w":"interest","sn":["興趣","使……感興趣","利息"],"g":"L6","l":0,"t":"Are boys and girls really born with different interests in toys?","f":"interests","a":0,"r":1},{"w":"interest","sn":["興趣","使……感興趣","利息"],"g":"L6","l":0,"t":"The quiz asked what words people use for something, and their answers showed interesting facts.","f":"interesting","a":1,"r":1},{"w":"interest","sn":["興趣","使……感興趣","利息"],"g":"L6","l":0,"t":"Her ideas were so interesting that I invited her to write some articles about movies for action!","f":"interesting","a":1,"r":1},{"w":"burn","sn":["燃燒","燒焦","消耗（熱量）"],"g":"L6","l":0,"t":"It doesn't take much time or space, and it burns calories faster than other ways of exercising.","f":"burns","a":2,"r":1},{"w":"burn","sn":["燃燒","燒焦","消耗（熱量）"],"g":"L6","l":0,"t":"One great thing about Tabata training is that your body will keep burning calories for at least an hour after minutes of Tabata training.","f":"burning","a":2,"r":1},{"w":"rest","sn":["休息","其餘的"],"g":"L6","l":0,"t":"The idea of Tabata training is simple: exercise for 20 seconds, rest for 10 seconds, and then repeat (at least eight times).","f":"rest","a":0,"r":1},{"w":"between","sn":["在……中間（兩者）","between A and B"],"g":"L6","l":1,"t":"Since the COVID-19 pandemic started, people have begun social distancing keeping a safe space between you and anyone you don't live with.","f":"between","a":1,"r":1},{"w":"must","sn":["必須","一定是（推測）"],"g":"L6","l":1,"t":"Clearly, this must be changed before the problem gets any worse.","f":"must","a":0,"r":1},{"w":"must","sn":["必須","一定是（推測）"],"g":"L6","l":1,"t":"He also thinks we must do everything we can to bring them back.","f":"must","a":0,"r":1},{"w":"pass","sn":["通過；及格","傳遞","經過"],"g":"L6","l":1,"t":"Years passed, and there were fewer and fewer trees on Easter island.","f":"passed","a":2,"r":1},{"w":"pass","sn":["通過；及格","傳遞","經過"],"g":"L6","l":1,"t":"The 120-km trail passes beautiful lakes, crosses rivers, and goes through mountains and hills.","f":"passes","a":2,"r":1},{"w":"letter","sn":["信件","字母"],"g":"L6","l":0,"t":"An anagram of a word or words is made by putting the letters of the word or words in a different way.","f":"letters","a":1,"r":1},{"w":"fun","sn":["樂趣","有趣的","make fun of 取笑"],"g":"L6","l":1,"t":"Anagrams are often longer words that don't really mean anything but are fun to say.","f":"fun","a":1,"r":1},{"w":"fun","sn":["樂趣","有趣的","make fun of 取笑"],"g":"L6","l":1,"t":"Ariely wanted to know if anyone shared his feelings, so he did a fun origami study.","f":"fun","a":1,"r":1},{"w":"run","sn":["跑","經營","運轉"],"g":"L6","l":0,"t":"Soon he could happily run and jump again.","f":"run","a":0,"r":1},{"w":"run","sn":["跑","經營","運轉"],"g":"L6","l":0,"t":"But the police didn't believe him until Philip ran to them and explained everything.","f":"ran","a":0,"r":1},{"w":"run","sn":["跑","經營","運轉"],"g":"L6","l":0,"t":"Sometimes they can even mean something 42 , like when a common word, restaurant, becomes eat rats, run!","f":"run","a":0,"r":1},{"w":"fact","sn":["事實","in fact 事實上"],"g":"L6","l":0,"t":"In fact, it was widely used in the U.S.","f":"fact","a":1,"r":1},{"w":"fact","sn":["事實","in fact 事實上"],"g":"L6","l":0,"t":"The quiz asked what words people use for something, and their answers showed interesting facts.","f":"facts","a":0,"r":1},{"w":"course","sn":["課程","of course 當然"],"g":"L6","l":0,"t":"One way to do so is to give more language courses to foreigners.","f":"courses","a":0,"r":1},{"w":"star","sn":["星星","明星","主演"],"g":"L6","l":1,"t":"After using the stars, how much did they pay for their meals?","f":"stars","a":0,"r":1},{"w":"star","sn":["星星","明星","主演"],"g":"L6","l":1,"t":"Amy went to four seasons' kitchen with her mother after she collected 15 stars.","f":"stars","a":0,"r":1},{"w":"smell","sn":["聞起來","氣味","聞"],"g":"L6","l":0,"t":"The soup smells really good.","f":"smells","a":0,"r":0},{"w":"smell","sn":["聞起來","氣味","聞"],"g":"L6","l":0,"t":"I don't like the smell of this fish.","f":"smell","a":1,"r":0},{"w":"smell","sn":["聞起來","氣味","聞"],"g":"L6","l":0,"t":"The dog smelled the box and then walked away.","f":"smelled","a":2,"r":0},{"w":"light","sn":["燈；光","輕的","點燃"],"g":"L6","l":0,"t":"Check all the lights before you put them on the tree.","f":"lights","a":0,"r":1},{"w":"light","sn":["燈；光","輕的","點燃"],"g":"L6","l":0,"t":"Hospitals had to use candles because they couldn't keep all the lights on.","f":"lights","a":0,"r":1},{"w":"light","sn":["燈；光","輕的","點燃"],"g":"L6","l":0,"t":"At p.m., companies play the song there's always tomorrow and turn off all the lights.","f":"lights","a":0,"r":1},{"w":"ride","sn":["騎","搭乘","一趟車程"],"g":"L6","l":1,"t":"Well, you wouldn't mind lending me one of your many ducks or chickens so I can ride it home, would you?","f":"ride","a":0,"r":1},{"w":"ride","sn":["騎","搭乘","一趟車程"],"g":"L6","l":1,"t":"When these bottles ride the waves of the sea, they hit each other or other garbage in the sea and break into small pieces of glass.","f":"ride","a":1,"r":1},{"w":"appear","sn":["出現","似乎"],"g":"L6","l":0,"t":"Icelandic is appearing more often in products.","f":"appearing","a":0,"r":1},{"w":"appear","sn":["出現","似乎"],"g":"L6","l":0,"t":"Pictures like this appeared in many newspapers at the time.","f":"appeared","a":0,"r":1},{"w":"middle","sn":["中間","中間的","middle school 中學"],"g":"L6","l":1,"t":"We got the middle seats.","f":"middle","a":1,"r":1},{"w":"middle","sn":["中間","中間的","middle school 中學"],"g":"L6","l":1,"t":"She joined the Sunday times, a UK newspaper, in 1985 and soon became its middle east reporter.","f":"middle","a":1,"r":1},{"w":"middle","sn":["中間","中間的","middle school 中學"],"g":"L6","l":1,"t":"Besides the middle east, she also reported from other parts of the world: Chechnya, Kosovo and Sri Lanka, for example.","f":"middle","a":1,"r":1},{"w":"chicken","sn":["雞","雞肉","膽小鬼"],"g":"L6","l":1,"t":"Chang kept a lot of ducks and chickens on his farm.","f":"chickens","a":0,"r":1},{"w":"chicken","sn":["雞","雞肉","膽小鬼"],"g":"L6","l":1,"t":"Well, you wouldn't mind lending me one of your many ducks or chickens so I can ride it home, would you?","f":"chickens","a":0,"r":1},{"w":"front","sn":["前面","in front of 在……前面","前方的"],"g":"L6","l":1,"t":"Every morning, he stands in front of the school to welcome everybody.","f":"front","a":1,"r":1},{"w":"front","sn":["前面","in front of 在……前面","前方的"],"g":"L6","l":1,"t":"Aunt Karen and Rose wanted to have it by the pond in the front yard while watching the ducks.","f":"front","a":2,"r":1},{"w":"front","sn":["前面","in front of 在……前面","前方的"],"g":"L6","l":1,"t":"The bathroom is by the front door, and you get to it from both the bedroom and the living room.","f":"front","a":2,"r":1},{"w":"mark","sn":["記號","標記","分數"],"g":"L6","l":1,"t":"In her short life of 40 years, Rose has made her mark on the world of movies with her articles for action!","f":"mark","a":0,"r":1},{"w":"paper","sn":["紙","報紙","報告"],"g":"L6","l":1,"t":"Builders were told to make origami, like paper frogs or paper birds.","f":"paper","a":0,"r":1},{"w":"wish","sn":["願望","希望","但願（與事實相反）"],"g":"L6","l":1,"t":"The blue lake city fire department wishes you a very happy and safe Christmas.","f":"wishes","a":1,"r":1},{"w":"wish","sn":["願望","希望","但願（與事實相反）"],"g":"L6","l":1,"t":"For months, people were paying the price while the electricity workers were fighting for their wish.","f":"wish","a":0,"r":1},{"w":"wish","sn":["願望","希望","但願（與事實相反）"],"g":"L6","l":1,"t":"In 1972, electricity workers in the UK asked to be paid more, and they decided to stop working until their wish was answered.","f":"wish","a":0,"r":1},{"w":"break","sn":["打破；弄壞","休息","break the ice 打破沉默"],"g":"L6","l":1,"t":"When these bottles ride the waves of the sea, they hit each other or other garbage in the sea and break into small pieces of glass.","f":"break","a":0,"r":1},{"w":"straight","sn":["直的","直接地","坦白的"],"g":"L6","l":0,"t":"Draw a straight line from here to there.","f":"straight","a":0,"r":0},{"w":"straight","sn":["直的","直接地","坦白的"],"g":"L6","l":0,"t":"After school, he went straight home.","f":"straight","a":1,"r":0},{"w":"straight","sn":["直的","直接地","坦白的"],"g":"L6","l":0,"t":"Please give me a straight answer.","f":"straight","a":2,"r":0},{"w":"taste","sn":["嘗起來","味道","品味"],"g":"L6","l":0,"t":"The cookies tasted so bad, but his mom said they were the best thing she ever got.","f":"tasted","a":0,"r":1},{"w":"draw","sn":["畫","拉；拖","吸引","平手"],"g":"L6","l":0,"t":"She likes to draw animals in her notebook.","f":"draw","a":0,"r":0},{"w":"draw","sn":["畫","拉；拖","吸引","平手"],"g":"L6","l":0,"t":"The new museum drew thousands of visitors last month.","f":"draw","a":2,"r":0},{"w":"draw","sn":["畫","拉；拖","吸引","平手"],"g":"L6","l":0,"t":"The game ended in a draw, so neither team won.","f":"draw","a":3,"r":0},{"w":"top","sn":["頂端","最好的","上衣"],"g":"L6","l":0,"t":"We finally reached the top of the mountain.","f":"top","a":0,"r":0},{"w":"top","sn":["頂端","最好的","上衣"],"g":"L6","l":0,"t":"He is one of the top students in our class.","f":"top","a":1,"r":0},{"w":"top","sn":["頂端","最好的","上衣"],"g":"L6","l":0,"t":"She bought a blue top and a pair of jeans.","f":"top","a":2,"r":0},{"w":"table","sn":["桌子","表格","set the table 擺餐具"],"g":"L6","l":1,"t":"However, on the dinner table there was only one small dish of one small fish.","f":"table","a":0,"r":1},{"w":"table","sn":["桌子","表格","set the table 擺餐具"],"g":"L6","l":1,"t":"Some go back later, turn on their table lamps, and keep working, and others find somewhere else to work until very late at night.","f":"table","a":0,"r":1},{"w":"hide","sn":["躲藏","隱藏","獸皮"],"g":"L6","l":1,"t":"Anagrams are also a good way to hide something.","f":"hide","a":1,"r":1},{"w":"hide","sn":["躲藏","隱藏","獸皮"],"g":"L6","l":1,"t":"In history, people often hid their important studies in anagrams.","f":"hid","a":1,"r":1},{"w":"shape","sn":["形狀","狀況（in good shape）","塑造"],"g":"L6","l":1,"t":"What colors and shapes are used in the painting?","f":"shapes","a":0,"r":1},{"w":"shape","sn":["形狀","狀況（in good shape）","塑造"],"g":"L6","l":1,"t":"Some had flowers in the shape of a bird, and some had grasses of different colors.","f":"shape","a":0,"r":1},{"w":"park","sn":["公園","停車"],"g":"L6","l":1,"t":"The children play in the park every afternoon.","f":"park","a":0,"r":0},{"w":"park","sn":["公園","停車"],"g":"L6","l":1,"t":"You can't park your car here.","f":"park","a":1,"r":0},{"w":"seat","sn":["座位","使就座（be seated）"],"g":"L6","l":1,"t":"We got the middle seats.","f":"seats","a":0,"r":1},{"w":"seat","sn":["座位","使就座（be seated）"],"g":"L6","l":1,"t":"The seats for the five o'clock are all sold out.","f":"seats","a":0,"r":1},{"w":"seat","sn":["座位","使就座（be seated）"],"g":"L6","l":1,"t":"Are you ok with seats in the second row?","f":"seats","a":0,"r":1},{"w":"stand","sn":["站立","忍受","攤位"],"g":"L6","l":1,"t":"She looked scared and stood behind the police.","f":"stood","a":0,"r":1},{"w":"stand","sn":["站立","忍受","攤位"],"g":"L6","l":1,"t":"Every morning, he stands in front of the school to welcome everybody.","f":"stands","a":0,"r":1},{"w":"stand","sn":["站立","忍受","攤位"],"g":"L6","l":1,"t":"Most of the time I see people standing in front of a painting, take a picture of it and then go on to the next painting.","f":"standing","a":0,"r":1},{"w":"across","sn":["橫越","在……對面","come across 偶然遇到"],"g":"L7","l":1,"t":"Right across the bathroom is the dining room, and you can see in here the only door to the kitchen.","f":"across","a":1,"r":1},{"w":"room","sn":["房間","空間"],"g":"L7","l":1,"t":"This is the living room.","f":"room","a":0,"r":1},{"w":"room","sn":["房間","空間"],"g":"L7","l":1,"t":"The kitchen and the dining room are on your left.","f":"room","a":0,"r":1},{"w":"room","sn":["房間","空間"],"g":"L7","l":1,"t":"This way, any smoke in the kitchen won't get into the living room.","f":"room","a":0,"r":1},{"w":"wind","sn":["風（讀 /wɪnd/）","上發條；蜿蜒（讀 /waɪnd/，發音不同）"],"g":"L7","l":0,"t":"They ordered two garden sandwiches, an autumn wind, and a winter snow.","f":"wind","a":0,"r":1},{"w":"wear","sn":["穿；戴","磨損","面帶（wear a smile）"],"g":"L7","l":0,"t":"In the northeast of the country, people wear sneakers.","f":"wear","a":0,"r":1},{"w":"mine","sn":["我的（東西）","礦坑","地雷"],"g":"L7","l":1,"t":"That bag is not yours; it's mine.","f":"mine","a":0,"r":0},{"w":"mine","sn":["我的（東西）","礦坑","地雷"],"g":"L7","l":1,"t":"Many workers used to dig for coal in this mine.","f":"mine","a":1,"r":0},{"w":"dry","sn":["乾燥的","弄乾；變乾"],"g":"L7","l":1,"t":"Became dry, and plants didn't grow.","f":"dry","a":0,"r":1},{"w":"dry","sn":["乾燥的","弄乾；變乾"],"g":"L7","l":1,"t":"When the tree begins to look yellow and dry, it's time to get it out of the house.","f":"dry","a":0,"r":1},{"w":"dry","sn":["乾燥的","弄乾；變乾"],"g":"L7","l":1,"t":"Well, it's so dark in here, the friend said with a dry smile, I can't see the other delicious dishes you've prepared for me.","f":"dry","a":0,"r":1},{"w":"page","sn":["頁","網頁"],"g":"L7","l":0,"t":"Some have lost their covers, some are missing a few pages, and some have pages that are falling out.","f":"pages","a":0,"r":1},{"w":"over","sn":["超過","越過","結束","over there 在那邊"],"g":"L7","l":1,"t":"A is flying over the houses.","f":"over","a":1,"r":1},{"w":"over","sn":["超過","越過","結束","over there 在那邊"],"g":"L7","l":1,"t":"Over the next ten years, Rose wrote more than 150 articles.","f":"over","a":0,"r":1},{"w":"treat","sn":["對待","治療","請客","款待"],"g":"L7","l":0,"t":"We should treat animals kindly.","f":"treat","a":0,"r":0},{"w":"treat","sn":["對待","治療","請客","款待"],"g":"L7","l":0,"t":"The doctor treated her broken arm.","f":"treated","a":1,"r":0},{"w":"treat","sn":["對待","治療","請客","款待"],"g":"L7","l":0,"t":"It's your birthday, so let me treat you to dinner.","f":"treat","a":2,"r":0},{"w":"blind","sn":["瞎的","blind date 相親"],"g":"L7","l":0,"t":"The old dog is blind, but it can still find its way home.","f":"blind","a":0,"r":0},{"w":"blind","sn":["瞎的","blind date 相親"],"g":"L7","l":0,"t":"My sister met her husband on a blind date.","f":"blind","a":1,"r":0},{"w":"heat","sn":["加熱","熱"],"g":"L7","l":0,"t":"For example, each family could turn on the heat in only one room; tv stations had to stop their shows at 10:30 p.m.; businesses could open only three days a week.","f":"heat","a":1,"r":1},{"w":"wave","sn":["揮（手）","波浪","一波（a wave of）"],"g":"L7","l":0,"t":"When these bottles ride the waves of the sea, they hit each other or other garbage in the sea and break into small pieces of glass.","f":"waves","a":1,"r":1},{"w":"title","sn":["標題","頭銜","冠軍"],"g":"L7","l":0,"t":"Why does the title say glass bottles' second life ?","f":"title","a":0,"r":1},{"w":"chinese","sn":["中國的","中國人","中文"],"g":"L7","l":1,"t":"We had dinner at a Chinese restaurant last night.","f":"Chinese","a":0,"r":0},{"w":"chinese","sn":["中國的","中國人","中文"],"g":"L7","l":1,"t":"She has been learning Chinese for three years.","f":"Chinese","a":2,"r":0},{"w":"screen","sn":["螢幕","篩選","紗窗"],"g":"L7","l":1,"t":"Don't look at the screen for too long; your eyes will hurt.","f":"screen","a":0,"r":0},{"w":"screen","sn":["螢幕","篩選","紗窗"],"g":"L7","l":1,"t":"Close the screen so the mosquitoes can't come in.","f":"screen","a":2,"r":0},{"w":"line","sn":["線條","排隊的隊伍","台詞"],"g":"L7","l":1,"t":"Draw a line under the word you don't know.","f":"line","a":0,"r":0},{"w":"line","sn":["線條","排隊的隊伍","台詞"],"g":"L7","l":1,"t":"There was a long line in front of the ticket office.","f":"line","a":1,"r":0},{"w":"line","sn":["線條","排隊的隊伍","台詞"],"g":"L7","l":1,"t":"The actor forgot his lines on stage.","f":"lines","a":2,"r":0},{"w":"sale","sn":["特價；拍賣","銷售","for sale 出售中"],"g":"L7","l":1,"t":"The store is having a big sale this weekend.","f":"sale","a":0,"r":0},{"w":"sale","sn":["特價；拍賣","銷售","for sale 出售中"],"g":"L7","l":1,"t":"The house next door is for sale.","f":"sale","a":2,"r":0},{"w":"point","sn":["得分","觀點；重點","指向"],"g":"L7","l":0,"t":"There are four important points in the report: a.","f":"points","a":1,"r":1},{"w":"nature","sn":["大自然","天性"],"g":"L7","l":0,"t":"The southend trail has been popular with nature lovers for years.","f":"nature","a":0,"r":1},{"w":"type","sn":["種類","打字"],"g":"L7","l":0,"t":"There are two types of lodging for visitors.","f":"types","a":0,"r":1},{"w":"hold","sn":["握住；抱","舉行","容納"],"g":"L7","l":1,"t":"When Cameron came home that day, he held his mom in his arms for a long time.","f":"held","a":0,"r":1},{"w":"bite","sn":["咬（過去式 bit）","一口的量","被叮咬"],"g":"L7","l":1,"t":"Be careful — that dog may bite you.","f":"bite","a":0,"r":0},{"w":"bite","sn":["咬（過去式 bit）","一口的量","被叮咬"],"g":"L7","l":1,"t":"Can I have a bite of your cake?","f":"bite","a":1,"r":0},{"w":"bite","sn":["咬（過去式 bit）","一口的量","被叮咬"],"g":"L7","l":1,"t":"I got a mosquito bite on my leg.","f":"bite","a":2,"r":0},{"w":"prize","sn":["獎；獎品","獎金"],"g":"L7","l":0,"t":"She won first prize in the singing contest.","f":"prize","a":0,"r":0},{"w":"prize","sn":["獎；獎品","獎金"],"g":"L7","l":0,"t":"The prize was ten thousand dollars.","f":"prize","a":1,"r":0},{"w":"snow","sn":["雪","下雪"],"g":"L7","l":0,"t":"They ordered two garden sandwiches, an autumn wind, and a winter snow.","f":"snow","a":0,"r":1},{"w":"date","sn":["日期","約會","棗子"],"g":"L7","l":0,"t":"What's the date today?","f":"date","a":0,"r":0},{"w":"date","sn":["日期","約會","棗子"],"g":"L7","l":0,"t":"He asked her out on a date.","f":"date","a":1,"r":0},{"w":"north","sn":["北方","朝北","北方的"],"g":"L7","l":1,"t":"The wind is coming from the north.","f":"north","a":0,"r":0},{"w":"north","sn":["北方","朝北","北方的"],"g":"L7","l":1,"t":"They live in the north part of the city.","f":"north","a":2,"r":0},{"w":"copy","sn":["複製；抄寫","複本；一份"],"g":"L8","l":1,"t":"Later, a man copied the manuscript and wrote for Elise by mistake.","f":"copied","a":0,"r":1},{"w":"american","sn":["美國的","美國人"],"g":"L8","l":0,"t":"The americans' experience can tell us whether it really saved lives.","f":"americans","a":1,"r":1},{"w":"sign","sn":["標誌；招牌","簽名","跡象"],"g":"L8","l":1,"t":"The sign says we can't take pictures here.","f":"sign","a":0,"r":0},{"w":"sign","sn":["標誌；招牌","簽名","跡象"],"g":"L8","l":1,"t":"Please sign your name at the bottom of the paper.","f":"sign","a":1,"r":0},{"w":"sign","sn":["標誌；招牌","簽名","跡象"],"g":"L8","l":1,"t":"Dark clouds are a sign of rain.","f":"sign","a":2,"r":0},{"w":"above","sn":["在……上面","在上面","以上的（the above）"],"g":"L8","l":1,"t":"Things may drop from above.","f":"above","a":1,"r":1},{"w":"square","sn":["廣場","正方形（的）","平方"],"g":"L8","l":0,"t":"We met our friends in the town square.","f":"square","a":0,"r":0},{"w":"square","sn":["廣場","正方形（的）","平方"],"g":"L8","l":0,"t":"Cut the paper into four square pieces.","f":"square","a":1,"r":0},{"w":"sail","sn":["航行；駕船","航程","帆"],"g":"L8","l":0,"t":"They sailed across the sea in a small boat.","f":"sailed","a":0,"r":0},{"w":"sail","sn":["航行；駕船","航程","帆"],"g":"L8","l":0,"t":"The wind filled the sail and the boat moved quickly.","f":"sail","a":2,"r":0},{"w":"medium","sn":["中等的","中等尺寸","媒介"],"g":"L8","l":0,"t":"I'd like a medium size, please.","f":"medium","a":0,"r":0},{"w":"medium","sn":["中等的","中等尺寸","媒介"],"g":"L8","l":0,"t":"The Internet has become an important medium for learning.","f":"medium","a":2,"r":0},{"w":"face","sn":["臉","面對"],"g":"L8","l":0,"t":"She washed her face and brushed her teeth.","f":"face","a":0,"r":0},{"w":"face","sn":["臉","面對"],"g":"L8","l":0,"t":"We must face the problem instead of running away.","f":"face","a":1,"r":0},{"w":"fool","sn":["傻瓜","愚弄"],"g":"L8","l":0,"t":"Don't be a fool — think before you act.","f":"fool","a":0,"r":0},{"w":"fool","sn":["傻瓜","愚弄"],"g":"L8","l":0,"t":"He tried to fool us with that story, but nobody believed him.","f":"fool","a":1,"r":0},{"w":"rock","sn":["岩石","搖動","搖滾樂"],"g":"L8","l":0,"t":"Some ducks are swimming in the pond and some turtles are sitting on the rocks.","f":"rocks","a":0,"r":1},{"w":"rock","sn":["岩石","搖動","搖滾樂"],"g":"L8","l":0,"t":"In their free time, they loved they used trees to make fire and making statues with big rocks.","f":"rocks","a":0,"r":1},{"w":"tip","sn":["小費","祕訣；提示","尖端"],"g":"L8","l":0,"t":"We left a tip for the waiter.","f":"tip","a":0,"r":0},{"w":"tip","sn":["小費","祕訣；提示","尖端"],"g":"L8","l":0,"t":"Here are some tips for learning English.","f":"tips","a":1,"r":0},{"w":"tip","sn":["小費","祕訣；提示","尖端"],"g":"L8","l":0,"t":"The tip of the pencil broke.","f":"tip","a":2,"r":0},{"w":"wake","sn":["醒來","叫醒","wake up 起床"],"g":"L8","l":0,"t":"I woke at six this morning.","f":"wake","a":0,"r":0},{"w":"wake","sn":["醒來","叫醒","wake up 起床"],"g":"L8","l":0,"t":"Please wake me up at seven.","f":"wake","a":1,"r":0},{"w":"hand","sn":["手","遞給","hand in 繳交"],"g":"L8","l":0,"t":"The man is holding a of grapes in his hands.","f":"hands","a":0,"r":1},{"w":"hand","sn":["手","遞給","hand in 繳交"],"g":"L8","l":0,"t":"The girl looks very tired with all the shopping bags in her hands.","f":"hands","a":0,"r":1},{"w":"hand","sn":["手","遞給","hand in 繳交"],"g":"L8","l":0,"t":"Also, the government has been in French speakers' hands since the two parts became one country.","f":"hands","a":0,"r":1},{"w":"bow","sn":["鞠躬（讀 /baʊ/）","蝴蝶結；弓；琴弓（讀 /boʊ/，發音不同）"],"g":"L8","l":0,"t":"The singer bowed to the audience after the show.","f":"bowed","a":0,"r":0},{"w":"bow","sn":["鞠躬（讀 /baʊ/）","蝴蝶結；弓；琴弓（讀 /boʊ/，發音不同）"],"g":"L8","l":0,"t":"She put a red bow on the gift.","f":"bow","a":1,"r":0},{"w":"season","sn":["季節","旺季","調味"],"g":"L8","l":0,"t":"Amy went to four seasons' kitchen with her mother after she collected 15 stars.","f":"seasons","a":0,"r":1},{"w":"correct","sn":["正確的","更正；改正"],"g":"L8","l":0,"t":"Only one of these answers is correct.","f":"correct","a":0,"r":0},{"w":"correct","sn":["正確的","更正；改正"],"g":"L8","l":0,"t":"The teacher corrected my spelling mistakes.","f":"corrected","a":1,"r":0},{"w":"fine","sn":["好的；沒問題","罰款"],"g":"L8","l":1,"t":"I'm fine, thank you.","f":"fine","a":0,"r":0},{"w":"fine","sn":["好的；沒問題","罰款"],"g":"L8","l":1,"t":"He had to pay a fine for parking in the wrong place.","f":"fine","a":1,"r":0},{"w":"sadly","sn":["難過地（looked sadly out the window）","令人遺憾地（will be sadly missed）"],"g":"L8","l":1,"t":"With heavy hearts, we are here to say goodbye to Rose Lacey, a wonderful writer who will be sadly missed.","f":"sadly","a":1,"r":1},{"w":"surprise","sn":["驚訝","使……驚訝","驚喜"],"g":"L8","l":0,"t":"It's not surprising that I say sneakers.","f":"surprising","a":1,"r":1},{"w":"surprise","sn":["驚訝","使……驚訝","驚喜"],"g":"L8","l":0,"t":"When he got his book back, he was very surprised at the new-old book.","f":"surprised","a":0,"r":1},{"w":"surprise","sn":["驚訝","使……驚訝","驚喜"],"g":"L8","l":0,"t":"But one Monday morning, I was surprised that rex was not there to say hello to us.","f":"surprised","a":0,"r":1},{"w":"subject","sn":["科目；學科（會考考這個）","主題；題目","主詞（文法）","研究對象"],"g":"L8","l":0,"t":"Math is my favorite subject.","f":"subject","a":0,"r":0},{"w":"subject","sn":["科目；學科（會考考這個）","主題；題目","主詞（文法）","研究對象"],"g":"L8","l":0,"t":"What is the subject of this article?","f":"subject","a":1,"r":0},{"w":"grass","sn":["草","草地"],"g":"L8","l":0,"t":"Some had flowers in the shape of a bird, and some had grasses of different colors.","f":"grasses","a":0,"r":1},{"w":"attention","sn":["注意","pay attention to 注意","關注"],"g":"LS","l":1,"t":"(sound of alarm) attention, please.","f":"attention","a":0,"r":1},{"w":"yard","sn":["院子","碼（長度單位，約 0.9 公尺）"],"g":"LS","l":1,"t":"Aunt Karen and Rose wanted to have it by the pond in the front yard while watching the ducks.","f":"yard","a":0,"r":1},{"w":"spell","sn":["拼字","一段時間（a spell of rain）","咒語"],"g":"LS","l":1,"t":"Can you spell your name for me?","f":"spell","a":0,"r":0},{"w":"spell","sn":["拼字","一段時間（a spell of rain）","咒語"],"g":"LS","l":1,"t":"In the story, the witch put a spell on the prince.","f":"spell","a":2,"r":0},{"w":"saw","sn":["see 的過去式：看見","鋸子；鋸"],"g":"LS","l":1,"t":"On the big day, when Wong brought his pot to the castle, he saw all the other children carrying interesting plants.","f":"saw","a":0,"r":1},{"w":"saw","sn":["see 的過去式：看見","鋸子；鋸"],"g":"LS","l":1,"t":"The police told Philip that the woman called 110 when she saw Philip's father trying to get into a house through a window.","f":"saw","a":0,"r":1},{"w":"saw","sn":["see 的過去式：看見","鋸子；鋸"],"g":"LS","l":1,"t":"Her articles often made them think whether they actually saw the same movie, but if they went to see it again, they experienced the movie in a whole new way.","f":"saw","a":0,"r":1},{"w":"row","sn":["一排","划（船）","吵架"],"g":"LS","l":1,"t":"Are you ok with seats in the second row?","f":"row","a":0,"r":1},{"w":"race","sn":["賽跑；競賽","種族"],"g":"LS","l":1,"t":"He won the race and got a gold medal.","f":"race","a":0,"r":0},{"w":"race","sn":["賽跑；競賽","種族"],"g":"LS","l":1,"t":"People of every race should be treated the same way.","f":"race","a":1,"r":0},{"w":"paint","sn":["顏料；油漆","畫；粉刷"],"g":"LS","l":1,"t":"They spend less than ten seconds on each painting.","f":"painting","a":1,"r":1},{"w":"paint","sn":["顏料；油漆","畫；粉刷"],"g":"LS","l":1,"t":"What colors and shapes are used in the painting?","f":"painting","a":1,"r":1},{"w":"paint","sn":["顏料；油漆","畫；粉刷"],"g":"LS","l":1,"t":"You need to look at the painting and study it from different angles.","f":"painting","a":1,"r":1},{"w":"oil","sn":["油","石油"],"g":"LS","l":1,"t":"Put some oil in the pan before you cook.","f":"oil","a":0,"r":0},{"w":"oil","sn":["油","石油"],"g":"LS","l":1,"t":"The country makes a lot of money from oil.","f":"oil","a":1,"r":0},{"w":"club","sn":["社團；俱樂部","球桿","棍棒"],"g":"LS","l":1,"t":"I joined the English club at school.","f":"club","a":0,"r":0},{"w":"club","sn":["社團；俱樂部","球桿","棍棒"],"g":"LS","l":1,"t":"He bought a new golf club.","f":"club","a":1,"r":0},{"w":"air","sn":["空氣","航空"],"g":"LS","l":1,"t":"The air in the mountains is fresh and clean.","f":"air","a":0,"r":0},{"w":"air","sn":["空氣","航空"],"g":"LS","l":1,"t":"We sent the package by air mail.","f":"air","a":1,"r":0}];
+
+/* =======================================================
+   設定區
+   ======================================================= */
+const POOL_NAME = "一字多義";
+const LESSON = "一字多義";
+const ROUND = 12;                 // 每回合出幾題
+
+/* 班級名單 */
+const CLASSES = {
+  a: { name:"國三班", seats:[
+    {n:"01", s:"靜"}, {n:"02", s:"若"}, {n:"03", s:"慧"}, {n:"04", s:"欣"},
+    {n:"05", s:"衫"}, {n:"06", s:"睿"}, {n:"07", s:"芸"}, {n:"08", s:"蓁"},
+    {n:"09", s:"亘"}, {n:"10", s:"晏"}, {n:"11", s:"裕"}, {n:"12", s:"瑋"},
+    {n:"00", s:"訪客", guest:true}
+  ]}
+};
+let _cid = ((new URLSearchParams(location.search).get("c")) || "a").toLowerCase();
+if(!CLASSES[_cid]) _cid = "a";
+const CLASS_ID = _cid;
+const CLS = CLASSES[CLASS_ID];
+const ROSTER = CLS.seats;
+const ALL_SEATS = ROSTER.map(function(p){ return p.n; });
+const SEAT_IDS  = ROSTER.filter(function(p){ return !p.guest; }).map(function(p){ return p.n; });
+function isGuest(n){
+  for(var i=0;i<ROSTER.length;i++){ if(String(ROSTER[i].n)===String(n)) return !!ROSTER[i].guest; }
+  return false;
+}
+function sname(n){
+  for(var i=0;i<ROSTER.length;i++){
+    if(String(ROSTER[i].n)===String(n)) return ROSTER[i].n + (ROSTER[i].s ? " " + ROSTER[i].s : "");
+  }
+  return String(n);
+}
+const TEACHER_CODE = "2026";
+
+const HOMEWORK = {
+  on: false,                      // 隨時練預設不綁作業；要指定範圍時改成 true
+  title: "本週作業",
+  due: "",
+  tasks: [ {stage:0, pass:18}, {stage:1, pass:14} ],
+  note: "可以重複練很多次，算你最好的那一次。"
+};
+
+const GFORM = {
+  url: "https://docs.google.com/forms/d/e/1FAIpQLSdG6ajrZXfG2LdjAXqsxCTwHrKhBo3aPA4U56Ug8ex0WMRMGw/formResponse",
+  f: { seat:"entry.113402022", lesson:"entry.770464151", stage:"entry.1305707477",
+       right:"entry.629191504", total:"entry.193167403", wrong:"entry.1924439157",
+       hw:"entry.952655181" }
+};
+/* ======================================================= */
+
+const KEY = "multisense_" + CLASS_ID;
+const STAGES = [
+  {n:"第 1 級", t:"最高頻", d:"最常考的多義字，先練這一級", g:"L1"},
+  {n:"第 2 級", t:"再加一批", d:"", g:"L2"},
+  {n:"第 3 級", t:"再加一批", d:"", g:"L3"},
+  {n:"第 4 級", t:"再加一批", d:"", g:"L4"},
+  {n:"第 5 級", t:"再加一批", d:"", g:"L5"},
+  {n:"第 6 級", t:"再加一批", d:"", g:"L6"},
+  {n:"第 7 級", t:"再加一批", d:"", g:"L7"},
+  {n:"第 8 級", t:"剩下的", d:"", g:"L8"},
+  {n:"聽力字", t:"只在聽力", d:"閱讀五年沒考過，只在聽力錄音稿出現", g:"LS"},
+  {n:"全部", t:"", d:"所有多義字混在一起", g:""}
+];
+STAGES.forEach(function(x){
+  if(!x.d) x.d = "同一個字，不同句子不同意思";
+  x.count = x.g ? WORDS.filter(function(w){ return w.g===x.g; }).length : WORDS.length;
+  x.t = (x.t ? x.t + "　" : "") + x.count + " 題";
+});
+WORDS.forEach(function(x,i){ x.id="w"+i; });
+let store=load(), seat=null, stage=0, mode="all", queue=[], idx=0, right=0;
+
+function load(){
+  try{ const o=JSON.parse(localStorage.getItem(KEY)); if(o&&o.logs&&o.wrong) return o; }catch(e){}
+  return {logs:[], wrong:{}};
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+function wrongOf(s){ if(!store.wrong[s]) store.wrong[s]={}; return store.wrong[s]; }
+function logsOf(s){ return store.logs.filter(function(l){ return String(l.seat)===String(s); }); }
+function bestOf(s,st){
+  const a=logsOf(s).filter(function(l){ return l.stage===st; }).map(function(l){ return l.right; });
+  return a.length ? Math.max.apply(null,a) : null;
+}
+function ymd(ts){ const d=new Date(ts); return (d.getMonth()+1)+"/"+d.getDate(); }
+function ymdhm(ts){ const d=new Date(ts);
+  return (d.getMonth()+1)+"/"+d.getDate()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function norm(s){ return String(s).toLowerCase().replace(/[‘’'`]/g,"").replace(/\s+/g," ").trim(); }
+function answersOf(w){
+  const m=w.match(/^(.+?)\s*\((.+?)\)\s*$/);
+  let list = m ? [m[1],m[2]] : [w];
+  const out=[];
+  list.forEach(function(x){ x.split("/").forEach(function(y){ y=y.trim(); if(y) out.push(y); }); });
+  return out;
+}
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+document.getElementById("sub").textContent =
+  "同一個字，在不同句子裡意思不一樣　·　共 " + WORDS.length + " 題　·　" + WORDS.filter(function(x){return x.r;}).length + " 題出自會考真題";
+
+function show(v){
+  ["Seat","Practice","Teacher","Report"].forEach(function(n){
+    document.getElementById("view"+n).classList.toggle("hide", n.toLowerCase()!==v); });
+  document.getElementById("who").classList.toggle("hide", v==="seat");
+  document.getElementById("foot").classList.toggle("hide", v!=="practice" && v!=="seat");
+  window.scrollTo(0,0);
+}
+
+/* ---------- 座號 ---------- */
+function drawSeats(){
+  document.getElementById("seatTitle").textContent = CLS.name + "　先選你的座號";
+  const g=document.getElementById("seatgrid"); g.innerHTML="";
+  for(const i of ALL_SEATS){
+    const b=document.createElement("button");
+    b.className="seat"+(isGuest(i)?" guest":"");
+    b.innerHTML=sname(i);
+    b.onclick=function(){ seat=i; startSeat(); };
+    g.appendChild(b);
+  }
+}
+function updateWho(){
+  const n=logsOf(seat).length;
+  document.getElementById("who").innerHTML =
+    CLS.name + "　" + sname(seat) + (n ? "　·　練過 " + n + " 次" : "")
+    + "<button onclick=\"show('seat');drawSeats()\">換人</button>";
+}
+function startSeat(){
+  updateWho(); show("practice");
+  stage=0; mode="all";
+  drawModes(); drawTabs(); start(); drawHw();
+}
+
+/* ---------- 作業 ---------- */
+function hwStatus(s){
+  if(!HOMEWORK.on) return null;
+  const items=HOMEWORK.tasks.map(function(t){
+    const b=bestOf(s,t.stage,HOMEWORK.range);
+    return {stage:t.stage,pass:t.pass,best:b,ok:(b!=null&&b>=t.pass)};
+  });
+  const done=items.filter(function(x){return x.ok;}).length;
+  return {items:items,done:done,all:items.length,complete:(done===items.length)};
+}
+function drawHw(){
+  const box=document.getElementById("hwPractice"), st=hwStatus(seat);
+  if(!st){ box.innerHTML=""; return; }
+  const li=st.items.map(function(x){
+    return "<li>"+(x.ok?"<span class='ok'>✅":"<span class='wait'>⬜")
+      +" "+STAGES[x.stage].n+"　"+STAGES[x.stage].t+"　至少 "+x.pass+" 題"
+      +(x.best==null?"（還沒做）":"（目前最好 "+x.best+" 題）")+"</span></li>"; }).join("");
+  box.innerHTML="<div class='hw"+(st.complete?" done":"")+"'><div class='t'>"+HOMEWORK.title
+    +"</div>"
+    +(HOMEWORK.due?"<div style='font-size:16px'>繳交："+HOMEWORK.due+"</div>":"")
+    +"<ul>"+li+"</ul><p class='n'>"+(st.complete?"🎉 本週作業完成了！":HOMEWORK.note)+"</p></div>";
+}
+
+/* ---------- 模式與範圍 ---------- */
+function notPassed(x){ const w=wrongOf(seat); return !!w[x.id]; }
+function todoCount(){ return WORDS.filter(notPassed).length; }
+
+function drawModes(){
+  const box=document.getElementById("modes"); const n=todoCount();
+  box.innerHTML="";
+  [["all","練這一級全部", ""],
+   ["todo","只練我還沒過的", n?n+" 個字":"目前沒有，先練全部"]].forEach(function(m){
+    const b=document.createElement("button");
+    b.className="mode"+(mode===m[0]?" on":"")+(m[0]==="todo"&&n?" hot":"");
+    b.innerHTML="<b>"+m[1]+"</b><small>"+m[2]+"</small>";
+    b.onclick=function(){ if(m[0]==="todo"&&!n) return; mode=m[0]; drawModes(); start(); };
+    box.appendChild(b);
+  });
+}
+
+/* ---------- 動態分頁（只顯示有題目的階） ---------- */
+function bankOf(st){
+  let list=WORDS.slice();
+  const g=STAGES[st].g;
+  if(g) list=list.filter(function(x){ return x.g===g; });
+  if(mode==="todo") list=list.filter(notPassed);
+  return list;
+}
+function liveStages(){
+  const out=[];
+  for(let i=0;i<STAGES.length;i++){
+    const g=STAGES[i].g;
+    let n = g ? WORDS.filter(function(x){ return x.g===g; }) : WORDS;
+    if(mode==="todo") n=n.filter(notPassed);
+    if(n.length) out.push(i);
+  }
+  return out;
+}
+function drawTabs(){
+  const live=liveStages();
+  if(live.indexOf(stage)<0 && live.length) stage=live[0];
+  const box=document.getElementById("tabs");
+  box.style.gridTemplateColumns="repeat(auto-fit,minmax(110px,1fr))";
+  box.innerHTML="";
+  live.forEach(function(i){
+    const d=document.createElement("div");
+    d.className="tab"+(i===stage?" on":"");
+    d.innerHTML="<b>"+STAGES[i].n+"</b>"+STAGES[i].t;
+    d.onclick=function(){ stage=i; drawTabs(); start(); };
+    box.appendChild(d);
+  });
+}
+
+/* ---------- 出題 ---------- */
+function start(){
+  drawTabs();
+  const all=shuffle(bankOf(stage));
+  queue=all.slice(0, Math.min(ROUND, all.length));
+  idx=0; right=0;
+  document.getElementById("stageName").textContent=STAGES[stage].n+"　"+STAGES[stage].d;
+  const b=bestOf(seat,stage);
+  document.getElementById("best").textContent=b==null?"最佳 —":"最佳 "+b+" 題";
+  if(!queue.length){
+    document.getElementById("card").innerHTML=
+      "<div class='done'><p class='msg'>這個範圍目前沒有題目。<br>換一個範圍，或按上面的「練全部的字」。</p></div>";
+    drawChips(); return;
+  }
+  render(); drawChips();
+}
+function bar(){
+  document.getElementById("count").textContent=idx+" / "+queue.length;
+  document.getElementById("fill").style.width=(idx/queue.length*100)+"%";
+}
+function say(t){
+  try{ const u=new SpeechSynthesisUtterance(t); u.lang="en-US"; u.rate=.85;
+       speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+function render(){
+  bar();
+  if(idx>=queue.length) return finish();
+  const q=queue[idx], card=document.getElementById("card");
+  const head="<div class='stage'><span>"+STAGES[stage].n+"　這裡是哪個意思</span>"
+    + (q.r ? "<span class='exam'>會考真題</span>" : "")
+    + (q.l ? "<span class='exam listen'>聽力也考過</span>" : "") + "</div>";
+  const spoken=q.w.replace(/'/g,"\\'");
+  card.innerHTML=head
+    +"<div class='sent'>"+hi(q.t,q.f)+"</div>"
+    +"<div class='zh'>畫底線的 <b>"+esc(q.w)+"</b> 在這句裡是什麼意思？"
+      +"<button class='say' onclick=\"say('"+spoken+"')\">🔊</button></div>"
+    +"<div class='opts' id='opts'></div><div class='fb' id='fb'></div>";
+  const correct=q.sn[q.a];
+  shuffle(q.sn.slice()).forEach(function(x){
+    const b=document.createElement("button"); b.className="opt"; b.textContent=x;
+    b.onclick=function(){ answer(x===correct,q,correct,b); };
+    document.getElementById("opts").appendChild(b);
+  });
+}
+
+/* 把句子裡出現的那個字標成底線 */
+/* 作答後把這個字的所有意思一次列出來，正解標色 */
+function allSenses(q){
+  return q.sn.map(function(x,i){
+    const c=(i===q.a) ? " style='color:#1f6b4f;font-weight:700'" : " style='color:#777'";
+    return "<span"+c+">"+String.fromCharCode(9312+i)+" "+esc(x)+"</span>";
+  }).join("　");
+}
+function hi(sent, form){
+  const re=new RegExp("\\b("+form.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")\\b","i");
+  return esc(sent).replace(re, "<u class='hl'>$1</u>");
+}
+
+function checkType(){
+  const q=queue[idx], inp=document.getElementById("inp");
+  const v=norm(inp.value);
+  const ok=answersOf(q.w).some(function(a){ return norm(a)===v; });
+  inp.disabled=true; answer(ok,q,answersOf(q.w)[0],null);
+}
+function answer(ok,q,correct,btn){
+  document.querySelectorAll(".opt").forEach(function(b){
+    b.disabled=true; if(b.textContent===correct) b.classList.add("right"); });
+  if(btn&&!ok) btn.classList.add("wrong");
+  const fb=document.getElementById("fb"), w=wrongOf(seat);
+  fb.className="fb show "+(ok?"good":"bad");
+  if(ok){ right++; w[q.id]=false;
+    fb.innerHTML="<span class='big'>✓ 答對了</span><b>"+esc(q.w)+"</b>　"+allSenses(q); }
+  else{ w[q.id]=true;
+    fb.innerHTML="<span class='big'>再看一次就好</span>這裡是 <b>"+esc(correct)+"</b><br><b>"+esc(q.w)+"</b>　"+allSenses(q); }
+  save(); drawChips(); drawModes(); say(answersOf(q.w)[0]);
+  const next=document.createElement("button");
+  next.className="go"; next.style.marginTop="16px";
+  next.textContent=idx+1>=queue.length?"看結果":"下一題 →";
+  next.onclick=function(){ idx++; render(); };
+  fb.appendChild(document.createElement("br")); fb.appendChild(next); next.focus();
+}
+function finish(){
+  const prevBest=bestOf(seat,stage), before=hwStatus(seat);
+  store.logs.push({seat:seat,stage:stage,mode:mode,right:right,total:queue.length,ts:Date.now()});
+  save(); drawHw(); updateWho(); drawModes();
+  const after=hwStatus(seat);
+  const justDone=after&&after.complete&&before&&!before.complete;
+  sendOut(seat,stage,right,queue.length,after);
+
+  const nowBest=bestOf(seat,stage), isBest=prevBest==null||right>prevBest;
+  document.getElementById("count").textContent=queue.length+" / "+queue.length;
+  document.getElementById("fill").style.width="100%";
+  document.getElementById("best").textContent="最佳 "+nowBest+" 題";
+
+  const left=todoCount();
+  let msg; const rate=right/queue.length;
+  if(justDone) msg="🎉 本週作業完成了！";
+  else if(mode==="todo") msg = left ? "還沒過的字剩下 "+left+" 個。再跑一次會更少。"
+                                    : "太厲害了，這個範圍的字你全部都過了！";
+  else if(isBest&&prevBest!=null) msg="破紀錄了！上次 "+prevBest+" 題，這次 "+right+" 題。";
+  else if(rate===1) msg="全對。往上一階試試看。";
+  else msg="按上面的「只練我還沒過的」再跑一次，第二次一定會比第一次好。";
+
+  const live=liveStages(), pos=live.indexOf(stage);
+  document.getElementById("card").innerHTML=
+    "<div class='done'><div class='score'>"+right+"</div>"
+    +"<div class='of'>答對 "+right+" 題 / 共 "+queue.length+" 題</div>"
+    +"<div class='best'>你的最佳紀錄："+nowBest+" 題</div><br>"
+    +"<p class='msg'>"+msg+"</p><div class='btnrow'>"
+    +"<button class='go' onclick='start()'>再練一次</button>"
+    +(pos>=0&&pos<live.length-1
+       ? "<button class='go ghost' onclick='stage="+live[pos+1]+";start()'>進到"+STAGES[live[pos+1]].n+" →</button>" : "")
+    +"</div></div>";
+  drawChips();
+}
+function drawChips(){
+  const w=wrongOf(seat);
+  const ks=WORDS.filter(function(x){ return w[x.id]; });
+  const box=document.getElementById("chips"), mini=document.getElementById("mini");
+  box.innerHTML="";
+  if(!ks.length){
+    box.innerHTML="<span class='chip clear'>目前沒有還沒過的字</span>";
+    mini.textContent="答錯的字會自動留在這裡，答對之後就會消失。"; return;
+  }
+  ks.slice(0,40).forEach(function(x){
+    const s=document.createElement("span"); s.className="chip"; s.textContent=x.w; box.appendChild(s); });
+  mini.textContent="共 "+ks.length+" 個字"+(ks.length>40?"（只列前 40 個）":"")
+    +"。按上面的「只練我還沒過的」就會只出這些。";
+}
+
+/* ---------- 送出 ---------- */
+function sendOut(seat,stage,right,total,hw){
+  if(!GFORM.url || isGuest(seat)) return;
+  const w=store.wrong[seat]||{};
+  const left=WORDS.filter(function(x){ return w[x.id]; });
+  const row={};
+  row[GFORM.f.seat]=CLASS_ID.toUpperCase()+"-"+sname(seat);
+  row[GFORM.f.lesson]=LESSON;
+  row[GFORM.f.stage]=STAGES[stage].n+" "+STAGES[stage].t+(mode==="todo"?"（只練沒過的）":"");
+  row[GFORM.f.right]=right;
+  row[GFORM.f.total]=total;
+  row[GFORM.f.wrong]="還沒過 "+left.length+" 字：" + left.slice(0,12).map(function(x){return x.w;}).join(" ");
+  row[GFORM.f.hw]=hw?(hw.complete?"已完成":"進行中 "+hw.done+"/"+hw.all):"";
+  post(row);
+}
+function post(row){
+  const body=new URLSearchParams();
+  for(const k in row) body.append(k,row[k]);
+  fetch(GFORM.url,{method:"POST",mode:"no-cors",body:body}).catch(function(){ queueRow(row); });
+}
+function queueRow(row){
+  if(!store.pending) store.pending=[];
+  store.pending.push(row);
+  if(store.pending.length>200) store.pending=store.pending.slice(-200);
+  save();
+}
+function flushPending(){
+  if(!GFORM.url||!store.pending||!store.pending.length) return;
+  const rows=store.pending.slice(); store.pending=[]; save();
+  rows.forEach(function(r){ post(r); });
+}
+
+/* ---------- 老師檢視 ---------- */
+function teacherGate(){
+  const f=document.getElementById("foot");
+  f.innerHTML="<div style='display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center'>"
+    +"<input type='password' id='tcode' placeholder='老師密碼' autocomplete='off' "
+    +  "style='font-size:17px;padding:9px 14px;border:2px solid #E2DDD0;border-radius:10px;width:150px;font-family:inherit'>"
+    +"<button id='tgo' style='background:#1F6B58;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:16px;cursor:pointer;font-family:inherit;text-decoration:none'>進入</button>"
+    +"<button id='tno' style='background:none;border:2px solid #E2DDD0;color:#5A554C;border-radius:10px;padding:9px 16px;font-size:16px;cursor:pointer;font-family:inherit;text-decoration:none'>取消</button>"
+    +"<span id='tmsg' style='color:#B23A32;font-size:15px'></span></div>";
+  const i=document.getElementById("tcode");
+  document.getElementById("tgo").onclick=tryCode;
+  document.getElementById("tno").onclick=resetFoot;
+  i.onkeydown=function(e){ if(e.key==="Enter") tryCode(); };
+  i.focus();
+}
+function tryCode(){
+  if(document.getElementById("tcode").value!==TEACHER_CODE){
+    document.getElementById("tmsg").textContent="密碼不對"; return; }
+  resetFoot(); drawTeacher(); show("teacher");
+}
+function resetFoot(){
+  const f=document.getElementById("foot");
+  f.innerHTML="<button>老師檢視</button>";
+  f.firstChild.onclick=teacherGate;
+}
+function leftOf(s){
+  const w=store.wrong[s]||{};
+  return WORDS.filter(function(x){ return w[x.id]; }).length;
+}
+function drawTeacher(){
+  let doneN=0, hwDone=0;
+  for(const i of SEAT_IDS){ if(logsOf(i).length) doneN++;
+    const st=hwStatus(i); if(st&&st.complete) hwDone++; }
+  document.getElementById("tSub").textContent=
+    "全班 "+SEAT_IDS.length+" 人，已經練過的有 "+doneN+" 人"
+    +(HOMEWORK.on?"，本週作業完成 "+hwDone+" 人":"")
+    +"，總共 "+store.logs.filter(function(l){ return !isGuest(l.seat); }).length+" 次練習紀錄。";
+
+  let h="<tr><th>座號</th><th class='num'>練習次數</th><th>最近一次</th>"
+    +STAGES.map(function(s){ return "<th class='num'>"+s.t+"</th>"; }).join("")
+    +"<th class='num'>還沒過</th></tr>";
+  for(const i of SEAT_IDS){
+    const ls=logsOf(i);
+    if(!ls.length){
+      h+="<tr class='none'><td>"+sname(i)+"</td><td class='num'>—</td><td>還沒做</td>"
+        +STAGES.map(function(){ return "<td class='num'>—</td>"; }).join("")+"<td class='num'>—</td></tr>";
+      continue;
+    }
+    const last=ls[ls.length-1];
+    h+="<tr><td><span class='seatlink' onclick='drawReport(\""+i+"\")'>"+sname(i)+"</span></td>"
+      +"<td class='num'>"+ls.length+"</td><td>"+ymdhm(last.ts)+"</td>"
+      +STAGES.map(function(s,si){ const b=bestOf(i,si); return "<td class='num'>"+(b==null?"—":b)+"</td>"; }).join("")
+      +"<td class='num'>"+leftOf(i)+"</td></tr>";
+  }
+  document.getElementById("tClass").innerHTML=h;
+
+  const tally={};
+  for(const i of SEAT_IDS){
+    const w=store.wrong[i]||{};
+    WORDS.forEach(function(x){ if(w[x.id]) tally[x.id]=(tally[x.id]||0)+1; });
+  }
+  const rank=Object.keys(tally).sort(function(a,b){ return tally[b]-tally[a]; });
+  let h2="<tr><th>單字</th><th>中文</th><th class='num'>幾個人還沒過</th><th></th></tr>";
+  if(!rank.length) h2+="<tr class='none'><td colspan='4'>還沒有資料</td></tr>";
+  const maxN=rank.length?tally[rank[0]]:1;
+  rank.slice(0,20).forEach(function(k){
+    const wd=WORDS.filter(function(x){ return x.id===k; })[0];
+    h2+="<tr><td><b>"+esc(wd.w)+"</b></td><td>"+esc(wd.sn[wd.a])+"</td><td class='num'>"+tally[k]+"</td>"
+      +"<td><span class='barcell'><i style='width:"+(tally[k]/maxN*140)+"px'></i></span></td></tr>";
+  });
+  document.getElementById("tWrong").innerHTML=h2;
+}
+
+/* ---------- 個人報告 ---------- */
+function drawReport(s){
+  const ls=logsOf(s);
+  document.getElementById("rTitle").textContent="座號 "+sname(s)+"　單字庫學習報告";
+  if(!ls.length){ document.getElementById("rRange").textContent="還沒有練習紀錄。"; show("report"); return; }
+  const first=ls[0], last=ls[ls.length-1];
+  document.getElementById("rRange").textContent=
+    "統計期間："+ymd(first.ts)+" ～ "+ymd(last.ts)+"　（"+POOL_NAME+"，共 "+WORDS.length+" 字）";
+  const days={}; ls.forEach(function(l){ days[ymd(l.ts)]=1; });
+  const w=store.wrong[s]||{};
+  const left=WORDS.filter(function(x){ return w[x.id]; });
+  const seen=WORDS.filter(function(x){ return w[x.id]!==undefined; });
+  document.getElementById("rKpis").innerHTML=
+    kpi("練習次數",ls.length+" 次")+kpi("練習天數",Object.keys(days).length+" 天")
+    +kpi("碰過的字",seen.length+" / "+WORDS.length)
+    +kpi("還沒過",left.length+" 字");
+  document.getElementById("rMsg").textContent =
+    ls.length>=3 ? "已經主動練了 "+ls.length+" 次。單字最需要的是反覆接觸，次數比分數重要。"
+                 : "才剛開始，先看練習次數就好，分數會慢慢跟上來。";
+  let h="<tr><th>日期</th><th>階段</th><th class='num'>答對</th><th class='num'>題數</th></tr>";
+  ls.slice().reverse().forEach(function(l){
+    h+="<tr><td>"+ymdhm(l.ts)+"</td>"
+      +"<td>"+STAGES[l.stage].n+"　"+STAGES[l.stage].t+(l.mode==="todo"?"（只練沒過的）":"")+"</td>"
+      +"<td class='num'>"+l.right+"</td><td class='num'>"+l.total+"</td></tr>"; });
+  document.getElementById("rLogs").innerHTML=h;
+  const box=document.getElementById("rChips"); box.innerHTML="";
+  if(!left.length) box.innerHTML="<span class='chip clear'>目前沒有還沒過的字</span>";
+  else left.slice(0,60).forEach(function(x){
+    const e=document.createElement("span"); e.className="chip";
+    e.textContent=x.w+"（"+x.sn[x.a].split("；")[0]+"）"; box.appendChild(e); });
+  show("report");
+}
+function kpi(l,v){ return "<div class='kpi'><span>"+l+"</span><b class='big2'>"+v+"</b></div>"; }
+
+function exportCSV(){
+  const rows=[["座號","日期時間","階段","模式","答對","題數"]];
+  store.logs.filter(function(l){ return !isGuest(l.seat); })
+    .sort(function(a,b){ return String(a.seat).localeCompare(String(b.seat))||a.ts-b.ts; })
+    .forEach(function(l){
+      rows.push([sname(l.seat),ymdhm(l.ts),
+                 STAGES[l.stage].n+" "+STAGES[l.stage].t,(l.mode==="todo"?"只練沒過的":"全部"),l.right,l.total]); });
+  const csv="﻿"+rows.map(function(r){
+    return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(","); }).join("\r\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download="單字庫練習紀錄_"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function wipe(){
+  if(!confirm("要清空全班所有紀錄嗎？這個動作無法復原。")) return;
+  if(!confirm("再確認一次：所有座號的練習紀錄都會不見。")) return;
+  store={logs:[],wrong:{}}; save(); drawTeacher(); drawSeats();
+}
+
+resetFoot(); drawSeats(); show("seat"); flushPending();
+</script>
+</body>
+</html>
