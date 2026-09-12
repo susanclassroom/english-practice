@@ -71,10 +71,10 @@
 </div>
 <script>
 /* =========================================================
-   每週上課前，改這兩行就好
+   每週上課前，改這一行就好
+   （繳交日期不寫在網站上，由老師自己發布）
    ========================================================= */
 const THIS_WEEK = "grammar";          // 這週要做的：bank／exam／multi／l1／l2／grammar／idioms／reading／all
-const DUE       = "9/22（週二）上課前";  // 繳交時間
 /* ========================================================= */
 
 const GROUPS = [
@@ -109,12 +109,11 @@ function label(id){
 
 const due=document.getElementById("due");
 if(THIS_WEEK==="all"){
-  due.innerHTML="<div class='t'>本週作業</div><div class='d'>下面的練習都要做。</div>"
-    + (DUE?"<div class='n'>繳交："+DUE+"</div>":"");
+  due.innerHTML="<div class='t'>本週作業</div><div class='d'>下面的練習都要做。</div>";
 }else{
   due.innerHTML="<div class='t'>這週只要做這一個</div>"
     + "<div class='d'>👉　"+label(THIS_WEEK)+"</div>"
-    + (DUE?"<div class='n'>繳交："+DUE+"　·　其他練習這週不用做</div>":"");
+    + "<div class='n'>其他練習這週不用做</div>";
 }
 
 const list=document.getElementById("list");

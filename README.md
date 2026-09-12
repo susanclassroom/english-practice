@@ -214,12 +214,14 @@ const CLASSES = {
 
 ## 每週指定作業（首頁）
 
-打開 `index.html`，最下面的 script 只有兩行要改：
+打開 `index.html`，最下面的 script 只有一行要改：
 
 ```js
-const THIS_WEEK = "grammar";          // 這週要做的：l1／l2／grammar／reading／all
-const DUE       = "9/22（週二）上課前";
+const THIS_WEEK = "grammar";   // 這週要做的
 ```
+
+**網站上不寫繳交日期**，一律由老師自己在課堂或群組發布。
+日期寫在網頁上很容易忘記改，學生看到過期的日期比沒有日期更糟。
 
 被指定的那一份會在首頁標成「本週作業」並 highlight，其他七份會淡化成
 「這週不用做，想多練可以點」。學生只要記首頁一個網址就好。
@@ -237,7 +239,6 @@ const SEATS = 15;              // 班上座號到幾號
 const TEACHER_CODE = "2026";   // 老師檢視的密碼
 
 const HOMEWORK = {
-  due: "9/15（週二）上課前",    // 繳交日
   tasks: [
     { stage:0, pass:26 },      // 第一階 看得懂：至少對 26 題
     { stage:1, pass:20 }       // 第二階 想得起來：至少對 20 題

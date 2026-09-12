@@ -300,7 +300,6 @@ const TEACHER_CODE = "2026";
 const HOMEWORK = {
   on: false,                      // 隨時練預設不綁作業；要指定範圍時改成 true
   title: "本週作業",
-  due: "",
   tasks: [ {stage:0, pass:18}, {stage:1, pass:14} ],
   note: "可以重複練很多次，算你最好的那一次。"
 };
@@ -414,7 +413,6 @@ function drawHw(){
       +(x.best==null?"（還沒做）":"（目前最好 "+x.best+" 題）")+"</span></li>"; }).join("");
   box.innerHTML="<div class='hw"+(st.complete?" done":"")+"'><div class='t'>"+HOMEWORK.title
     +"</div>"
-    +(HOMEWORK.due?"<div style='font-size:16px'>繳交："+HOMEWORK.due+"</div>":"")
     +"<ul>"+li+"</ul><p class='n'>"+(st.complete?"🎉 本週作業完成了！":HOMEWORK.note)+"</p></div>";
 }
 
