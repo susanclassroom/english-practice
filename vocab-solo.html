@@ -301,16 +301,17 @@ const HOMEWORK = {
 };
 
 /* ---- 這一份的獨立表單 ----------------------------------
-   這是「單字練習專用」的獨立檔案，紀錄要收到自己的試算表。
-   新表單建好後，把下面的 url 和 7 個 entry 代號整組換掉即可。
-   ★ 還沒換之前，紀錄會先送到原本那份共用表單，
-     課次欄寫「單字庫（指定練習）」，資料不會遺失，用篩選就挑得出來。
+   單字練習專用，紀錄收進自己的試算表，不跟其他練習混。
+   要換成別的表單時，用 tools/form-entries.py 抓新的代號，
+   把下面整個區塊換掉即可。
+   表單七題必須都是「簡答」且都不勾必填——作業狀態常常是空的，
+   設成必填會讓整筆紀錄被退回（實測 HTTP 400）。
    -------------------------------------------------------- */
 const GFORM = {
-  url: "https://docs.google.com/forms/d/e/1FAIpQLSdG6ajrZXfG2LdjAXqsxCTwHrKhBo3aPA4U56Ug8ex0WMRMGw/formResponse",
-  f: { seat:"entry.113402022", lesson:"entry.770464151", stage:"entry.1305707477",
-       right:"entry.629191504", total:"entry.193167403", wrong:"entry.1924439157",
-       hw:"entry.952655181" }
+  url: "https://docs.google.com/forms/d/e/1FAIpQLSfJoXSEsU8EJ84jyyBiCaLf-B5lNTJHUuyYlYEYkV4pXQ_Aqg/formResponse",
+  f: { seat:"entry.109700768", lesson:"entry.1239910608", stage:"entry.914579534",
+       right:"entry.801992510", total:"entry.538869499", wrong:"entry.1986792941",
+       hw:"entry.1699141852" }
 };
 /* ======================================================= */
 
