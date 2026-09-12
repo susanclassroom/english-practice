@@ -158,6 +158,26 @@
   .kpi{background:var(--brand-soft);border-radius:12px;padding:14px 16px}
   .kpi span{display:block;font-size:15px;color:var(--sub)}
   @media print{ body{background:#fff} .noprint{display:none!important} .card{box-shadow:none;border:1px solid #ccc} }
+  .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+  @media(max-width:680px){.modes{grid-template-columns:1fr}}
+  .mode{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 13px;
+    text-align:left;cursor:pointer;font-family:inherit}
+  .mode b{display:block;font-size:16px;margin-bottom:2px}
+  .mode small{color:#666;font-size:13.5px}
+  .mode.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .mode.on small{color:#e8f3ec}
+  .mode.hot{border-color:var(--gold);background:var(--gold-soft)}
+  .mode.dead{opacity:.45;cursor:default}
+  .prog{background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:13px 15px;margin-bottom:14px}
+  .prog .pt{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;
+    justify-content:space-between;align-items:baseline;gap:10px}
+  .prog .pt em{font-style:normal;color:var(--brand);font-size:20px}
+  .prog .ptrack{height:12px;background:var(--line);border-radius:99px;overflow:hidden;display:flex}
+  .prog .pdone{height:100%;background:var(--brand)}
+  .prog .pleft{height:100%;background:var(--gold)}
+  .prog .pn{margin-top:9px;font-size:14.5px;color:#555;line-height:1.7}
+  .prog .pn b{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -186,6 +206,8 @@
     <div class="lb">要練哪個文法？</div>
     <div class="gs" id="gs"></div>
   </div>
+  <div class="prog" id="prog"></div>
+  <div class="modes" id="modes"></div>
   <div class="tabs" id="tabs"></div>
   <div class="bar">
     <span id="stageName">第一階</span>
@@ -600,9 +622,10 @@ function updateWho(){
 }
 function startSeat(){
   updateWho();
-  show("practice"); stage=0; poolMode="all";
+  show("practice"); stage=0;
   group = HOMEWORK.on ? HOMEWORK.group : "all";
-  drawGroups(); start(); drawHwPractice();
+  poolMode = newCount() ? "new" : (wrongCount() ? "wrong" : "all");
+  drawGroups(); drawModes(); drawProgress(); start(); drawHwPractice();
 }
 
 /* ---------- 文法點篩選 ---------- */
@@ -613,7 +636,7 @@ function drawGroups(){
     const b=document.createElement("button");
     b.className="gchip"+(g.id===group?" on":"");
     b.textContent=g.name;
-    b.onclick=function(){ group=g.id; drawGroups(); start(); };
+    b.onclick=function(){ group=g.id; drawGroups(); refreshMode(); drawModes(); drawProgress(); start(); };
     box.appendChild(b);
   });
 }
@@ -624,24 +647,71 @@ STAGES.forEach(function(s,i){
   const d=document.createElement("div");
   d.className="tab"+(i===0?" on":"");
   d.innerHTML="<b>"+s.n+"</b>"+s.t;
-  d.onclick=function(){ stage=i; start(); };
+  d.onclick=function(){ stage=i; refreshMode(); drawModes(); drawProgress(); start(); };
   tabsEl.appendChild(d);
 });
 
 /* ---------- 出題 ---------- */
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+/* ---------- 進度與模式（都跟著目前選的文法點算） ---------- */
+function groupItems(){
+  let all=[];
+  BANKS.forEach(function(b){ all=all.concat(b); });
+  return group==="all" ? all : all.filter(function(x){ return x.g===group; });
+}
+function stageItems(){
+  const b=BANKS[stage];
+  return group==="all" ? b : b.filter(function(x){ return x.g===group; });
+}
+function newCount(){ const w=wrongOf(seat); return stageItems().filter(function(x){ return w[x.id]===undefined; }).length; }
+function wrongCount(){ const w=wrongOf(seat); return stageItems().filter(function(x){ return w[x.id]===true; }).length; }
+
+function drawProgress(){
+  const box=document.getElementById("prog"); if(!box) return;
+  const w=wrongOf(seat), items=groupItems(), total=items.length;
+  let done=0,left=0;
+  items.forEach(function(x){ if(w[x.id]===false) done++; else if(w[x.id]===true) left++; });
+  const untouched=total-done-left, pct=total?Math.round(done/total*1000)/10:0;
+  box.innerHTML="<div class='pt'><span>"+(group==="all"?"全部文法":gname(group))+"　總進度（四階合計）</span><em>"+pct+"%</em></div>"
+   +"<div class='ptrack'><span class='pdone' style='width:"+(total?done/total*100:0)+"%'></span>"
+   +"<span class='pleft' style='width:"+(total?left/total*100:0)+"%'></span></div>"
+   +"<div class='pn'>已經會 <b>"+done+"</b> 題 ・ 還沒過 <b>"+left+"</b> 題 ・ "
+   +"還沒練到 <b>"+untouched+"</b> 題 ・ 共 "+total+" 題</div>";
+}
+function drawModes(){
+  const box=document.getElementById("modes"); if(!box) return;
+  const nNew=newCount(), nWrong=wrongCount(), nAll=stageItems().length;
+  box.innerHTML="";
+  [["new","接著練", nNew ? "這一階沒練過的 "+nNew+" 題" : "這一階都練過了！"],
+   ["wrong","只練我還沒過的", nWrong ? "這一階 "+nWrong+" 題" : "目前沒有"],
+   ["all","全部複習", "這一階 "+nAll+" 題"]].forEach(function(m){
+    const dead=(m[0]==="new"&&!nNew)||(m[0]==="wrong"&&!nWrong);
+    const b=document.createElement("button");
+    b.className="mode"+(poolMode===m[0]?" on":"")+(dead?" dead":"")
+      +((m[0]==="wrong"&&nWrong&&poolMode!=="wrong")?" hot":"");
+    b.innerHTML="<b>"+m[1]+"</b><small>"+m[2]+"</small>";
+    b.onclick=function(){ if(dead) return; poolMode=m[0]; drawModes(); drawProgress(); start(); };
+    box.appendChild(b);
+  });
+}
+
 function pool(){
   let list = BANKS[stage];
   if(group!=="all") list = list.filter(function(x){ return x.g===group; });
+  const w=wrongOf(seat);
   if(poolMode==="wrong"){
-    const w=wrongOf(seat);
-    const hit=list.filter(function(x){ return w[x.id]; });
+    const hit=list.filter(function(x){ return w[x.id]===true; });
+    if(hit.length) list=hit;
+  }
+  if(poolMode==="new"){
+    const hit=list.filter(function(x){ return w[x.id]===undefined; });
     if(hit.length) list=hit;
   }
   return list;
 }
 function start(){
   document.querySelectorAll(".tab").forEach(function(t,i){ t.classList.toggle("on", i===stage); });
+  refreshMode(); drawModes(); drawProgress();   /* 模式若已無題目先換掉，別讓標籤說謊 */
   const all=shuffle(pool());
   queue = all.slice(0, Math.min(ROUND, all.length));
   idx=0; right=0;
@@ -721,7 +791,7 @@ function answer(ok, q, correct, btn){
   if(ok){ right++; w[q.id]=false; fb.innerHTML="<span class='big'>✓ 答對了</span>"+gname(q.g); }
   else{ w[q.id]=true;
     fb.innerHTML="<span class='big'>再看一次就好</span>正確答案是 <b>"+esc(correct)+"</b>　（"+gname(q.g)+"）"; }
-  save(); drawChips();
+  save(); drawChips(); drawModes(); drawProgress();
   if(stage===1 && /^[a-zA-Z' ]+$/.test(q.a)) say(q.a);
   const next=document.createElement("button");
   next.className="go"; next.style.marginTop="16px";
@@ -782,8 +852,10 @@ function drawChips(){
   });
   mini.textContent="共 "+total+" 題。按「只練錯過的題目」可以只練它們。";
 }
-function onlyWrong(){ poolMode="wrong"; start(); }
-function allItems(){ poolMode="all"; start(); }
+function refreshMode(){ if((poolMode==="new"&&!newCount())||(poolMode==="wrong"&&!wrongCount()))
+  poolMode = newCount() ? "new" : (wrongCount() ? "wrong" : "all"); }
+function onlyWrong(){ poolMode="wrong"; drawModes(); drawProgress(); start(); }
+function allItems(){ poolMode="all"; drawModes(); drawProgress(); start(); }
 
 /* ---------- 送出 ---------- */
 function sendOut(seat, stage, right, total, hw){

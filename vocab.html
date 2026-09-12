@@ -403,6 +403,8 @@ function drawHw(){
 /* ---------- 模式與範圍 ---------- */
 function notPassed(x){ const w=wrongOf(seat); return w[x.id]===true; }
 function notTouched(x){ const w=wrongOf(seat); return w[x.id]===undefined; }
+/* 按鈕上的數字＝這個模式在「目前範圍」實際會出的題數，不用全域數字，避免標籤說謊 */
+function countMode(m){ const keep=mode; mode=m; const n=bankOf(stage).length; mode=keep; return n; }
 function newCount(){ return WORDS.filter(notTouched).length; }
 function todoCount(){ return WORDS.filter(notPassed).length; }
 
@@ -429,11 +431,11 @@ function drawProgress(){
 
 function drawModes(){
   const box=document.getElementById("modes");
-  const nNew=newCount(), nTodo=todoCount();
+  const nNew=countMode("new"), nTodo=countMode("todo"), nAll=countMode("all");
   box.innerHTML="";
   [["new","接著練", nNew ? "沒練過的 "+nNew+" 字" : "都練過了！"],
    ["todo","只練我還沒過的", nTodo ? nTodo+" 字" : "目前沒有"],
-   ["all","全部複習", WORDS.length+" 字"]].forEach(function(m){
+   ["all","全部複習", nAll+" 字"]].forEach(function(m){
     const dead=(m[0]==="new"&&!nNew)||(m[0]==="todo"&&!nTodo);
     const b=document.createElement("button");
     b.className="mode"+(mode===m[0]?" on":"")+(dead?" dead":"")
@@ -476,6 +478,12 @@ function drawTabs(){
 /* ---------- 出題 ---------- */
 function start(){
   drawTabs();
+  /* 這個模式在這個範圍沒題目了就自動換一個，避免「畫面說都練過了、卻還在出舊題」 */
+  if(!bankOf(stage).length){
+    const order=["new","todo","all"].filter(function(m){ return m!==mode; });
+    for(let i=0;i<order.length;i++){ mode=order[i]; if(bankOf(stage).length) break; }
+    drawModes(); drawProgress();
+  }
   const all=shuffle(bankOf(stage));
   queue=all.slice(0, Math.min(ROUND, all.length));
   idx=0; right=0;

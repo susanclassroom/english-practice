@@ -34,8 +34,8 @@
   .seat.guest{border-style:dashed;color:var(--sub);font-size:20px}
 
   /* 模式：練全部 / 只練沒過的 */
-  .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-  @media(max-width:520px){.modes{grid-template-columns:1fr}}
+  .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+  @media(max-width:680px){.modes{grid-template-columns:1fr}}
   .mode{background:var(--card);border:2px solid var(--line);border-radius:var(--r);
     padding:14px 18px;cursor:pointer;font-family:inherit;font-size:18px;text-align:left;color:var(--ink)}
   .mode small{display:block;font-size:14px;color:var(--sub);font-weight:400;margin-top:2px}
@@ -171,6 +171,17 @@
   .kpi{background:var(--brand-soft);border-radius:12px;padding:14px 16px}
   .kpi span{display:block;font-size:15px;color:var(--sub)}
   @media print{ body{background:#fff} .noprint{display:none!important} .card{box-shadow:none;border:1px solid #ccc} }
+  .prog{background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:13px 15px;margin-bottom:14px}
+  .prog .pt{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;
+    justify-content:space-between;align-items:baseline;gap:10px}
+  .prog .pt em{font-style:normal;color:var(--brand);font-size:20px}
+  .prog .ptrack{height:12px;background:var(--line);border-radius:99px;overflow:hidden;display:flex}
+  .prog .pdone{height:100%;background:var(--brand)}
+  .prog .pleft{height:100%;background:var(--gold)}
+  .prog .pn{margin-top:9px;font-size:14.5px;color:#555;line-height:1.7}
+  .prog .pn b{color:var(--ink)}
+  .mode.dead{opacity:.45}
 </style>
 </head>
 <body>
@@ -194,6 +205,7 @@
 
 <div id="viewPractice" class="hide">
   <div id="hwPractice"></div>
+  <div class="prog" id="prog"></div>
   <div class="modes" id="modes"></div>
   <div class="tabs" id="tabs"></div>
   <div class="bar">
@@ -497,8 +509,9 @@ function updateWho(){
 }
 function startSeat(){
   updateWho(); show("practice");
-  stage=0; mode="all";
-  drawModes(); drawTabs(); start(); drawHw();
+  stage=0;
+  mode = newCount() ? "new" : (todoCount() ? "todo" : "all");
+  drawModes(); drawProgress(); drawTabs(); start(); drawHw();
 }
 
 /* ---------- 作業 ---------- */
@@ -525,18 +538,38 @@ function drawHw(){
 }
 
 /* ---------- 模式與範圍 ---------- */
-function notPassed(x){ const w=wrongOf(seat); return !!w[x.id]; }
+function notPassed(x){ const w=wrongOf(seat); return w[x.id]===true; }
+function notTouched(x){ const w=wrongOf(seat); return w[x.id]===undefined; }
+/* 按鈕上的數字＝這個模式在「目前範圍」實際會出的題數，不用全域數字，避免標籤說謊 */
+function countMode(m){ const keep=mode; mode=m; const n=bankOf(stage).length; mode=keep; return n; }
+function newCount(){ return WORDS.filter(notTouched).length; }
+function drawProgress(){
+  const box=document.getElementById("prog"); if(!box) return;
+  const w=wrongOf(seat), total=WORDS.length;
+  let done=0,left=0;
+  WORDS.forEach(function(x){ if(w[x.id]===false) done++; else if(w[x.id]===true) left++; });
+  const untouched=total-done-left, pct=Math.round(done/total*1000)/10;
+  box.innerHTML="<div class='pt'><span>慣用語總進度</span><em>"+pct+"%</em></div>"
+   +"<div class='ptrack'><span class='pdone' style='width:"+(done/total*100)+"%'></span>"
+   +"<span class='pleft' style='width:"+(left/total*100)+"%'></span></div>"
+   +"<div class='pn'>已經會 <b>"+done+"</b> 條 ・ 還沒過 <b>"+left+"</b> 條 ・ "
+   +"還沒練到 <b>"+untouched+"</b> 條 ・ 共 "+total+" 條</div>";
+}
 function todoCount(){ return WORDS.filter(notPassed).length; }
 
 function drawModes(){
-  const box=document.getElementById("modes"); const n=todoCount();
+  const box=document.getElementById("modes");
+  const nNew=countMode("new"), nTodo=countMode("todo"), nAll=countMode("all");
   box.innerHTML="";
-  [["all","練全部", WORDS.length+" 條"],
-   ["todo","只練我還沒過的", n?n+" 條":"目前沒有，先練全部"]].forEach(function(m){
+  [["new","接著練", nNew ? "沒練過的 "+nNew+" 條" : "都練過了！"],
+   ["todo","只練我還沒過的", nTodo ? nTodo+" 條" : "目前沒有"],
+   ["all","全部複習", nAll+" 條"]].forEach(function(m){
+    const dead=(m[0]==="new"&&!nNew)||(m[0]==="todo"&&!nTodo);
     const b=document.createElement("button");
-    b.className="mode"+(mode===m[0]?" on":"")+(m[0]==="todo"&&n?" hot":"");
+    b.className="mode"+(mode===m[0]?" on":"")+(dead?" dead":"")
+      +((m[0]==="todo"&&nTodo&&mode!=="todo")?" hot":"");
     b.innerHTML="<b>"+m[1]+"</b><small>"+m[2]+"</small>";
-    b.onclick=function(){ if(m[0]==="todo"&&!n) return; mode=m[0]; drawModes(); start(); };
+    b.onclick=function(){ if(dead) return; mode=m[0]; drawModes(); drawProgress(); drawProgress(); start(); };
     box.appendChild(b);
   });
 }
@@ -545,6 +578,7 @@ function drawModes(){
 function bankOf(st){
   let list=WORDS.slice();
   if(mode==="todo") list=list.filter(notPassed);
+  if(mode==="new")  list=list.filter(notTouched);
   if(st===2) list=list.filter(function(x){ return x.exam; });   // 第三階只出會考真題
   return list;
 }
@@ -571,6 +605,12 @@ function drawTabs(){
 /* ---------- 出題 ---------- */
 function start(){
   drawTabs();
+  /* 這個模式在這個範圍沒題目了就自動換一個，避免「畫面說都練過了、卻還在出舊題」 */
+  if(!bankOf(stage).length){
+    const order=["new","todo","all"].filter(function(m){ return m!==mode; });
+    for(let i=0;i<order.length;i++){ mode=order[i]; if(bankOf(stage).length) break; }
+    drawModes(); drawProgress();
+  }
   const all=shuffle(bankOf(stage));
   queue=all.slice(0, Math.min(ROUND, all.length));
   idx=0; right=0;
@@ -639,7 +679,7 @@ function answer(ok,q,correct,btn){
     fb.innerHTML="<span class='big'>✓ 答對了</span><b>"+esc(q.w)+"</b>　"+esc(q.z); }
   else{ w[q.id]=true;
     fb.innerHTML="<span class='big'>再看一次就好</span><b>"+esc(q.w)+"</b>　"+esc(q.z); }
-  save(); drawChips(); drawModes(); say(q.w.replace(/[^A-Za-z' ]/g," "));
+  save(); drawChips(); drawModes(); drawProgress(); say(q.w.replace(/[^A-Za-z' ]/g," "));
   const next=document.createElement("button");
   next.className="go"; next.style.marginTop="16px";
   next.textContent=idx+1>=queue.length?"看結果":"下一題 →";
@@ -649,7 +689,7 @@ function answer(ok,q,correct,btn){
 function finish(){
   const prevBest=bestOf(seat,stage), before=hwStatus(seat);
   store.logs.push({seat:seat,stage:stage,mode:mode,right:right,total:queue.length,ts:Date.now()});
-  save(); drawHw(); updateWho(); drawModes();
+  save(); drawHw(); updateWho(); drawModes(); drawProgress();
   const after=hwStatus(seat);
   const justDone=after&&after.complete&&before&&!before.complete;
   sendOut(seat,stage,right,queue.length,after);
@@ -702,7 +742,7 @@ function sendOut(seat,stage,right,total,hw){
   const row={};
   row[GFORM.f.seat]=CLASS_ID.toUpperCase()+"-"+sname(seat);
   row[GFORM.f.lesson]=LESSON;
-  row[GFORM.f.stage]=STAGES[stage].n+" "+STAGES[stage].t+(mode==="todo"?"（只練沒過的）":"");
+  row[GFORM.f.stage]=STAGES[stage].n+" "+STAGES[stage].t+(mode==="todo"?"（只練沒過的）":mode==="new"?"（接著練新的）":"");
   row[GFORM.f.right]=right;
   row[GFORM.f.total]=total;
   row[GFORM.f.wrong]="還沒過 "+left.length+" 字：" + left.slice(0,12).map(function(x){return x.w;}).join(" ");
