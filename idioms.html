@@ -895,6 +895,57 @@ function wipe(){
 }
 
 resetFoot(); drawSeats(); show("seat"); flushPending();
+
+/* ============================================================
+   沒做完就離開，也要留下紀錄
+   ------------------------------------------------------------
+   原本只有 finish()（做完整回合）才會送出，學生做到一半關掉，
+   那一次完全收不到。這段在關頁面或切到別的 App 時補送一筆，
+   每回合最多補一次——做完的那一筆由 finish() 自己送。
+   用 sendBeacon 而不是 fetch，是因為關頁面時 fetch 會被瀏覽器中斷。
+   ============================================================ */
+(function(){
+  var roundSent = false;
+  var _start = start, _finish = finish;
+  start  = function(){ roundSent = false; return _start.apply(this, arguments); };
+  finish = function(){ roundSent = true;  return _finish.apply(this, arguments); };
+
+  function leftCount(){
+    var w = wrongOf(seat), n = 0;
+    for (var k in w) if (w[k] === true) n++;
+    return n;
+  }
+  function beacon(row){
+    try{
+      var body = new URLSearchParams();
+      for (var k in row) body.append(k, row[k]);
+      var blob = new Blob([body.toString()],
+                          { type: "application/x-www-form-urlencoded;charset=UTF-8" });
+      if (navigator.sendBeacon && navigator.sendBeacon(GFORM.url, blob)) return true;
+    }catch(e){}
+    return false;
+  }
+  function flushPartial(){
+    if (roundSent || !GFORM.url || !seat || isGuest(seat)) return;
+    if (!queue.length || !idx) return;      /* 一題都還沒做完就離開，不記 */
+    roundSent = true;
+    var st = STAGES[stage] || { n: "", t: "" };
+    var hw = hwStatus(seat);
+    var row = {};
+    row[GFORM.f.seat]   = CLASS_ID.toUpperCase() + "-" + sname(seat);
+    row[GFORM.f.lesson] = LESSON;
+    row[GFORM.f.stage]  = st.n + " " + st.t + "（沒做完就離開　" + idx + "/" + queue.length + " 題）";
+    row[GFORM.f.right]  = right;
+    row[GFORM.f.total]  = idx;
+    row[GFORM.f.wrong]  = "沒做完就離開　·　累計還沒過 " + leftCount() + " 項";
+    row[GFORM.f.hw]     = hw ? (hw.complete ? "已完成" : "進行中 " + hw.done + "/" + hw.all) : "";
+    if (!beacon(row)) queueRow(row);
+  }
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState === "hidden") flushPartial();
+  });
+  window.addEventListener("pagehide", flushPartial);
+})();
 </script>
 </body>
 </html>
