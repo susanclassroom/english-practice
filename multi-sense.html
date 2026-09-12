@@ -171,6 +171,16 @@
   .sent{font-size:21px;line-height:1.85;padding:6px 2px 2px;letter-spacing:.2px}
   .sent .hl{text-decoration-thickness:2px;text-underline-offset:4px;font-weight:700;color:#1f6b4f}
   .stage .exam.listen{color:#3a6fb0;background:#eaf2ff}
+  .prog{background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:13px 15px;margin-bottom:14px}
+  .prog .pt{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;
+    justify-content:space-between;align-items:baseline;gap:10px}
+  .prog .pt em{font-style:normal;color:var(--brand);font-size:20px}
+  .prog .ptrack{height:12px;background:var(--line);border-radius:99px;overflow:hidden;display:flex}
+  .prog .pdone{height:100%;background:var(--brand)}
+  .prog .pleft{height:100%;background:var(--gold)}
+  .prog .pn{margin-top:9px;font-size:14.5px;color:#555;line-height:1.7}
+  .prog .pn b{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -194,6 +204,7 @@
 
 <div id="viewPractice" class="hide">
   <div id="hwPractice"></div>
+  <div class="prog" id="prog"></div>
   <div class="modes" id="modes"></div>
   <div class="tabs" id="tabs"></div>
   <div class="bar">
@@ -378,7 +389,7 @@ function updateWho(){
 function startSeat(){
   updateWho(); show("practice");
   stage=0; mode="all";
-  drawModes(); drawTabs(); start(); drawHw();
+  drawModes(); drawProgress(); drawTabs(); start(); drawHw();
 }
 
 /* ---------- 作業 ---------- */
@@ -408,6 +419,27 @@ function drawHw(){
 function notPassed(x){ const w=wrongOf(seat); return !!w[x.id]; }
 function todoCount(){ return WORDS.filter(notPassed).length; }
 
+/* ---------- 總進度（學生看得到自己離完成還有多遠） ---------- */
+function drawProgress(){
+  const box=document.getElementById("prog"); if(!box) return;
+  const w=wrongOf(seat), total=WORDS.length;
+  let done=0, left=0;
+  WORDS.forEach(function(x){
+    if(w[x.id]===false) done++;
+    else if(w[x.id]===true) left++;
+  });
+  const untouched=total-done-left;
+  const pct=total?Math.round(done/total*1000)/10:0;
+  box.innerHTML=
+    "<div class='pt'><span>一字多義總進度</span><em>"+pct+"%</em></div>"
+   +"<div class='ptrack'>"
+   +"<span class='pdone' style='width:"+(done/total*100)+"%'></span>"
+   +"<span class='pleft' style='width:"+(left/total*100)+"%'></span>"
+   +"</div>"
+   +"<div class='pn'>已經會 <b>"+done+"</b> 題 ・ 還沒過 <b>"+left+"</b> 題 ・ "
+   +"還沒練到 <b>"+untouched+"</b> 題 ・ 共 "+total+" 題</div>";
+}
+
 function drawModes(){
   const box=document.getElementById("modes"); const n=todoCount();
   box.innerHTML="";
@@ -416,7 +448,7 @@ function drawModes(){
     const b=document.createElement("button");
     b.className="mode"+(mode===m[0]?" on":"")+(m[0]==="todo"&&n?" hot":"");
     b.innerHTML="<b>"+m[1]+"</b><small>"+m[2]+"</small>";
-    b.onclick=function(){ if(m[0]==="todo"&&!n) return; mode=m[0]; drawModes(); start(); };
+    b.onclick=function(){ if(m[0]==="todo"&&!n) return; mode=m[0]; drawModes(); drawProgress(); start(); };
     box.appendChild(b);
   });
 }
@@ -532,7 +564,7 @@ function answer(ok,q,correct,btn){
     fb.innerHTML="<span class='big'>✓ 答對了</span><b>"+esc(q.w)+"</b>　"+allSenses(q); }
   else{ w[q.id]=true;
     fb.innerHTML="<span class='big'>再看一次就好</span>這裡是 <b>"+esc(correct)+"</b><br><b>"+esc(q.w)+"</b>　"+allSenses(q); }
-  save(); drawChips(); drawModes(); say(answersOf(q.w)[0]);
+  save(); drawChips(); drawModes(); drawProgress(); say(answersOf(q.w)[0]);
   const next=document.createElement("button");
   next.className="go"; next.style.marginTop="16px";
   next.textContent=idx+1>=queue.length?"看結果":"下一題 →";
@@ -542,7 +574,7 @@ function answer(ok,q,correct,btn){
 function finish(){
   const prevBest=bestOf(seat,stage), before=hwStatus(seat);
   store.logs.push({seat:seat,stage:stage,mode:mode,right:right,total:queue.length,ts:Date.now()});
-  save(); drawHw(); updateWho(); drawModes();
+  save(); drawHw(); updateWho(); drawModes(); drawProgress();
   const after=hwStatus(seat);
   const justDone=after&&after.complete&&before&&!before.complete;
   sendOut(seat,stage,right,queue.length,after);
