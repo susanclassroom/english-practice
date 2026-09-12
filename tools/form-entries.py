@@ -20,7 +20,22 @@ KEYS = ["seat", "lesson", "stage", "right", "total", "wrong", "hw"]
 def fetch(url):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req) as r:
-        return r.read().decode("utf-8", "replace")
+        return r.geturl(), r.read().decode("utf-8", "replace")
+
+
+def check_open(final_url, html):
+    """學生不會登入 Google，所以表單一定要「任何人都能填」。
+    需要登入的表單，學生按送出不會有錯誤訊息（no-cors 拿不到回應），
+    紀錄卻一筆都收不到——這是最難發現的失敗，所以先擋在這裡。"""
+    if "accounts.google.com" in final_url or "ServiceLogin" in final_url:
+        sys.exit(
+            "✗ 這份表單需要登入才能填。\n"
+            "  學生不會登入，送出會靜靜地失敗，你在試算表裡一筆都看不到。\n"
+            "  修法：開啟表單 → 設定（齒輪）→ 回覆 →\n"
+            "        關閉「限制為 <機構> 使用者」與「收集電子郵件地址」。\n"
+            "  用學校或機關的 Google Workspace 帳號建表單時，這兩項常常預設是開的。")
+    if "FB_PUBLIC_LOAD_DATA_" not in html:
+        sys.exit("✗ 這一頁看起來不是公開的表單。確認網址是「傳送 → 連結」複製到的那個。")
 
 
 def parse(html):
@@ -43,7 +58,10 @@ def main():
     url = sys.argv[1].split("?")[0]
     if url.endswith("/edit"):
         sys.exit("這是編輯網址，抓不到。請用「傳送 → 連結」那個 viewform 網址。")
-    title, fields = parse(fetch(url))
+    final_url, html = fetch(url)
+    check_open(final_url, html)
+    title, fields = parse(html)
+    print("✓ 不需要登入就能填，學生送得出去\n")
     print("表單：%s" % title)
     print("題目數：%d\n" % len(fields))
     for name, entry in fields:
