@@ -71,7 +71,8 @@ def main():
         print("\n⚠ 題目數不是 %d 題，請確認表單結構跟其他練習一致再接。" % len(KEYS))
         return
 
-    post = url.rsplit("/", 1)[0] + "/formResponse"
+    # 用轉址後的真實網址組 formResponse，短網址（forms.gle）才不會組錯
+    post = final_url.split("?")[0].rsplit("/", 1)[0] + "/formResponse"
     print("\n可以直接貼進練習頁的設定區塊：\n")
     print("const GFORM = {")
     print('  url: "%s",' % post)
