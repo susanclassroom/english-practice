@@ -201,7 +201,6 @@
 <div id="viewPractice" class="hide">
   <div id="hwPractice"></div>
   <div class="prog" id="prog"></div>
-  <div class="picker" id="books"></div>
   <div class="modes" id="modes"></div>
   <div class="tabs" id="tabs"></div>
   <div class="bar">
@@ -316,16 +315,6 @@ const STAGES = [
 WORDS.forEach(function(x,i){ x.id="w"+i; });
 let store=load(), seat=null, stage=0, mode="all", queue=[], idx=0, right=0;
 
-/* 冊次範圍：0 = 六冊全部，1~6 = 只練該冊 */
-const BOOKS = [
-  {v:0, t:"六冊全部"}, {v:1, t:"第一冊"}, {v:2, t:"第二冊"}, {v:3, t:"第三冊"},
-  {v:4, t:"第四冊"}, {v:5, t:"第五冊"}, {v:6, t:"第六冊"}
-];
-let book = 0;
-function inBook(x){ return book===0 || x.b===book; }
-function scoped(){ return WORDS.filter(inBook); }
-function bookName(){ return book===0 ? "六冊全部" : "第"+"一二三四五六"[book-1]+"冊"; }
-
 function load(){
   try{ const o=JSON.parse(localStorage.getItem(KEY)); if(o&&o.logs&&o.wrong) return o; }catch(e){}
   return {logs:[], wrong:{}};
@@ -352,7 +341,7 @@ function answersOf(w){
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
 
 document.getElementById("sub").textContent =
-  "佳音翰林 B1–B6 課本單字　·　共 " + WORDS.length + " 字";
+  "國中三年的字放在一起　·　共 " + WORDS.length + " 字";
 
 function show(v){
   ["Seat","Practice","Teacher","Report"].forEach(function(n){
@@ -384,7 +373,7 @@ function startSeat(){
   updateWho(); show("practice");
   stage=0;
   mode = newCount() ? "new" : (todoCount() ? "todo" : "all");
-  drawBooks(); drawModes(); drawProgress(); drawTabs(); start(); drawHw();
+  drawModes(); drawProgress(); drawTabs(); start(); drawHw();
 }
 
 /* ---------- 作業 ---------- */
@@ -414,23 +403,22 @@ function notPassed(x){ const w=wrongOf(seat); return w[x.id]===true; }
 function notTouched(x){ const w=wrongOf(seat); return w[x.id]===undefined; }
 /* 按鈕上的數字＝這個模式在「目前範圍」實際會出的題數，不用全域數字，避免標籤說謊 */
 function countMode(m){ const keep=mode; mode=m; const n=bankOf(stage).length; mode=keep; return n; }
-function newCount(){ return scoped().filter(notTouched).length; }
-function todoCount(){ return scoped().filter(notPassed).length; }
+function newCount(){ return WORDS.filter(notTouched).length; }
+function todoCount(){ return WORDS.filter(notPassed).length; }
 
 /* ---------- 總進度（學生看得到自己離完成還有多遠） ---------- */
 function drawProgress(){
   const box=document.getElementById("prog"); if(!box) return;
-  const list=scoped();
-  const w=wrongOf(seat), total=list.length;
+  const w=wrongOf(seat), total=WORDS.length;
   let done=0, left=0;
-  list.forEach(function(x){
+  WORDS.forEach(function(x){
     if(w[x.id]===false) done++;
     else if(w[x.id]===true) left++;
   });
   const untouched=total-done-left;
   const pct=total?Math.round(done/total*1000)/10:0;
   box.innerHTML=
-    "<div class='pt'><span>"+bookName()+"　總進度</span><em>"+pct+"%</em></div>"
+    "<div class='pt'><span>翰林單字表　總進度</span><em>"+pct+"%</em></div>"
    +"<div class='ptrack'>"
    +"<span class='pdone' style='width:"+(done/total*100)+"%'></span>"
    +"<span class='pleft' style='width:"+(left/total*100)+"%'></span>"
@@ -458,30 +446,11 @@ function drawModes(){
 
 /* ---------- 動態分頁（只顯示有題目的階） ---------- */
 function bankOf(st){
-  let list=scoped();
+  let list=WORDS.slice();
   if(mode==="todo") list=list.filter(notPassed);
   if(mode==="new")  list=list.filter(notTouched);
   if(st===1) list=list.filter(function(x){ return x.t!==0; });  // 句型／整句打不出來
   return list;
-}
-
-/* ---------- 冊次 ---------- */
-function drawBooks(){
-  const box=document.getElementById("books");
-  const cnt={}; WORDS.forEach(function(x){ cnt[x.b]=(cnt[x.b]||0)+1; });
-  let h="<div class='lb'>要練哪一冊？老師沒特別說的話，就用「六冊全部」。</div><div class='gs'>";
-  BOOKS.forEach(function(b){
-    const nb = b.v===0 ? WORDS.length : (cnt[b.v]||0);
-    h+="<button class='gchip"+(book===b.v?" on":"")+"' data-b='"+b.v+"'>"+b.t+" <i>"+nb+"</i></button>";
-  });
-  box.innerHTML=h+"</div>";
-  box.querySelectorAll(".gchip").forEach(function(el){
-    el.onclick=function(){
-      book=parseInt(el.dataset.b,10);
-      mode = newCount() ? "new" : (todoCount() ? "todo" : "all");
-      drawBooks(); drawModes(); drawProgress(); start(); drawChips();
-    };
-  });
 }
 function liveStages(){
   const out=[];
@@ -550,7 +519,7 @@ function render(){
       b.onclick=function(){ answer(x===q.z,q,q.z,b); };
       document.getElementById("opts").appendChild(b);
     });
-  }else if(stage===1){
+  }else{
     const a0=answersOf(q.w)[0];
     const hint=a0[0]+a0.slice(1).replace(/[a-zA-Z]/g,"_");
     card.innerHTML=head
@@ -563,15 +532,6 @@ function render(){
       +"<div class='fb' id='fb'></div>";
     const inp=document.getElementById("inp"); inp.focus();
     inp.onkeydown=function(e){ if(e.key==="Enter") checkType(); };
-  }else{
-    card.innerHTML=head
-      +"<div class='sent'>"+esc(q.g).replace("___","<span class='gap'></span>")+"</div>"
-      +"<div class='opts' id='opts'></div><div class='fb' id='fb'></div>";
-    shuffle(q.o).forEach(function(x){
-      const b=document.createElement("button"); b.className="opt"; b.textContent=x;
-      b.onclick=function(){ answer(x===q.o[0],q,q.o[0],b); };
-      document.getElementById("opts").appendChild(b);
-    });
   }
 }
 function checkType(){
@@ -633,7 +593,7 @@ function finish(){
 }
 function drawChips(){
   const w=wrongOf(seat);
-  const ks=scoped().filter(function(x){ return w[x.id]; });
+  const ks=WORDS.filter(function(x){ return w[x.id]; });
   const box=document.getElementById("chips"), mini=document.getElementById("mini");
   box.innerHTML="";
   if(!ks.length){
@@ -653,7 +613,7 @@ function sendOut(seat,stage,right,total,hw){
   const left=WORDS.filter(function(x){ return w[x.id]; });
   const row={};
   row[GFORM.f.seat]=CLASS_ID.toUpperCase()+"-"+sname(seat);
-  row[GFORM.f.lesson]=LESSON+(book?"　"+bookName():"");
+  row[GFORM.f.lesson]=LESSON;
   row[GFORM.f.stage]=STAGES[stage].n+" "+STAGES[stage].t+(mode==="todo"?"（只練沒過的）":mode==="new"?"（接著練新的）":"");
   row[GFORM.f.right]=right;
   row[GFORM.f.total]=total;
@@ -844,7 +804,7 @@ resetFoot(); drawSeats(); show("seat"); flushPending();
     var hw = hwStatus(seat);
     var row = {};
     row[GFORM.f.seat]   = CLASS_ID.toUpperCase() + "-" + sname(seat);
-    row[GFORM.f.lesson] = LESSON + (book ? "　" + bookName() : "");
+    row[GFORM.f.lesson] = LESSON;
     row[GFORM.f.stage]  = st.n + " " + st.t + "（沒做完就離開　" + idx + "/" + queue.length + " 題）";
     row[GFORM.f.right]  = right;
     row[GFORM.f.total]  = idx;
