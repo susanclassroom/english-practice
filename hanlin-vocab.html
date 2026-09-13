@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>翰林單字表　B1–B6</title>
+<style>
+  :root{
+    --bg:#F7F5EF; --card:#fff; --ink:#26241F; --sub:#5A554C;
+    --line:#E2DDD0; --brand:#1F6B58; --brand-soft:#E6F1ED;
+    --gold:#C98A17; --gold-soft:#FDF3DE;
+    --ok:#1F7A44; --ok-soft:#E4F3E9;
+    --no:#B23A32; --no-soft:#FBE9E7; --r:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Hiragino Sans TC",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:19px;line-height:1.75;-webkit-text-size-adjust:100%}
+  .wrap{max-width:860px;margin:0 auto;padding:20px 16px 72px}
+  .hide{display:none!important}
+
+  header{background:var(--brand);color:#fff;border-radius:var(--r);padding:20px 22px;margin-bottom:18px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  header h1{margin:0 0 6px;font-size:26px;letter-spacing:.5px}
+  header p{margin:0;font-size:16px;opacity:.92}
+  .who{background:rgba(255,255,255,.16);border-radius:99px;padding:6px 16px;font-size:17px;white-space:nowrap}
+  .who button{background:none;border:none;color:#fff;font-size:15px;cursor:pointer;
+    text-decoration:underline;font-family:inherit;padding:0 0 0 8px;opacity:.85}
+
+  .seatgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:10px;margin-top:18px}
+  .seat{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:16px 0;
+    font-size:24px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .seat:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .seat.guest{border-style:dashed;color:var(--sub);font-size:20px}
+
+  /* 模式：練全部 / 只練沒過的 */
+  .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+  .mode.dead{opacity:.45}
+  @media(max-width:680px){.modes{grid-template-columns:1fr}}
+  .mode{background:var(--card);border:2px solid var(--line);border-radius:var(--r);
+    padding:14px 18px;cursor:pointer;font-family:inherit;font-size:18px;text-align:left;color:var(--ink)}
+  .mode small{display:block;font-size:14px;color:var(--sub);font-weight:400;margin-top:2px}
+  .mode:hover{border-color:var(--brand)}
+  .mode.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .mode.on small{color:rgba(255,255,255,.85)}
+  .mode.hot{border-color:var(--gold);background:var(--gold-soft)}
+  .mode.hot.on{background:var(--gold);border-color:var(--gold);color:#fff}
+
+  .picker{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;margin-bottom:14px}
+  .picker .lb{font-size:15px;color:var(--sub);margin-bottom:10px}
+  .gs{display:flex;gap:8px;flex-wrap:wrap}
+  .gchip{background:var(--card);border:2px solid var(--line);border-radius:99px;
+    padding:7px 16px;font-size:17px;cursor:pointer;font-family:inherit;color:var(--sub)}
+  .gchip:hover{border-color:var(--brand);color:var(--brand)}
+  .gchip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .gchip i{font-style:normal;opacity:.7;font-size:14px}
+
+  .tabs{display:grid;gap:8px;margin-bottom:16px}
+  .tab{background:var(--card);border:2px solid var(--line);border-radius:12px;
+    padding:12px 6px;text-align:center;cursor:pointer;font-size:15px;line-height:1.4;
+    color:var(--sub);transition:.15s}
+  .tab b{display:block;font-size:19px;color:var(--ink);font-weight:600;margin-bottom:2px}
+  .tab:hover{border-color:var(--brand)}
+  .tab.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .tab.on b{color:#fff}
+
+  .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:12px 16px;margin-bottom:14px;font-size:16px;color:var(--sub)}
+  .bar .grow{flex:1;min-width:100px}
+  .track{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+  .fill{height:100%;background:var(--brand);width:0;transition:width .25s}
+  .pill{background:var(--gold-soft);color:var(--gold);border-radius:99px;
+    padding:3px 12px;font-size:15px;white-space:nowrap}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:26px 24px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .stage{font-size:15px;color:var(--sub);margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .gtag{background:var(--brand-soft);color:var(--brand);border-radius:99px;padding:2px 12px;font-size:14px}
+
+  .word{font-size:44px;font-weight:700;margin:6px 0 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;line-height:1.25}
+  .zh{font-size:17px;color:var(--sub);margin:-2px 0 18px}
+  .say{background:var(--brand-soft);border:none;border-radius:50%;width:44px;height:44px;
+    font-size:20px;cursor:pointer;color:var(--brand);flex:none}
+  .say:hover{background:#D5E7E1}
+  .sent{font-size:23px;line-height:2;margin:6px 0 20px}
+  .sent .gap{display:inline-block;min-width:116px;height:1.5em;vertical-align:-.3em;
+    border-bottom:4px solid var(--gold);margin:0 4px}
+  .hint{font-size:30px;letter-spacing:5px;color:var(--gold);font-weight:700;margin-bottom:4px}
+
+  .opts{display:grid;gap:12px}
+  .opts.two{grid-template-columns:1fr 1fr}
+  @media(max-width:560px){.opts.two{grid-template-columns:1fr}}
+  .opt{background:var(--card);border:2px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-size:21px;text-align:left;cursor:pointer;
+    font-family:inherit;color:var(--ink);transition:.12s}
+  .opt:hover:not(:disabled){border-color:var(--brand);background:var(--brand-soft)}
+  .opt:disabled{cursor:default}
+  .opt.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok);font-weight:600}
+  .opt.wrong{border-color:var(--no);background:var(--no-soft);color:var(--no)}
+
+  .typebox{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+  input[type=text]{font-size:26px;padding:12px 16px;border:2px solid var(--line);
+    border-radius:12px;font-family:inherit;width:300px;max-width:100%;letter-spacing:1px}
+  input[type=text]:focus{outline:none;border-color:var(--brand)}
+
+  button.go{background:var(--brand);color:#fff;border:none;border-radius:12px;
+    padding:14px 26px;font-size:19px;cursor:pointer;font-family:inherit}
+  button.go:hover{background:#17553f}
+  button.ghost{background:transparent;color:var(--brand);border:2px solid var(--brand)}
+  button.ghost:hover{background:var(--brand-soft)}
+
+  .fb{margin-top:20px;padding:16px 18px;border-radius:12px;font-size:19px;display:none}
+  .fb.show{display:block}
+  .fb.good{background:var(--ok-soft);color:var(--ok)}
+  .fb.bad{background:var(--no-soft);color:var(--no)}
+  .fb .big{font-size:22px;font-weight:700;display:block;margin-bottom:4px}
+
+  .done{text-align:center;padding:20px 0}
+  .done .score{font-size:64px;font-weight:700;color:var(--brand);line-height:1.1}
+  .done .of{font-size:20px;color:var(--sub);margin-bottom:16px}
+  .done .best{display:inline-block;background:var(--gold-soft);color:var(--gold);
+    border-radius:99px;padding:8px 20px;font-size:17px;margin-bottom:22px}
+  .done .msg{font-size:21px;margin-bottom:24px}
+  .btnrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  .review{margin-top:26px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r);padding:18px 20px}
+  .review h3{margin:0 0 10px;font-size:18px;color:var(--sub);font-weight:600}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--no-soft);color:var(--no);border-radius:99px;padding:5px 14px;font-size:16px}
+  .chip.clear{background:var(--ok-soft);color:var(--ok)}
+  .mini{font-size:15px;color:var(--sub);margin-top:10px}
+  .tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .tools button{font-size:15px;padding:9px 16px;border-radius:10px;cursor:pointer;
+    font-family:inherit;border:2px solid var(--line);background:var(--card);color:var(--sub)}
+  .tools button:hover{border-color:var(--brand);color:var(--brand)}
+
+  .hw{background:var(--gold-soft);border:2px solid #EBD9AE;border-radius:var(--r);
+    padding:16px 20px;margin-bottom:16px;color:#6B4A0E}
+  .hw.done{background:var(--ok-soft);border-color:#B9DCC6;color:var(--ok)}
+  .hw .t{font-size:20px;font-weight:700}
+  .hw ul{margin:10px 0 0;padding:0;list-style:none;font-size:17px}
+  .hw li{margin:5px 0}
+  .hw .n{margin:10px 0 0;font-size:15px;opacity:.85}
+  .ok{color:var(--ok);font-weight:600}
+  .wait{color:var(--sub)}
+
+  .foot{margin-top:30px;text-align:center}
+  .foot button{background:none;border:none;color:var(--sub);font-size:15px;
+    cursor:pointer;font-family:inherit;text-decoration:underline;opacity:.7}
+  h2.sec{font-size:22px;margin:0 0 4px}
+  p.secsub{margin:0 0 18px;color:var(--sub);font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:17px}
+  th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-size:15px;color:var(--sub);font-weight:600;white-space:nowrap}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.none td{color:var(--sub)}
+  .seatlink{color:var(--brand);cursor:pointer;text-decoration:underline;font-weight:600}
+  .barcell{display:flex;align-items:center;gap:8px}
+  .barcell i{display:block;height:12px;background:var(--no);border-radius:3px;opacity:.75}
+  .scroll{overflow-x:auto}
+  .note{background:var(--gold-soft);border-radius:12px;padding:14px 16px;font-size:16px;color:#7A5410;margin:16px 0}
+  .big2{font-size:34px;font-weight:700;color:var(--brand);line-height:1.2}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:6px 0 20px}
+  .kpi{background:var(--brand-soft);border-radius:12px;padding:14px 16px}
+  .kpi span{display:block;font-size:15px;color:var(--sub)}
+  @media print{ body{background:#fff} .noprint{display:none!important} .card{box-shadow:none;border:1px solid #ccc} }
+  .prog{background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:13px 15px;margin-bottom:14px}
+  .prog .pt{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;
+    justify-content:space-between;align-items:baseline;gap:10px}
+  .prog .pt em{font-style:normal;color:var(--brand);font-size:20px}
+  .prog .ptrack{height:12px;background:var(--line);border-radius:99px;overflow:hidden;display:flex}
+  .prog .pdone{height:100%;background:var(--brand)}
+  .prog .pleft{height:100%;background:var(--gold)}
+  .prog .pn{margin-top:9px;font-size:14.5px;color:#555;line-height:1.7}
+  .prog .pn b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>翰林單字表　B1–B6</h1>
+    <p id="sub"></p>
+  </div>
+  <div class="who hide" id="who"></div>
+</header>
+
+<div id="viewSeat">
+  <div class="card">
+    <h2 class="sec" id="seatTitle">先選你的座號</h2>
+    <p class="secsub">選了以後，你的練習紀錄就會分開存，不會跟別人混在一起。</p>
+    <div class="seatgrid" id="seatgrid"></div>
+  </div>
+</div>
+
+<div id="viewPractice" class="hide">
+  <div id="hwPractice"></div>
+  <div class="prog" id="prog"></div>
+  <div class="picker" id="books"></div>
+  <div class="modes" id="modes"></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="bar">
+    <span id="stageName"></span>
+    <span class="grow"><span class="track"><span class="fill" id="fill"></span></span></span>
+    <span id="count">0 / 0</span>
+    <span class="pill" id="best">最佳 —</span>
+  </div>
+  <div class="card" id="card"></div>
+  <div class="review">
+    <h3>我還沒過的字</h3>
+    <div class="chips" id="chips"></div>
+    <p class="mini" id="mini"></p>
+  </div>
+</div>
+
+<div id="viewTeacher" class="hide">
+  <div class="card">
+    <h2 class="sec">這台裝置上的作答狀況</h2>
+    <p class="secsub" style="color:#b06a00">⚠ 這裡只看得到<b>在這台裝置上</b>練過的紀錄。學生用自己手機練的不會出現在這裡——全班的資料在 Google 試算表「K5-2026-單字練習紀錄」。</p>
+    <p class="secsub" id="tSub"></p>
+    <div class="scroll"><table id="tClass"></table></div>
+    <h2 class="sec" style="margin-top:32px">全班最常錯的字</h2>
+    <p class="secsub">這是下一堂課最該花時間的地方。</p>
+    <div class="scroll"><table id="tWrong"></table></div>
+    <div class="tools noprint">
+      <button onclick="exportCSV()">匯出 CSV</button>
+      <button onclick="show('seat')">回到練習</button>
+      <button onclick="wipe()">清空全部紀錄</button>
+    </div>
+  </div>
+</div>
+
+<div id="viewReport" class="hide">
+  <div class="card">
+    <h2 class="sec" id="rTitle">學習報告</h2>
+    <p class="secsub" id="rRange"></p>
+    <div class="kpis" id="rKpis"></div>
+    <div class="note" id="rMsg"></div>
+    <h2 class="sec" style="margin-top:26px;font-size:19px">每次練習紀錄</h2>
+    <div class="scroll"><table id="rLogs"></table></div>
+    <h2 class="sec" style="margin-top:26px;font-size:19px">目前還沒過的字</h2>
+    <div class="chips" id="rChips"></div>
+    <div class="tools noprint">
+      <button onclick="window.print()">列印 / 存成 PDF</button>
+      <button onclick="show('teacher')">回到全班</button>
+    </div>
+  </div>
+</div>
+
+<div class="foot noprint" id="foot"></div>
+
+</div>
+<script>
+const WORDS = [{"w":"handsome","p":"(adj.)","z":"英俊的","b":1,"u":"1-1","n":"第四（的）"},{"w":"new","p":"(adj.)","z":"新的","b":1,"u":"1-1","n":"正方形的；正方形"},{"w":"classmate","p":"(n.)","z":"同學","b":1,"u":"1-1","n":"片"},{"w":"young","p":"(adj.)","z":"年輕的","b":1,"u":"1-1","n":"忙碌的"},{"w":"woman","p":"(n.)","z":"女人（複數為women）","b":1,"u":"1-1","n":"炸雞"},{"w":"very","p":"(adv.)","z":"非常","b":1,"u":"1-1","n":"更…"},{"w":"beautiful","p":"(adj.)","z":"美麗的","b":1,"u":"1-1","n":"五分熟；中等的"},{"w":"too","p":"(adv.)","z":"也；太…","b":1,"u":"1-1","m":1,"n":"幾乎"},{"w":"Nice to meet you.","p":"","z":"很高興認識你。","b":1,"u":"1-1","t":0,"n":"喊叫"},{"w":"cousin","p":"(n.)","z":"堂表兄弟姐妹","b":1,"u":"1-1","n":"肉"},{"w":"really","p":"(adv.)","z":"真地","b":1,"u":"1-1","n":"大聲地"},{"w":"year(s) old","p":"","z":"…歲","b":1,"u":"1-1","t":0,"n":"稍候"},{"w":"I see.","p":"","z":"我知道了。","b":1,"u":"1-1","n":"依靠；指望"},{"w":"singer","p":"(n.)","z":"歌手","b":1,"u":"1-1","n":"圖書館"},{"w":"office worker","p":"(n.)","z":"上班族","b":1,"u":"1-1","n":"天空"},{"w":"housewife","p":"(n.)","z":"家庭主婦","b":1,"u":"1-1","n":"星期二"},{"w":"police officer","p":"(n.)","z":"警察","b":1,"u":"1-1","n":"類型；打字"},{"w":"writer","p":"(n.)","z":"作家","b":1,"u":"1-1","n":"青少年"},{"w":"uncle","p":"(n.)","z":"叔伯；舅舅","b":1,"u":"1-1","n":"問題"},{"w":"aunt","p":"(n.)","z":"阿姨；姑姑","b":1,"u":"1-1","n":"行人穿越道"},{"w":"wife","p":"(n.)","z":"妻子","b":1,"u":"1-1","n":"紀錄；記載"},{"w":"daughter","p":"(n.)","z":"女兒","b":1,"u":"1-1","n":"資訊"},{"w":"husband","p":"(n.)","z":"丈夫","b":1,"u":"1-1","n":"嘴巴"},{"w":"son","p":"(n.)","z":"兒子","b":1,"u":"1-1","n":"健康"},{"w":"dear","p":"(adj.)","z":"親愛的","b":1,"u":"1-1","n":"受歡迎的"},{"w":"family","p":"(n.)","z":"家庭；家人","b":1,"u":"1-1","n":"輪船"},{"w":"elementary school","p":"(n.)","z":"國小","b":1,"u":"1-1","n":"湯匙"},{"w":"junior high school","p":"(n.)","z":"國中","b":1,"u":"1-1","n":"句子"},{"w":"baby","p":"(n.)；(adj.)","z":"嬰兒；年幼的","b":1,"u":"1-1","n":"風景；名勝"},{"w":"house","p":"(n.)","z":"房子","b":1,"u":"1-2","n":"檸檬"},{"w":"parents","p":"(n.)","z":"父母親","b":1,"u":"1-2","n":"機場"},{"w":"living room","p":"(n.)","z":"客廳","b":1,"u":"1-2","n":"城鎮"},{"w":"wall","p":"(n.)","z":"牆壁","b":1,"u":"1-2","n":"來源"},{"w":"purple","p":"(adj.)；(n.)","z":"紫色（的）","b":1,"u":"1-2","n":"很少（的）"},{"w":"favorite","p":"(adj.)；(n.)","z":"最喜愛（的）","b":1,"u":"1-2","n":"無聊的"},{"w":"color","p":"(n.)","z":"顏色","b":1,"u":"1-2","n":"課；班級"},{"w":"kitchen","p":"(n.)","z":"廚房","b":1,"u":"1-2","n":"銷售員；業務員"},{"w":"dining room","p":"(n.)","z":"飯廳","b":1,"u":"1-2","n":"時尚"},{"w":"but","p":"(conj.)","z":"但是","b":1,"u":"1-2","n":"自從"},{"w":"gray","p":"(adj.)；(n.)","z":"灰色（的）","b":1,"u":"1-2","n":"漂亮的"},{"w":"brown","p":"(adj.)；(n.)","z":"棕色（的）","b":1,"u":"1-2","n":"尖銳的；敏銳的"},{"w":"cookie","p":"(n.)","z":"餅乾","b":1,"u":"1-2","n":"總計（的）；全部（的）"},{"w":"mice","p":"(n.)","z":"老鼠（為mouse的複數）","b":1,"u":"1-2","n":"石塊；岩石"},{"w":"maybe","p":"(adv.)","z":"可能","b":1,"u":"1-2","n":"相當"},{"w":"sofa","p":"(n.)","z":"沙發","b":1,"u":"1-2","n":"水果沙拉"},{"w":"hungry","p":"(adj.)","z":"餓的","b":1,"u":"1-2","n":"著名的"},{"w":"notebook","p":"(n.)","z":"筆記本","b":1,"u":"1-2","n":"丈夫"},{"w":"marker","p":"(n.)","z":"記號筆；彩色筆","b":1,"u":"1-2","n":"花園"},{"w":"brush","p":"(n.)","z":"毛筆；筆刷","b":1,"u":"1-2","n":"照片"},{"w":"gift","p":"(n.)","z":"禮物","b":1,"u":"1-2","n":"問題"},{"w":"pencil case","p":"(n.)","z":"鉛筆盒（= pencil box）","b":1,"u":"1-2","n":"鞋"},{"w":"bathroom","p":"(n.)","z":"浴室；廁所","b":1,"u":"1-2","n":"星期六"},{"w":"table","p":"(n.)","z":"桌子","b":1,"u":"1-2","n":"迷因"},{"w":"bedroom","p":"(n.)","z":"臥室","b":1,"u":"1-2","n":"公眾（的）"},{"w":"near","p":"(prep.)","z":"在…附近","b":1,"u":"1-2","n":"到…裡面"},{"w":"between","p":"(prep.)","z":"在…之間","b":1,"u":"1-2","n":"穿越；從頭到尾；透過；憑藉"},{"w":"behind","p":"(prep.)","z":"在…後面","b":1,"u":"1-2","n":"在…前面"},{"w":"in front of","p":"(prep.)","z":"在…前面","b":1,"u":"1-2","n":"在…附近"},{"w":"special","p":"(adj.)","z":"特別的","b":1,"u":"1-2","n":"幾個的"},{"w":"inside","p":"(prep.)","z":"在…裡面","b":1,"u":"1-2","n":"在…上方；在上方"},{"w":"right","p":"(adv.)；(adj.)；(n.)","z":"就；正確的；權利；右邊（的）","b":1,"u":"1-2","m":1,"n":"令人傷心地"},{"w":"each other","p":"(pron.)","z":"彼此；互相","b":1,"u":"1-2","n":"每樣事物"},{"w":"above","p":"(prep.)；(adv.)","z":"在…上方；在上方","b":1,"u":"1-2","n":"在…裡面"},{"w":"enough","p":"(adj.)；(adv.)；(pron.)","z":"足夠（的）","b":1,"u":"1-2","n":"很少（的）"},{"w":"person","p":"(n.)","z":"人 （複數為 persons 或 people）","b":1,"u":"1-2","n":"公斤"},{"w":"guy","p":"(n.)","z":"人；傢伙","b":1,"u":"1-3","n":"英文"},{"w":"magic","p":"(adj.)；(n.)","z":"神奇的；魔法","b":1,"u":"1-3","n":"風大的"},{"w":"with","p":"(prep.)","z":"用；和","b":1,"u":"1-3","n":"被；由；在…旁邊；搭乘；藉由…方式；早於；不遲於"},{"w":"can","p":"(aux.)；(n.)","z":"可以；會；罐子","b":1,"u":"1-3","m":1,"n":"（日本的）動畫片"},{"w":"many","p":"(adj.)；(pron.)","z":"許多（的）","b":1,"u":"1-3","n":"優秀的；極佳的"},{"w":"place","p":"(n.)；(v.)","z":"地方；放置","b":1,"u":"1-3","m":1,"n":"一月"},{"w":"use","p":"(v.)；(n.)","z":"使用","b":1,"u":"1-3","n":"用膠帶黏貼；膠帶"},{"w":"sure","p":"(adv.)；(adj.)","z":"當然；確定的","b":1,"u":"1-3","n":"向西地；西方（的）"},{"w":"let's…","p":"","z":"讓我們一起…","b":1,"u":"1-3","t":0,"n":"醒來；叫醒…"},{"w":"careful","p":"(adj.)","z":"小心的","b":1,"u":"1-3","n":"勤奮的"},{"w":"museum","p":"(n.)","z":"博物館","b":1,"u":"1-3","n":"飛機（= airplane）"},{"w":"Hurry!","p":"","z":"快點！","b":1,"u":"1-3","t":0,"n":"起床"},{"w":"please","p":"(int.)；(v.)","z":"請；拜託；（使）滿意；取悅","b":1,"u":"1-3","m":1,"n":"停車"},{"w":"wait","p":"(v.)","z":"等待","b":1,"u":"1-3","n":"預計；期望"},{"w":"man","p":"(n.)","z":"男人 （複數為 men）","b":1,"u":"1-3","n":"國中"},{"w":"now","p":"(adv.)","z":"現在","b":1,"u":"1-3","n":"好地；健康的"},{"w":"or","p":"(conj.)","z":"或者；否則","b":1,"u":"1-3","m":1,"n":"自從"},{"w":"time","p":"(n.)","z":"次；時間","b":1,"u":"1-3","n":"小考"},{"w":"wake up","p":"","z":"醒來；叫醒…","b":1,"u":"1-3","n":"我沒辦法。/我控制不了。"},{"w":"class","p":"(n.)","z":"課；班級","b":1,"u":"1-3","n":"小時"},{"w":"Oh my!","p":"","z":"天哪！","b":1,"u":"1-3","t":0,"n":"快點！"},{"w":"see","p":"(v.)","z":"看見","b":1,"u":"1-3","n":"表現；秀出；表演；節目"},{"w":"quiet","p":"(adj.)","z":"安靜的","b":1,"u":"1-3","n":"大部分的；最…；最多"},{"w":"turn off","p":"","z":"關掉","b":1,"u":"1-3","n":"快點；少來了"},{"w":"sign","p":"(n.)；(v.)","z":"標誌；簽名；跡象","b":1,"u":"1-3","m":1,"n":"地震"},{"w":"talk","p":"(v.)","z":"說話","b":1,"u":"1-3","n":"發生"},{"w":"fight","p":"(v.)；(n.)","z":"吵架；打架","b":1,"u":"1-3","n":"點餐；訂購"},{"w":"turn","p":"(n.)","z":"（依次輪到的）機會","b":1,"u":"1-3","n":"展覽會"},{"w":"follow","p":"(v.)","z":"遵守；跟隨","b":1,"u":"1-3","n":"清洗"},{"w":"rule","p":"(n.)","z":"規則","b":1,"u":"1-3","n":"先生"},{"w":"safe","p":"(adj.)","z":"安全的","b":1,"u":"1-3","n":"有雪的；下雪"},{"w":"wash","p":"(v.)","z":"清洗","b":1,"u":"1-3","n":"知道；知道；認識"},{"w":"hand","p":"(n.)；(v.)","z":"手；遞給","b":1,"u":"1-3","m":1,"n":"寵物"},{"w":"after class","p":"","z":"下課後","b":1,"u":"1-3","n":"…歲"},{"w":"mummy","p":"(n.)","z":"木乃伊","b":1,"u":"1-3","n":"狐狸"},{"w":"rock","p":"(n.)","z":"石塊；岩石","b":1,"u":"1-3","m":1,"n":"興趣；使感興趣"},{"w":"dinosaur","p":"(n.)","z":"恐龍","b":1,"u":"1-3","n":"片"},{"w":"lab","p":"(n.)","z":"實驗室","b":1,"u":"1-3","n":"制服"},{"w":"music video","p":"(n.)","z":"音樂影片","b":1,"u":"1-4","n":"百"},{"w":"band","p":"(n.)","z":"樂團","b":1,"u":"1-4","n":"謊言；說謊（現在分詞為lying）；躺；臥（現在分詞為lying）"},{"w":"take a look","p":"","z":"看一看","b":1,"u":"1-4","n":"感到緊張"},{"w":"all","p":"(adj.)","z":"所有的","b":1,"u":"1-4","n":"真實的"},{"w":"cute","p":"(adj.)","z":"可愛的","b":1,"u":"1-4","n":"年輕的"},{"w":"great","p":"(adj.)","z":"棒的","b":1,"u":"1-4","n":"下一個的"},{"w":"free","p":"(adj.)","z":"有空的；免費的","b":1,"u":"1-4","m":1,"n":"現代的"},{"w":"weekend","p":"(n.)","z":"週末","b":1,"u":"1-4","n":"恐龍"},{"w":"Saturday","p":"(n.)","z":"星期六","b":1,"u":"1-4","n":"生還者"},{"w":"together","p":"(adv.)","z":"一起","b":1,"u":"1-4","n":"作為替代"},{"w":"ready","p":"(adj.)","z":"準備好的","b":1,"u":"1-4","n":"高的"},{"w":"p.m.","p":"(adv.)","z":"下午；晚上","b":1,"u":"1-4","n":"一次"},{"w":"o'clock","p":"(adv.)","z":"…點鐘","b":1,"u":"1-4","n":"也（不）"},{"w":"day","p":"(n.)","z":"日；天","b":1,"u":"1-4","n":"英文"},{"w":"today","p":"(adv.)；(n.)","z":"今天","b":1,"u":"1-4","n":"在網上；線上的"},{"w":"Friday","p":"(n.)","z":"星期五","b":1,"u":"1-4","n":"咖啡"},{"w":"Sunday","p":"(n.)","z":"星期日","b":1,"u":"1-4","n":"瓦礫；碎石"},{"w":"Monday","p":"(n.)","z":"星期一","b":1,"u":"1-4","n":"手機"},{"w":"Tuesday","p":"(n.)","z":"星期二","b":1,"u":"1-4","n":"女人（複數為women）"},{"w":"Wednesday","p":"(n.)","z":"星期三","b":1,"u":"1-4","n":"銷售員；業務員"},{"w":"Thursday","p":"(n.)","z":"星期四","b":1,"u":"1-4","n":"工具"},{"w":"week","p":"(n.)","z":"週；星期","b":1,"u":"1-4","n":"祝福"},{"w":"a.m.","p":"(adv.)","z":"上午；凌晨","b":1,"u":"1-4","n":"今晚"},{"w":"study","p":"(v.)；(n.)","z":"研讀；研究","b":1,"u":"1-4","m":1,"n":"允許"},{"w":"English","p":"(n.)","z":"英文","b":1,"u":"1-4","n":"玩笑；笑話"},{"w":"take a walk","p":"","z":"散步","b":1,"u":"1-4","n":"處理；負責"},{"w":"movie","p":"(n.)","z":"電影","b":1,"u":"1-4","n":"角色"},{"w":"take a picture","p":"","z":"拍照","b":1,"u":"1-4","n":"說服（某人）做…"},{"w":"party","p":"(n.)","z":"派對；宴會","b":1,"u":"1-4","n":"耳朵"},{"w":"report","p":"(v.)；(n.)","z":"報導","b":1,"u":"1-4","n":"屬於"},{"w":"popular","p":"(adj.)","z":"受歡迎的","b":1,"u":"1-4","n":"容易的"},{"w":"fan","p":"(n.)","z":"…迷；風扇","b":1,"u":"1-4","m":1,"n":"幼犬"},{"w":"shake hands","p":"","z":"握手","b":1,"u":"1-4","n":"稍候"},{"w":"everyone","p":"(pron.)","z":"每個人（= everybody）","b":1,"u":"1-4","n":"哪一個"},{"w":"K-pop","p":"(n.)","z":"韓國流行音樂（=Korean popular music）","b":1,"u":"1-4","n":"公眾（的）"},{"w":"concert","p":"(n.)","z":"音樂會；演唱會","b":1,"u":"1-4","n":"人才；天分"},{"w":"meet-and-greet","p":"(n.)","z":"見面會","b":1,"u":"1-4","n":"雞肉飯"},{"w":"stage","p":"(n.)","z":"舞台","b":1,"u":"1-4","n":"區域"},{"w":"date","p":"(n.)；(v.)","z":"日期；約會","b":1,"u":"1-5","m":1,"n":"中午"},{"w":"November","p":"(n.)","z":"十一月","b":1,"u":"1-5","n":"空間"},{"w":"first","p":"(adj.)；(adv.)；(n.)","z":"第一（的）","b":1,"u":"1-5","n":"危險的"},{"w":"Thanksgiving","p":"(n.)","z":"感恩節","b":1,"u":"1-5","n":"行星"},{"w":"important","p":"(adj.)","z":"重要的","b":1,"u":"1-5","n":"可愛的；美好的"},{"w":"holiday","p":"(n.)","z":"節日；假日","b":1,"u":"1-5","n":"漢堡（= burger）"},{"w":"when","p":"(adv.)","z":"何時","b":1,"u":"1-5","n":"可能"},{"w":"fourth","p":"(adj.)；(adv.)；(n.)","z":"第四（的）","b":1,"u":"1-5","n":"中國的；中國人"},{"w":"birthday","p":"(n.)","z":"生日","b":1,"u":"1-5","n":"刀"},{"w":"also","p":"(adv.)","z":"也；此外","b":1,"u":"1-5","n":"向南地；南方（的）"},{"w":"before","p":"(prep.)","z":"在…之前","b":1,"u":"1-5","n":"沿著"},{"w":"around","p":"(adv.)；(prep.)","z":"圍繞；在…附近；大約","b":1,"u":"1-5","m":1,"n":"向北地；北方（的）"},{"w":"How about…?","p":"","z":"那…呢？","b":1,"u":"1-5","t":0,"n":"（使）變成"},{"w":"second","p":"(adj.)；(adv.)；(n.)","z":"第二（的）；秒","b":1,"u":"1-5","m":1,"n":"親愛的"},{"w":"next","p":"(adj.)","z":"下一個的","b":1,"u":"1-5","n":"真實的"},{"w":"month","p":"(n.)","z":"月份","b":1,"u":"1-5","n":"房子"},{"w":"January","p":"(n.)","z":"一月","b":1,"u":"1-5","n":"肉"},{"w":"February","p":"(n.)","z":"二月","b":1,"u":"1-5","n":"可可"},{"w":"March","p":"(n.)","z":"三月","b":1,"u":"1-5","n":"分鐘"},{"w":"April","p":"(n.)","z":"四月","b":1,"u":"1-5","n":"三月"},{"w":"May","p":"(n.)；(aux.)","z":"五月；可以；可能","b":1,"u":"1-5","m":1,"n":"綿羊"},{"w":"June","p":"(n.)","z":"六月","b":1,"u":"1-5","n":"戰爭"},{"w":"July","p":"(n.)","z":"七月","b":1,"u":"1-5","n":"三明治"},{"w":"August","p":"(n.)","z":"八月","b":1,"u":"1-5","n":"大學"},{"w":"September","p":"(n.)","z":"九月","b":1,"u":"1-5","n":"炸雞"},{"w":"October","p":"(n.)","z":"十月","b":1,"u":"1-5","n":"餅乾"},{"w":"December","p":"(n.)","z":"十二月","b":1,"u":"1-5","n":"小提琴"},{"w":"New Year's Eve","p":"(n.)","z":"元旦前夕","b":1,"u":"1-5","n":"籃子"},{"w":"Christmas","p":"(n.)","z":"聖誕節","b":1,"u":"1-5","n":"信；字母"},{"w":"third","p":"(n.)","z":"第三（的）","b":1,"u":"1-5","n":"巧克力"},{"w":"animal","p":"(n.)","z":"動物","b":1,"u":"1-5","n":"農夫"},{"w":"cow","p":"(n.)","z":"牛；乳牛","b":1,"u":"1-5","n":"暑假"},{"w":"think","p":"(v.)","z":"想，認為","b":1,"u":"1-5","n":"（使）乾燥；乾的"},{"w":"lucky","p":"(adj.)","z":"幸運的","b":1,"u":"1-5","n":"有幫助的"},{"w":"only","p":"(adv.)；(adj.)","z":"只是；唯一的","b":1,"u":"1-5","n":"今晚"},{"w":"dinner","p":"(n.)","z":"晚餐","b":1,"u":"1-5","n":"（一）打"},{"w":"give","p":"(v.)","z":"給；給予","b":1,"u":"1-5","m":1,"n":"價錢為；花費"},{"w":"thankful","p":"(adj.)","z":"感謝的","b":1,"u":"1-5","n":"醜的"},{"w":"turkey leg","p":"(n.)","z":"火雞腿","b":1,"u":"1-5","n":"桌子"},{"w":"nervous","p":"(adj.)","z":"緊張的","b":1,"u":"1-5","n":"容易的"},{"w":"cry out","p":"","z":"喊叫","b":1,"u":"1-5","n":"冷靜一下"},{"w":"lion","p":"(n.)","z":"獅子","b":1,"u":"1-6","n":"中午"},{"w":"over there","p":"","z":"在那裡","b":1,"u":"1-6","n":"說服（某人）做…"},{"w":"king","p":"(n.)","z":"國王","b":1,"u":"1-6","n":"雞肉飯"},{"w":"some","p":"(adj.)；(pron.)","z":"一些（的）","b":1,"u":"1-6","n":"醜的"},{"w":"elephant","p":"(n.)","z":"大象","b":1,"u":"1-6","n":"心情"},{"w":"so","p":"(adv.)；(conj.)","z":"如此地；所以","b":1,"u":"1-6","m":1,"n":"其他"},{"w":"any","p":"(adj.)；(pron.)","z":"任何（的）","b":1,"u":"1-6","n":"國家的"},{"w":"tiger","p":"(n.)","z":"老虎","b":1,"u":"1-6","n":"漫畫展（= comic con）"},{"w":"zebra","p":"(n.)","z":"斑馬","b":1,"u":"1-6","n":"愉快；榮幸"},{"w":"back","p":"(n.)；(adv.)","z":"背；後面；返回","b":1,"u":"1-6","m":1,"n":"水果沙拉"},{"w":"help","p":"(n.)；(v.)","z":"幫助；幫忙","b":1,"u":"1-6","n":"神"},{"w":"monkey","p":"(n.)","z":"猴子","b":1,"u":"1-6","n":"商人"},{"w":"fox","p":"(n.)","z":"狐狸","b":1,"u":"1-6","n":"發燒"},{"w":"horse","p":"(n.)","z":"馬","b":1,"u":"1-6","n":"生命；生活"},{"w":"rat","p":"(n.)","z":"老鼠","b":1,"u":"1-6","n":"沙發"},{"w":"bear","p":"(n.)","z":"熊","b":1,"u":"1-6","n":"黑板"},{"w":"world","p":"(n.)","z":"世界","b":1,"u":"1-6","n":"競賽"},{"w":"example","p":"(n.)","z":"實例","b":1,"u":"1-6","n":"輪船"},{"w":"bug","p":"(n.)","z":"蟲子","b":1,"u":"1-6","n":"大小；尺寸"},{"w":"food","p":"(n.)","z":"食物","b":1,"u":"1-6","n":"郵局"},{"w":"clean up","p":"","z":"清理；打掃","b":1,"u":"1-6","n":"保持聯繫"},{"w":"full","p":"(adj.)","z":"飽的；滿的","b":1,"u":"1-6","n":"很少（的）"},{"w":"healthy","p":"(adj.)","z":"健康的","b":1,"u":"1-6","n":"所有的"},{"w":"thanks to","p":"","z":"幸虧；由於","b":1,"u":"1-6","n":"即將來臨；在附近"},{"w":"clean","p":"(adj.)","z":"乾淨的","b":1,"u":"1-6","n":"明智的"},{"w":"never","p":"(adv.)","z":"從不；從未","b":1,"u":"1-6","m":1,"n":"勇敢地"},{"w":"herd","p":"(n.)","z":"獸群","b":1,"u":"1-6","n":"演員"},{"w":"know","p":"(v.)","z":"知道；知道；認識","b":1,"u":"1-6","m":1,"n":"滾動"},{"w":"oxpecker","p":"(n.)","z":"牛椋鳥","b":1,"u":"1-6","n":"蜂蜜；親愛的（用於稱呼）"},{"w":"expert","p":"(n.)","z":"專家","b":1,"u":"1-6","n":"次；時間"},{"w":"coat","p":"(n.)","z":"皮毛；外套","b":1,"u":"1-6","m":1,"n":"工作"},{"w":"luckily","p":"(adv.)","z":"幸運地","b":1,"u":"1-6","n":"從不；從未"},{"w":"provide","p":"(v.)","z":"提供","b":1,"u":"1-6","n":"儲存"},{"w":"like","p":"(v.)；(prep.)","z":"喜歡；像…","b":2,"u":"2-1","n":"清洗"},{"w":"sport","p":"(n.)","z":"運動","b":2,"u":"2-1","n":"藥"},{"w":"much","p":"(adj.)；(pron.)；(adv.)","z":"多（的）","b":2,"u":"2-1","n":"有雪的；下雪"},{"w":"team","p":"(n.)","z":"隊；組","b":2,"u":"2-1","n":"區域"},{"w":"practice","p":"(v.)；(n.)","z":"練習","b":2,"u":"2-1","n":"擦拭"},{"w":"every","p":"(adj.)","z":"每一","b":2,"u":"2-1","n":"酥脆的"},{"w":"then","p":"(adv.)","z":"那麼；然後；那時候","b":2,"u":"2-1","m":1,"n":"作為替代"},{"w":"swim","p":"(v.)","z":"游泳","b":2,"u":"2-1","n":"煮沸"},{"w":"join","p":"(v.)","z":"參加","b":2,"u":"2-1","n":"騙；詭計"},{"w":"eye","p":"(n.)","z":"眼睛","b":2,"u":"2-1","n":"恐懼"},{"w":"hair","p":"(n.)","z":"頭髮","b":2,"u":"2-1","n":"祕書"},{"w":"hundred","p":"(n.)","z":"百","b":2,"u":"2-1","n":"空中；空氣"},{"w":"centimeter","p":"(n.)","z":"公分（= cm）","b":2,"u":"2-1","n":"碗"},{"w":"You can say that again!","p":"","z":"一點也沒錯！","b":2,"u":"2-1","t":0,"n":"簡單地說"},{"w":"guitar","p":"(n.)","z":"吉他","b":2,"u":"2-1","n":"藉口；理由"},{"w":"piano","p":"(n.)","z":"鋼琴","b":2,"u":"2-1","n":"選擇"},{"w":"fly a kite","p":"","z":"放風箏","b":2,"u":"2-1","n":"下課後"},{"w":"paint","p":"(v.)：(n.)","z":"畫圖；顏料：油漆","b":2,"u":"2-1","n":"贏；獲勝"},{"w":"make a cake","p":"","z":"做蛋糕","b":2,"u":"2-1","n":"盡可能的…"},{"w":"nose","p":"(n.)","z":"鼻子","b":2,"u":"2-1","n":"手指"},{"w":"leg","p":"(n.)","z":"腿","b":2,"u":"2-1","n":"十五分鐘；四分之一"},{"w":"large","p":"(adj.)","z":"大的","b":2,"u":"2-1","n":"荒唐的；瘋狂的"},{"w":"ear","p":"(n.)","z":"耳朵","b":2,"u":"2-1","n":"雨林 （= rain forest )"},{"w":"mouth","p":"(n.)","z":"嘴巴","b":2,"u":"2-1","n":"時尚"},{"w":"thick","p":"(adj.)","z":"厚的","b":2,"u":"2-1","n":"尖銳的；敏銳的"},{"w":"lip","p":"(n.)","z":"嘴唇","b":2,"u":"2-1","n":"品項"},{"w":"strong","p":"(adj.)","z":"強壯的","b":2,"u":"2-1","n":"晚的"},{"w":"arm","p":"(n.)","z":"手臂","b":2,"u":"2-1","n":"交通；車流（量）"},{"w":"height","p":"(n.)","z":"身高；高度","b":2,"u":"2-1","n":"韓國流行音樂（=Korean popular music）"},{"w":"player","p":"(n.)","z":"選手；球員","b":2,"u":"2-1","n":"國王"},{"w":"the USA","p":"(n.)","z":"美國（= the United States of America）","b":2,"u":"2-1","n":"夾克"},{"w":"body","p":"(n.)","z":"身體","b":2,"u":"2-1","n":"襪子"},{"w":"put one's all","p":"","z":"盡全力","b":2,"u":"2-1","n":"想要"},{"w":"into","p":"(prep.)","z":"到…裡面","b":2,"u":"2-1","n":"在…旁邊"},{"w":"a lot of","p":"","z":"很多的（= lots of）","b":2,"u":"2-1","n":"下（車、飛機等）"},{"w":"stand out","p":"","z":"突出","b":2,"u":"2-1","n":"不但…也…"},{"w":"different","p":"(adj.)","z":"不同的","b":2,"u":"2-1","n":"好吃的"},{"w":"top","p":"(adj.)；(n.)","z":"頂尖的；頂部（的）","b":2,"u":"2-1","m":1,"n":"嚇人的；令人害怕的"},{"w":"on the other hand","p":"","z":"另一方面","b":2,"u":"2-1","n":"錯過機會"},{"w":"make up for…","p":"","z":"彌補…","b":2,"u":"2-1","t":0,"n":"騎單車"},{"w":"born","p":"(adj.)","z":"天生的；出生的","b":2,"u":"2-1","m":1,"n":"錯誤的"},{"w":"perfect","p":"(adj.)","z":"完美的","b":2,"u":"2-1","n":"受歡迎的"},{"w":"three-pointer","p":"(n.)","z":"三分球","b":2,"u":"2-1","n":"星星；明星"},{"w":"hard work","p":"(n.)","z":"勤奮努力","b":2,"u":"2-1","n":"杯"},{"w":"both","p":"(pron.)","z":"兩者（都）","b":2,"u":"2-1","n":"每個人（= everybody）"},{"w":"early","p":"(adj.)；(adv.)","z":"早的","b":2,"u":"2-2","n":"準備好的"},{"w":"work","p":"(n.)；(v.)","z":"工作；作品","b":2,"u":"2-2","m":1,"n":"速度競賽"},{"w":"often","p":"(adv.)","z":"經常","b":2,"u":"2-2","n":"仍然"},{"w":"get up","p":"","z":"起床","b":2,"u":"2-2","n":"洗耳恭聽"},{"w":"usually","p":"(adv.)","z":"通常","b":2,"u":"2-2","n":"一次"},{"w":"seldom","p":"(adv.)","z":"很少","b":2,"u":"2-2","n":"到國外"},{"w":"sometimes","p":"(adv.)","z":"有時候","b":2,"u":"2-2","n":"只是；唯一的"},{"w":"even","p":"(adv.)","z":"甚至","b":2,"u":"2-2","n":"上午；凌晨"},{"w":"late","p":"(adj.)；(adv.)","z":"晚的","b":2,"u":"2-2","n":"優秀的；極佳的"},{"w":"do one's homework","p":"","z":"做功課","b":2,"u":"2-2","n":"必須"},{"w":"hour","p":"(n.)","z":"小時","b":2,"u":"2-2","n":"設計"},{"w":"always","p":"(adv.)","z":"總是","b":2,"u":"2-2","n":"向北地；北方（的）"},{"w":"tired","p":"(adj.)","z":"疲累的","b":2,"u":"2-2","n":"有用的"},{"w":"shower","p":"(n.)；(v.)","z":"淋浴","b":2,"u":"2-2","n":"星期五"},{"w":"by the way","p":"","z":"順帶一提","b":2,"u":"2-2","n":"導致"},{"w":"library","p":"(n.)","z":"圖書館","b":2,"u":"2-2","n":"麵"},{"w":"check out","p":"","z":"借（書）；查看","b":2,"u":"2-2","m":1,"n":"當然。"},{"w":"once","p":"(adv.)","z":"一次","b":2,"u":"2-2","n":"很可能；大概"},{"w":"twice","p":"(adv.)","z":"兩次","b":2,"u":"2-2","n":"前；以前"},{"w":"walk","p":"(v.)","z":"遛（寵物）","b":2,"u":"2-2","n":"放慢；慢的；慢地"},{"w":"I can't help it.","p":"","z":"我沒辦法。/我控制不了。","b":2,"u":"2-2","t":0,"n":"報名參加"},{"w":"How often…?","p":"","z":"多常…？","b":2,"u":"2-2","t":0,"n":"幾個；一些"},{"w":"about","p":"(adv.)","z":"大約","b":2,"u":"2-2","n":"向北地；北方（的）"},{"w":"brush one's teeth","p":"","z":"刷牙（teeth為tooth的複數）","b":2,"u":"2-2","n":"很多的（= lots of）"},{"w":"face","p":"(n.)；(v.)","z":"臉；面對","b":2,"u":"2-2","m":1,"n":"祝福"},{"w":"breakfast","p":"(n.)","z":"早餐","b":2,"u":"2-2","n":"自我"},{"w":"lunch","p":"(n.)","z":"午餐","b":2,"u":"2-2","n":"父母親"},{"w":"exercise","p":"(v.)；(n.)","z":"運動；習題；練習","b":2,"u":"2-2","m":1,"n":"學習"},{"w":"computer","p":"(n.)","z":"電腦","b":2,"u":"2-2","n":"檸檬"},{"w":"minute","p":"(n.)","z":"分鐘","b":2,"u":"2-2","n":"區域"},{"w":"answer","p":"(n.)；(v.)","z":"回答；答案","b":2,"u":"2-2","n":"課；班級"},{"w":"question","p":"(n.)","z":"問題","b":2,"u":"2-2","n":"女演員"},{"w":"trouble","p":"(n.)","z":"困難；麻煩","b":2,"u":"2-2","n":"羽毛球"},{"w":"life","p":"(n.)","z":"生命；生活","b":2,"u":"2-2","n":"藉口；理由"},{"w":"love","p":"(v.)；(n.)","z":"愛","b":2,"u":"2-2","n":"通往"},{"w":"real","p":"(adj.)","z":"真實的","b":2,"u":"2-2","n":"有雪的；下雪"},{"w":"cram school","p":"(n.)","z":"補習班","b":2,"u":"2-2","n":"大象"},{"w":"owl","p":"(n.)","z":"貓頭鷹","b":2,"u":"2-2","n":"猴子"},{"w":"painting","p":"(n.)","z":"畫作","b":2,"u":"2-3","n":"刻板印象；對…有偏見"},{"w":"flower","p":"(n.)","z":"花","b":2,"u":"2-3","n":"浴室；廁所"},{"w":"which","p":"(pron.)；(adj.)","z":"哪一個","b":2,"u":"2-3","n":"我的（東西）"},{"w":"thirsty","p":"(adj.)","z":"口渴的","b":2,"u":"2-3","n":"一些（的）"},{"w":"coffee","p":"(n.)","z":"咖啡","b":2,"u":"2-3","n":"肉"},{"w":"shop","p":"(n.)","z":"商店","b":2,"u":"2-3","n":"飯廳"},{"w":"later","p":"(adv.)","z":"稍後；晚點","b":2,"u":"2-3","n":"向西地；西方（的）"},{"w":"Of course.","p":"","z":"當然。","b":2,"u":"2-3","n":"很高興認識你。"},{"w":"clerk","p":"(n.)","z":"店員","b":2,"u":"2-3","n":"角色"},{"w":"juice","p":"(n.)","z":"果汁","b":2,"u":"2-3","n":"訣竅"},{"w":"want","p":"(v.)","z":"想要","b":2,"u":"2-3","n":"告訴；分辨"},{"w":"anything","p":"(pron.)","z":"任何事物","b":2,"u":"2-3","n":"哪一個"},{"w":"else","p":"(adv.)","z":"其他","b":2,"u":"2-3","n":"也（不）"},{"w":"treat","p":"(n.)；(v.)","z":"請客；款待；對待；治療","b":2,"u":"2-3","m":1,"n":"機車"},{"w":"sweet","p":"(adj.)；(n.)","z":"甜美的；甜的；甜食","b":2,"u":"2-3","m":1,"n":"害怕的"},{"w":"hot","p":"(adj.)","z":"熱的","b":2,"u":"2-3","n":"便宜的"},{"w":"chocolate","p":"(n.)","z":"巧克力","b":2,"u":"2-3","n":"彩虹"},{"w":"dollar","p":"(n.)","z":"元","b":2,"u":"2-3","n":"第三（的）"},{"w":"for here","p":"","z":"內用","b":2,"u":"2-3","n":"盡可能"},{"w":"to go","p":"","z":"外帶","b":2,"u":"2-3","n":"騎單車"},{"w":"Here you are.","p":"","z":"給你。（= Here you go.）","b":2,"u":"2-3","t":0,"n":"…歲"},{"w":"bright","p":"(adj.)","z":"鮮豔的；明亮的","b":2,"u":"2-3","n":"棒的"},{"w":"dark","p":"(adj.)","z":"黑的；暗的","b":2,"u":"2-3","n":"許多（的）"},{"w":"art","p":"(n.)","z":"美術；藝術","b":2,"u":"2-3","n":"老虎"},{"w":"milk","p":"(n.)","z":"牛奶","b":2,"u":"2-3","n":"電腦"},{"w":"hamburger","p":"(n.)","z":"漢堡（= burger）","b":2,"u":"2-3","n":"鼓"},{"w":"chicken rice","p":"(n.)","z":"雞肉飯","b":2,"u":"2-3","n":"主題"},{"w":"tea","p":"(n.)","z":"茶","b":2,"u":"2-3","n":"候選人"},{"w":"ice cream","p":"(n.)","z":"冰淇淋","b":2,"u":"2-3","n":"三分球"},{"w":"soup","p":"(n.)","z":"湯","b":2,"u":"2-3","n":"（依次輪到的）機會"},{"w":"sandwich","p":"(n.)","z":"三明治","b":2,"u":"2-3","n":"點心"},{"w":"show","p":"(v.)；(n.)","z":"表現；秀出；表演；節目","b":2,"u":"2-3","m":1,"n":"想，認為"},{"w":"part","p":"(n.)","z":"部分","b":2,"u":"2-3","n":"男服務生"},{"w":"sky","p":"(n.)","z":"天空","b":2,"u":"2-3","n":"季節"},{"w":"street","p":"(n.)","z":"街道","b":2,"u":"2-3","n":"河流"},{"w":"by","p":"(prep.)","z":"被；由；在…旁邊；搭乘；藉由…方式；早於；不遲於","b":2,"u":"2-3","m":1,"n":"在…前面"},{"w":"nearby","p":"(adv.)","z":"附近","b":2,"u":"2-3","n":"明天"},{"w":"create","p":"(v.)","z":"創造","b":2,"u":"2-3","n":"種植；植物"},{"w":"balance","p":"(n.)","z":"平衡","b":2,"u":"2-3","n":"洞"},{"w":"why","p":"(adv.)","z":"為什麼","b":2,"u":"2-4","n":"很快地"},{"w":"wear","p":"(v.)","z":"戴；穿","b":2,"u":"2-4","n":"殺死"},{"w":"mask","p":"(n.)","z":"口罩；面具","b":2,"u":"2-4","n":"恐怖"},{"w":"because","p":"(conj.)","z":"因為","b":2,"u":"2-4","n":"當…時"},{"w":"sick","p":"(adj.)","z":"生病的","b":2,"u":"2-4","n":"嘈雜的"},{"w":"water","p":"(n.)","z":"水","b":2,"u":"2-4","n":"熊"},{"w":"glass","p":"(n.)","z":"玻璃杯；玻璃","b":2,"u":"2-4","n":"頭髮"},{"w":"flour","p":"(n.)","z":"麵粉","b":2,"u":"2-4","n":"油"},{"w":"need","p":"(v.)；(n.)","z":"需要；需求","b":2,"u":"2-4","n":"吹"},{"w":"pie","p":"(n.)","z":"派","b":2,"u":"2-4","n":"迷因"},{"w":"still","p":"(adv.)","z":"仍然","b":2,"u":"2-4","n":"幾乎"},{"w":"thing","p":"(n.)","z":"東西；事情","b":2,"u":"2-4","n":"樂齡中心"},{"w":"a little","p":"","z":"一點點","b":2,"u":"2-4","n":"感到緊張"},{"w":"salt","p":"(n.)","z":"鹽","b":2,"u":"2-4","n":"圖書館"},{"w":"something","p":"(pron.)","z":"某物；某事","b":2,"u":"2-4","n":"我的（東西）"},{"w":"sugar","p":"(n.)","z":"糖","b":2,"u":"2-4","n":"牙醫"},{"w":"get","p":"(v.)","z":"取得；到達；變成","b":2,"u":"2-4","m":1,"n":"享受；喜愛"},{"w":"all right","p":"","z":"好吧；好的","b":2,"u":"2-4","n":"怎麼會? / 為什麼?"},{"w":"back off","p":"","z":"退後；走開","b":2,"u":"2-4","n":"天哪！"},{"w":"meal","p":"(n.)","z":"餐","b":2,"u":"2-4","n":"飯店"},{"w":"bottle","p":"(n.)","z":"瓶子","b":2,"u":"2-4","n":"葡萄"},{"w":"candy","p":"(n.)","z":"糖果","b":2,"u":"2-4","n":"神"},{"w":"popcorn","p":"(n.)","z":"爆米花","b":2,"u":"2-4","n":"主題"},{"w":"cup","p":"(n.)","z":"杯","b":2,"u":"2-4","n":"監視器"},{"w":"bowl","p":"(n.)","z":"碗","b":2,"u":"2-4","n":"課程；路線"},{"w":"fruit salad","p":"(n.)","z":"水果沙拉","b":2,"u":"2-4","n":"火車；訓練"},{"w":"pizza","p":"(n.)","z":"披薩","b":2,"u":"2-4","n":"假髮"},{"w":"milk shake","p":"(n.)","z":"奶昔（= milkshake）","b":2,"u":"2-4","n":"叔伯；舅舅"},{"w":"toast","p":"(n.)；(v.)","z":"烤吐司；烘烤","b":2,"u":"2-4","n":"擁抱"},{"w":"bread","p":"(n.)","z":"麵包","b":2,"u":"2-4","n":"星期二"},{"w":"yummy","p":"(adj.)","z":"好吃的","b":2,"u":"2-4","n":"害羞的"},{"w":"easy","p":"(adj.)","z":"容易的","b":2,"u":"2-4","n":"任何（的）"},{"w":"snack","p":"(n.)","z":"點心","b":2,"u":"2-4","n":"餐廳"},{"w":"kid","p":"(n.)","z":"小孩","b":2,"u":"2-4","n":"心；心臟"},{"w":"cheese","p":"(n.)","z":"乳酪","b":2,"u":"2-4","n":"暑假"},{"w":"plate","p":"(n.)","z":"盤子","b":2,"u":"2-4","n":"兒子"},{"w":"last","p":"(adv.)；(adj.)；(v.)","z":"最後（的）；上一個的；持續","b":2,"u":"2-4","m":1,"n":"可能"},{"w":"enjoy","p":"(v.)","z":"享受；喜愛","b":2,"u":"2-4","n":"拖地；拖把"},{"w":"turn into","p":"","z":"（使）變成","b":2,"u":"2-4","n":"放風箏"},{"w":"each","p":"(adj.)；(pron.)","z":"每一個（的）","b":2,"u":"2-4","n":"無價值的"},{"w":"tub","p":"(n.)","z":"桶","b":2,"u":"2-4","n":"專家"},{"w":"slice","p":"(n.)","z":"片","b":2,"u":"2-4","n":"廚房"},{"w":"spread","p":"(n.)；(v.)","z":"抹醬；散播；（使）蔓延","b":2,"u":"2-4","m":1,"n":"消防局"},{"w":"mix","p":"(v.)","z":"混合；拌和","b":2,"u":"2-4","n":"油炸；油煎"},{"w":"yesterday","p":"(adv.)；(n.)","z":"昨天","b":2,"u":"2-5","n":"只是；唯一的"},{"w":"beach","p":"(n.)","z":"海灘","b":2,"u":"2-5","n":"國小"},{"w":"trash","p":"(n.)","z":"垃圾","b":2,"u":"2-5","n":"親戚"},{"w":"ago","p":"(adv.)","z":"前；以前","b":2,"u":"2-5","n":"圍繞；在…附近；大約"},{"w":"visit","p":"(v.)；(n.)","z":"拜訪","b":2,"u":"2-5","n":"賣"},{"w":"island","p":"(n.)","z":"島嶼","b":2,"u":"2-5","n":"(一)雙；(一)對"},{"w":"a few","p":"","z":"幾個；一些","b":2,"u":"2-5","n":"保持聯繫"},{"w":"sea","p":"(n.)","z":"海","b":2,"u":"2-5","n":"水池"},{"w":"stop","p":"(v.)","z":"停止","b":2,"u":"2-5","n":"建造"},{"w":"happen","p":"(v.)","z":"發生","b":2,"u":"2-5","n":"預訂；預約"},{"w":"dead","p":"(adj.)","z":"死亡的","b":2,"u":"2-5","n":"完美的"},{"w":"warm","p":"(adj.)","z":"溫暖的","b":2,"u":"2-5","n":"漂亮的"},{"w":"rainforest","p":"(n.)","z":"雨林 （= rain forest )","b":2,"u":"2-5","n":"文化"},{"w":"die","p":"(v.)","z":"死亡 （現在分詞為dying）","b":2,"u":"2-5","n":"開始"},{"w":"How come?","p":"","z":"怎麼會? / 為什麼?","b":2,"u":"2-5","t":0,"n":"具有；呈現"},{"w":"busy","p":"(adj.)","z":"忙碌的","b":2,"u":"2-5","n":"兼職的"},{"w":"river","p":"(n.)","z":"河流","b":2,"u":"2-5","n":"湯"},{"w":"lake","p":"(n.)","z":"湖泊","b":2,"u":"2-5","n":"盤子"},{"w":"hill","p":"(n.)","z":"山丘","b":2,"u":"2-5","n":"休息"},{"w":"mountain","p":"(n.)","z":"山","b":2,"u":"2-5","n":"機器人"},{"w":"camp","p":"(n.)；(v.)","z":"露營；紮營","b":2,"u":"2-5","n":"幫助；幫忙"},{"w":"climb","p":"(v.)","z":"爬（山）","b":2,"u":"2-5","n":"（使）乾燥；乾的"},{"w":"row a boat","p":"","z":"划船","b":2,"u":"2-5","n":"放輕鬆"},{"w":"plant","p":"(v.)；(n.)","z":"種植；植物","b":2,"u":"2-5","n":"搜尋；狩獵"},{"w":"hike","p":"(v.)；(n.)","z":"健行","b":2,"u":"2-5","n":"夢遊"},{"w":"picnic","p":"(v.)；(n.)","z":"野餐","b":2,"u":"2-5","n":"煮沸"},{"w":"live","p":"(v.)","z":"居住","b":2,"u":"2-5","n":"警告"},{"w":"playground","p":"(n.)","z":"遊樂場；操場","b":2,"u":"2-5","n":"浪；揮手；揮舞"},{"w":"everything","p":"(pron.)","z":"每樣事物","b":2,"u":"2-5","n":"每個人（= everybody）"},{"w":"change","p":"(v.)；(n.)","z":"改變；找零","b":2,"u":"2-5","m":1,"n":"（使）驚訝"},{"w":"burn","p":"(v.)","z":"燃燒","b":2,"u":"2-5","n":"丟；投擲"},{"w":"oil","p":"(n.)","z":"油","b":2,"u":"2-5","n":"信；字母"},{"w":"sell","p":"(v.)","z":"賣","b":2,"u":"2-5","n":"贏；獲勝"},{"w":"make money","p":"","z":"賺錢","b":2,"u":"2-5","n":"拍照"},{"w":"miss","p":"(v.)","z":"想念；趕不上；錯過","b":2,"u":"2-5","m":1,"n":"死亡 （現在分詞為dying）"},{"w":"little","p":"(adj.)","z":"小的","b":2,"u":"2-5","n":"巨大的"},{"w":"little by little","p":"","z":"一點一點地；逐漸地","b":2,"u":"2-5","n":"說服（某人）做…"},{"w":"way","p":"(n.)","z":"方式；距離；路線","b":2,"u":"2-5","m":1,"n":"碗"},{"w":"coral reef","p":"(n.)","z":"珊瑚礁","b":2,"u":"2-5","n":"串；線"},{"w":"palm","p":"(n.)","z":"棕櫚","b":2,"u":"2-5","n":"選擇"},{"w":"company","p":"(n.)","z":"公司","b":2,"u":"2-5","n":"母雞"},{"w":"village","p":"(n.)","z":"村莊","b":2,"u":"2-5","n":"樂趣；喜悅"},{"w":"adult","p":"(n.)","z":"成人","b":2,"u":"2-5","n":"嘴唇"},{"w":"airport","p":"(n.)","z":"機場","b":2,"u":"2-6","n":"腰帶"},{"w":"travel","p":"(v.)；(n.)","z":"旅行；行進","b":2,"u":"2-6","n":"餵養"},{"w":"rest","p":"(n.)；(v.)","z":"休息","b":2,"u":"2-6","n":"玻璃杯；玻璃"},{"w":"hotel","p":"(n.)","z":"飯店","b":2,"u":"2-6","n":"海"},{"w":"plane","p":"(n.)","z":"飛機（= airplane）","b":2,"u":"2-6","n":"水管"},{"w":"the sights","p":"(n.)","z":"風景；名勝","b":2,"u":"2-6","n":"問題；事件；要緊；重要"},{"w":"bookstore","p":"(n.)","z":"書店","b":2,"u":"2-6","n":"咬；咬（傷）"},{"w":"buy","p":"(v.)","z":"購買","b":2,"u":"2-6","n":"遛（寵物）"},{"w":"just","p":"(adv.)","z":"就；只","b":2,"u":"2-6","n":"也（不）"},{"w":"learn","p":"(v.)","z":"學習","b":2,"u":"2-6","n":"迫使；推動"},{"w":"story","p":"(n.)","z":"故事","b":2,"u":"2-6","n":"票"},{"w":"cool","p":"(adj.)","z":"酷的；涼爽的","b":2,"u":"2-6","m":1,"n":"安全的"},{"w":"train","p":"(n.)；(v.)","z":"火車；訓練","b":2,"u":"2-6","m":1,"n":"百萬"},{"w":"cold","p":"(adj.)；(n.)","z":"冷的；感冒","b":2,"u":"2-6","m":1,"n":"便宜的"},{"w":"try","p":"(v.)；(n.)","z":"嘗試'","b":2,"u":"2-6","n":"居住"},{"w":"take","p":"(v.)","z":"帶；拿；取；搭乘（交通工具）；花費（時間）","b":2,"u":"2-6","m":1,"n":"持續；保持"},{"w":"the other day","p":"","z":"前幾天","b":2,"u":"2-6","n":"放風箏"},{"w":"station","p":"(n.)","z":"車站；局","b":2,"u":"2-6","n":"河流"},{"w":"department store","p":"(n.)","z":"百貨公司","b":2,"u":"2-6","n":"地面"},{"w":"restaurant","p":"(n.)","z":"餐廳","b":2,"u":"2-6","n":"幫助；幫忙"},{"w":"theater","p":"(n.)","z":"電影院","b":2,"u":"2-6","n":"主題"},{"w":"market","p":"(n.)","z":"市場","b":2,"u":"2-6","n":"天空"},{"w":"temple","p":"(n.)","z":"寺廟","b":2,"u":"2-6","n":"現金"},{"w":"famous","p":"(adj.)","z":"有名的","b":2,"u":"2-6","n":"任何（的）"},{"w":"during","p":"(prep.)","z":"在…期間","b":2,"u":"2-6","n":"超過"},{"w":"besides","p":"(adv.)；(prep.)","z":"除…之外","b":2,"u":"2-6","n":"明天"},{"w":"fall in love","p":"","z":"墜入情網","b":2,"u":"2-6","n":"至少"},{"w":"age","p":"(n.)","z":"年紀","b":2,"u":"2-6","n":"飯廳"},{"w":"lose","p":"(v.)","z":"失去","b":2,"u":"2-6","n":"加熱；熱"},{"w":"cry","p":"(v.)","z":"哭泣","b":2,"u":"2-6","n":"祈求；祈禱"},{"w":"hide","p":"(v.)","z":"躲藏","b":2,"u":"2-6","n":"解釋"},{"w":"build","p":"(v.)","z":"建造","b":2,"u":"2-6","n":"運動；習題；練習"},{"w":"trip","p":"(n.)","z":"旅行；行程","b":2,"u":"2-6","n":"能力"},{"w":"sadly","p":"(adv.)","z":"令人傷心地","b":2,"u":"2-6","n":"勇敢地"},{"w":"building","p":"(n.)","z":"建築物","b":2,"u":"2-6","n":"刀"},{"w":"flea","p":"(n.)","z":"跳蚤","b":2,"u":"2-6","n":"環境"},{"w":"golden","p":"(adj.)","z":"金黃色的","b":2,"u":"2-6","n":"容易的"},{"w":"well known","p":"(adj.)","z":"著名的","b":2,"u":"2-6","n":"有空的；免費的"},{"w":"forever","p":"(adv.)","z":"永遠","b":2,"u":"2-6","n":"只是；唯一的"},{"w":"Easter","p":"(n.)","z":"復活節","b":2,"u":"2-CF","n":"巧克力"},{"w":"moon","p":"(n.)","z":"月亮","b":2,"u":"2-CF","n":"注意力持續時間"},{"w":"church","p":"(n.)","z":"教堂","b":2,"u":"2-CF","n":"角色扮演者"},{"w":"roll","p":"(v.)","z":"滾動","b":2,"u":"2-CF","n":"省略"},{"w":"hunt","p":"(v.)；(n.)","z":"搜尋；狩獵","b":2,"u":"2-CF","n":"畫圖；顏料：油漆"},{"w":"fall","p":"(v.)","z":"降臨；發生","b":2,"u":"2-CF","n":"哭泣"},{"w":"get together","p":"","z":"團聚","b":2,"u":"2-CF","n":"快點；少來了"},{"w":"activity","p":"(n.)","z":"活動","b":2,"u":"2-CF","n":"結尾；結束"},{"w":"unique","p":"(adj.)","z":"獨特的","b":2,"u":"2-CF","n":"有雪的；下雪"},{"w":"summer vacation","p":"(n.)","z":"暑假","b":3,"u":"3-1","n":"麵"},{"w":"weather","p":"(n.)","z":"天氣","b":3,"u":"3-1","n":"中間"},{"w":"Taiwan","p":"(n.)","z":"臺灣","b":3,"u":"3-1","n":"手臂"},{"w":"fun","p":"(n.)；(adj.)","z":"樂趣；有趣的","b":3,"u":"3-1","n":"螢幕"},{"w":"snow","p":"(v.)；(n.)","z":"下雪；雪","b":3,"u":"3-1","n":"介意"},{"w":"send","p":"(v.)","z":"寄；送","b":3,"u":"3-1","n":"享受；喜愛"},{"w":"postcard","p":"(n.)","z":"明信片","b":3,"u":"3-1","n":"元旦前夕"},{"w":"borrow","p":"(v.)","z":"借（入）","b":3,"u":"3-1","n":"發生"},{"w":"lend","p":"(v.)","z":"借（出）","b":3,"u":"3-1","n":"愛"},{"w":"glove","p":"(n.)","z":"手套","b":3,"u":"3-1","n":"一半；二分之一"},{"w":"kind","p":"(adj.)；(n.)","z":"親切的；有同情心的；種類","b":3,"u":"3-1","m":1,"n":"假的；偽造的"},{"w":"lovely","p":"(adj.)","z":"可愛的；美好的","b":3,"u":"3-1","n":"誠實的；可信的"},{"w":"jacket","p":"(n.)","z":"夾克","b":3,"u":"3-1","n":"番茄"},{"w":"hate","p":"(v.)","z":"討厭","b":3,"u":"3-1","n":"拖地；拖把"},{"w":"heavy","p":"(adj.)","z":"厚重的；大量的","b":3,"u":"3-1","n":"醜的"},{"w":"season","p":"(n.)","z":"季節","b":3,"u":"3-1","n":"工作"},{"w":"spring","p":"(n.)","z":"春天","b":3,"u":"3-1","n":"三分球"},{"w":"cloud","p":"(n.)","z":"雲","b":3,"u":"3-1","n":"工作；作品"},{"w":"sun","p":"(n.)","z":"太陽","b":3,"u":"3-1","n":"能力"},{"w":"autumn","p":"(n.)","z":"秋天（= fall）","b":3,"u":"3-1","n":"元旦前夕"},{"w":"wind","p":"(n.)","z":"風","b":3,"u":"3-1","n":"舞台"},{"w":"winter","p":"(n.)","z":"冬天","b":3,"u":"3-1","n":"獎"},{"w":"sunny","p":"(adj.)","z":"陽光普照的","b":3,"u":"3-1","n":"中國的；中國人"},{"w":"snowy","p":"(adj.)","z":"有雪的；下雪","b":3,"u":"3-1","n":"成功的"},{"w":"rainy","p":"(adj.)","z":"有雨的；下雨的","b":3,"u":"3-1","n":"嘈雜的"},{"w":"cloudy","p":"(adj.)","z":"多雲的","b":3,"u":"3-1","n":"英俊的"},{"w":"windy","p":"(adj.)","z":"風大的","b":3,"u":"3-1","n":"假的；偽造的"},{"w":"speak","p":"(v.)","z":"講話","b":3,"u":"3-1","n":"下雪；雪"},{"w":"mad","p":"(adj.)","z":"生氣的","b":3,"u":"3-1","n":"令人興奮的；刺激的"},{"w":"in fact","p":"","z":"事實上","b":3,"u":"3-1","n":"玩帆船；航行"},{"w":"mean","p":"(v.)；(adj.)","z":"意指；刻薄的；兇惡的","b":3,"u":"3-1","m":1,"n":"旅行；行進"},{"w":"another","p":"(adj.)；(pron.)","z":"另一（的）","b":3,"u":"3-1","n":"舒適的；自在的"},{"w":"order","p":"(v.)；(n.)","z":"點餐；訂購","b":3,"u":"3-1","n":"描述"},{"w":"strange","p":"(adj.)","z":"奇怪的；陌生的","b":3,"u":"3-1","n":"容易的"},{"w":"soon","p":"(adv.)","z":"很快地","b":3,"u":"3-1","n":"仍然"},{"w":"Rd.","p":"(n.)","z":"路（Road的縮寫）","b":3,"u":"3-1","n":"實例"},{"w":"ROC","p":"(n.)","z":"中華民國（= Republic of China）","b":3,"u":"3-1","n":"水果沙拉"},{"w":"snowborad","p":"(n.)","z":"滑雪板","b":3,"u":"3-1","n":"（日本的）動畫片"},{"w":"anyway","p":"(adv.)","z":"無論如何","b":3,"u":"3-1","n":"很快地"},{"w":"club","p":"(n.)","z":"社團","b":3,"u":"3-2","n":"照片"},{"w":"make up one's mind","p":"","z":"下定決心","b":3,"u":"3-2","n":"借（書）；查看"},{"w":"interesting","p":"(adj.)","z":"有趣的","b":3,"u":"3-2","n":"有才華的"},{"w":"science","p":"(n.)","z":"科學","b":3,"u":"3-2","n":"（一）則；片；張"},{"w":"subject","p":"(n.)","z":"學科；主題","b":3,"u":"3-2","n":"湯"},{"w":"hear","p":"(v.)","z":"聽見","b":3,"u":"3-2","n":"碰撞；打擊；點擊數"},{"w":"same","p":"(adj.)","z":"相同的","b":3,"u":"3-2","n":"簡單的"},{"w":"call","p":"(v.)；(n.)","z":"打電話；呼叫；稱呼","b":3,"u":"3-2","m":1,"n":"考不及格；失敗"},{"w":"tell","p":"(v.)","z":"告訴；分辨","b":3,"u":"3-2","m":1,"n":"愛"},{"w":"pull one's leg","p":"","z":"開玩笑","b":3,"u":"3-2","n":"在那裡"},{"w":"poor","p":"(adj.)","z":"不佳的;貧窮的","b":3,"u":"3-2","n":"便宜的"},{"w":"end","p":"(n.)","z":"結尾；結束","b":3,"u":"3-2","n":"計畫；節目"},{"w":"whose","p":"(adj.)；(pron.)","z":"誰的（東西）","b":3,"u":"3-2","n":"緊張的"},{"w":"camera","p":"(n.)","z":"相機","b":3,"u":"3-2","n":"心情"},{"w":"mine","p":"(pron.)","z":"我的（東西）","b":3,"u":"3-2","n":"他們自己"},{"w":"What's up?","p":"","z":"怎麼了？","b":3,"u":"3-2","t":0,"n":"划船"},{"w":"when…","p":"(conj.)","z":"當…","b":3,"u":"3-2","t":0,"n":"直到"},{"w":"sign up","p":"","z":"報名參加","b":3,"u":"3-2","n":"想要"},{"w":"wrong","p":"(adj.)","z":"錯誤的","b":3,"u":"3-2","n":"大部分的；最…；最多"},{"w":"hold on","p":"","z":"稍候","b":3,"u":"3-2","n":"放輕鬆"},{"w":"math","p":"(n.)","z":"數學（= mathematics）","b":3,"u":"3-2","n":"長凳；長椅"},{"w":"soccer","p":"(n.)","z":"足球","b":3,"u":"3-2","n":"選票"},{"w":"Chinese","p":"(adj.)；(n.)","z":"中國的；中國人","b":3,"u":"3-2","n":"疲累的"},{"w":"history","p":"(n.)","z":"歷史","b":3,"u":"3-2","n":"日記"},{"w":"violin","p":"(n.)","z":"小提琴","b":3,"u":"3-2","n":"獎"},{"w":"robot","p":"(n.)","z":"機器人","b":3,"u":"3-2","n":"文化"},{"w":"health","p":"(n.)","z":"健康","b":3,"u":"3-2","n":"微笑"},{"w":"PE","p":"(n.)","z":"體育（= physical education）","b":3,"u":"3-2","n":"現金"},{"w":"look for","p":"","z":"尋找","b":3,"u":"3-2","n":"不是…就是…"},{"w":"Ms.","p":"(n.)","z":"女士","b":3,"u":"3-2","n":"社團"},{"w":"engineer","p":"(n.)","z":"工程師","b":3,"u":"3-2","n":"座位"},{"w":"lesson","p":"(n.)","z":"課；課程","b":3,"u":"3-2","n":"阿姨；姑姑"},{"w":"difficult","p":"(adj.)","z":"困難的","b":3,"u":"3-2","n":"苗條的；微小的"},{"w":"teach","p":"(v.)","z":"教導","b":3,"u":"3-2","n":"帶來；攜帶"},{"w":"own","p":"(adj.)；(v.)","z":"自己的；擁有","b":3,"u":"3-2","n":"每一"},{"w":"finish","p":"(v.)","z":"完成；結束","b":3,"u":"3-2","n":"烘焙"},{"w":"festival","p":"(n.)","z":"節慶","b":3,"u":"3-2","n":"人；傢伙"},{"w":"start","p":"(v.)；(n.)","z":"開始","b":3,"u":"3-2","n":"猜測"},{"w":"choice","p":"(n.)","z":"選擇","b":3,"u":"3-2","n":"隊；組"},{"w":"not…at all","p":"","z":"一點也不…","b":3,"u":"3-2","t":0,"n":"我知道了。"},{"w":"miss out","p":"","z":"錯過機會","b":3,"u":"3-2","n":"快點；少來了"},{"w":"design","p":"(n.)；(v.)","z":"設計","b":3,"u":"3-2","n":"按鈕；鈕扣"},{"w":"swimmer","p":"(n.)","z":"泳者","b":3,"u":"3-2","n":"淋浴"},{"w":"underwater","p":"(adj.)；(adv.)","z":"水下的","b":3,"u":"3-2","n":"鮮豔的；明亮的"},{"w":"winner","p":"(n.)","z":"獲勝者","b":3,"u":"3-2","n":"戰爭"},{"w":"contest","p":"(n.)","z":"競賽","b":3,"u":"3-2","n":"沐浴"},{"w":"guest","p":"(adj.)；(n.)","z":"客座的；賓客","b":3,"u":"3-2","n":"陽光普照的"},{"w":"someone","p":"(pron.)","z":"某人 (=somebody)","b":3,"u":"3-3","n":"兩者（都）"},{"w":"break","p":"(v.)；(n.)","z":"打破；損壞；休息","b":3,"u":"3-3","m":1,"n":"到達"},{"w":"do the dishes","p":"","z":"洗碗盤","b":3,"u":"3-3","n":"另一方面"},{"w":"half","p":"(n.)","z":"一半；二分之一","b":3,"u":"3-3","n":"天氣"},{"w":"past","p":"(prep.)；(adv.)；(adj.)；(n.)","z":"經過；過去（的）","b":3,"u":"3-3","n":"穿越；從頭到尾；透過；憑藉"},{"w":"leave","p":"(v.)","z":"離開；遺留","b":3,"u":"3-3","m":1,"n":"輸入；進入"},{"w":"quarter","p":"(n.)","z":"十五分鐘；四分之一","b":3,"u":"3-3","n":"水管"},{"w":"remember","p":"(v.)","z":"記得","b":3,"u":"3-3","n":"造成"},{"w":"take it easy","p":"","z":"放輕鬆","b":3,"u":"3-3","n":"…歲"},{"w":"cool down","p":"","z":"冷靜一下","b":3,"u":"3-3","n":"外帶"},{"w":"close","p":"(adj.)","z":"靠近的","b":3,"u":"3-3","n":"便宜的"},{"w":"feed","p":"(v.)","z":"餵養","b":3,"u":"3-3","n":"慶祝"},{"w":"pet","p":"(n.)","z":"寵物","b":3,"u":"3-3","n":"抹醬；散播；（使）蔓延"},{"w":"sweep","p":"(v.)","z":"掃","b":3,"u":"3-3","n":"拼字"},{"w":"floor","p":"(n.)","z":"地板；樓層","b":3,"u":"3-3","n":"十月"},{"w":"fix","p":"(v.)","z":"修理；解決","b":3,"u":"3-3","n":"教導"},{"w":"drawer","p":"(n.)","z":"抽屜","b":3,"u":"3-3","n":"晚餐"},{"w":"mop","p":"(v.)；(n.)","z":"拖地；拖把","b":3,"u":"3-3","n":"標記"},{"w":"stairs","p":"(n.)","z":"樓梯","b":3,"u":"3-3","n":"糖"},{"w":"wipe","p":"(v.)","z":"擦拭","b":3,"u":"3-3","n":"居住"},{"w":"window","p":"(n.)","z":"窗戶","b":3,"u":"3-3","n":"電子郵件"},{"w":"dry","p":"(v.)；(adj.)","z":"（使）乾燥；乾的","b":3,"u":"3-3","n":"慶祝"},{"w":"hang","p":"(v.)","z":"吊；掛","b":3,"u":"3-3","n":"發生"},{"w":"clothes","p":"(n.)","z":"衣服","b":3,"u":"3-3","n":"牛肉"},{"w":"move","p":"(v.)；(n.)","z":"移動","b":3,"u":"3-3","n":"拖地；拖把"},{"w":"city","p":"(n.)","z":"城市","b":3,"u":"3-3","n":"句子"},{"w":"dream","p":"(n.)；(v.)；(adj.)","z":"夢；夢想（的）","b":3,"u":"3-3","n":"差別"},{"w":"almost","p":"(adv.)","z":"幾乎","b":3,"u":"3-3","n":"通常"},{"w":"fall asleep","p":"","z":"睡著","b":3,"u":"3-3","n":"下（車、飛機等）"},{"w":"scared","p":"(adj.)","z":"害怕的","b":3,"u":"3-3","n":"健康的"},{"w":"problem","p":"(n.)","z":"問題","b":3,"u":"3-3","n":"英文"},{"w":"tip","p":"(n.)","z":"訣竅","b":3,"u":"3-3","n":"青少年"},{"w":"however","p":"(adv.)","z":"然而","b":3,"u":"3-3","n":"下午；晚上"},{"w":"nothing","p":"(pron.)","z":"沒什麼；無事；無物","b":3,"u":"3-3","n":"某物；某事"},{"w":"catch","p":"(v.)","z":"捉；接","b":3,"u":"3-3","n":"居住"},{"w":"through","p":"(prep.)","z":"穿越；從頭到尾；透過；憑藉","b":3,"u":"3-3","m":1,"n":"被；由；在…旁邊；搭乘；藉由…方式；早於；不遲於"},{"w":"finally","p":"(adv.)","z":"終於；最後","b":3,"u":"3-3","n":"昨天"},{"w":"save","p":"(v.)","z":"拯救；節省；儲存","b":3,"u":"3-3","m":1,"n":"充滿；裝滿"},{"w":"terrible","p":"(adj.)","z":"可怕的；糟糕的","b":3,"u":"3-3","n":"美味的"},{"w":"monitor","p":"(n.)","z":"監視器","b":3,"u":"3-3","n":"口袋"},{"w":"sleepwalk","p":"(v.)","z":"夢遊","b":3,"u":"3-3","n":"允許"},{"w":"web","p":"(n.)","z":"網子","b":3,"u":"3-3","n":"種子"},{"w":"hole","p":"(n.)","z":"洞","b":3,"u":"3-3","n":"候選人"},{"w":"hope","p":"(v.)；(n.)","z":"希望","b":3,"u":"3-4","n":"居住"},{"w":"future","p":"(n.)；(adj.)","z":"未來（的）","b":3,"u":"3-4","n":"收音機；廣播"},{"w":"plan","p":"(v.)；(n.)","z":"規劃；計畫","b":3,"u":"3-4","n":"考不及格；失敗"},{"w":"lawyer","p":"(n.)","z":"律師","b":3,"u":"3-4","n":"冰箱（ =fridge）"},{"w":"job","p":"(n.)","z":"工作","b":3,"u":"3-4","n":"水果沙拉"},{"w":"get butterflies in one's stomach","p":"","z":"感到緊張","b":3,"u":"3-4","t":0,"n":"對…不陌生"},{"w":"worry","p":"(v.)；(n.)","z":"擔心","b":3,"u":"3-4","n":"聞起來；氣味"},{"w":"keep","p":"(v.)","z":"持續；保持","b":3,"u":"3-4","n":"等待"},{"w":"idea","p":"(n.)","z":"主意；想法","b":3,"u":"3-4","n":"山丘"},{"w":"put on","p":"","z":"穿上","b":3,"u":"3-4","n":"下定決心"},{"w":"reporter","p":"(n.)","z":"記者","b":3,"u":"3-4","n":"公寓"},{"w":"interview","p":"(v.)；(n.)","z":"採訪；面試","b":3,"u":"3-4","n":"搜尋；狩獵"},{"w":"mail carrier","p":"(n.)","z":"郵差（= mailman）","b":3,"u":"3-4","n":"機場"},{"w":"dentist","p":"(n.)","z":"牙醫","b":3,"u":"3-4","n":"三明治"},{"w":"factory","p":"(n.)","z":"工廠","b":3,"u":"3-4","n":"洗手間"},{"w":"fisherman","p":"(n.)","z":"漁夫","b":3,"u":"3-4","n":"倍"},{"w":"secretary","p":"(n.)","z":"祕書","b":3,"u":"3-4","n":"茶"},{"w":"boss","p":"(n.)","z":"老闆","b":3,"u":"3-4","n":"課；課程"},{"w":"salesman","p":"(n.)","z":"銷售員；業務員","b":3,"u":"3-4","n":"公克"},{"w":"farmer","p":"(n.)","z":"農夫","b":3,"u":"3-4","n":"膝蓋"},{"w":"grow","p":"(v.)","z":"種植；成長","b":3,"u":"3-4","n":"黏貼"},{"w":"soldier","p":"(n.)","z":"士兵","b":3,"u":"3-4","n":"畢業"},{"w":"country","p":"(n.)","z":"國家；鄉村","b":3,"u":"3-4","m":1,"n":"同學"},{"w":"truck driver","p":"(n.)","z":"卡車司機","b":3,"u":"3-4","n":"果汁"},{"w":"drive","p":"(v.)","z":"開（車）","b":3,"u":"3-4","n":"完成；結束"},{"w":"successful","p":"(adj.)","z":"成功的","b":3,"u":"3-4","n":"幸運的"},{"w":"find","p":"(v.)","z":"找到；發現","b":3,"u":"3-4","n":"失去"},{"w":"grade","p":"(n.)","z":"年級；成績","b":3,"u":"3-4","m":1,"n":"梳子：梳理"},{"w":"decide","p":"(v.)","z":"決定","b":3,"u":"3-4","n":"燃燒"},{"w":"become","p":"(v.)","z":"成為","b":3,"u":"3-4","n":"採訪；面試"},{"w":"relative","p":"(n.)","z":"親戚","b":3,"u":"3-4","n":"步驟"},{"w":"believe","p":"(v.)","z":"相信","b":3,"u":"3-4","n":"邀請"},{"w":"act","p":"(v.)","z":"表演","b":3,"u":"3-4","n":"輸入；進入"},{"w":"all over","p":"","z":"遍及","b":3,"u":"3-4","n":"能夠"},{"w":"make fun of","p":"","z":"取笑","b":3,"u":"3-4","n":"既不…也不…"},{"w":"give up","p":"","z":"放棄","b":3,"u":"3-4","n":"感到緊張"},{"w":"channel","p":"(n.)","z":"頻道","b":3,"u":"3-4","n":"小提琴"},{"w":"wig","p":"(n.)","z":"假髮","b":3,"u":"3-4","n":"成癮"},{"w":"career","p":"(n.)","z":"職業","b":3,"u":"3-4","n":"毯子"},{"w":"deliver","p":"(v.)","z":"投遞；運送","b":3,"u":"3-4","n":"煮沸"},{"w":"success","p":"(n.)","z":"成功","b":3,"u":"3-4","n":"標誌；簽名；跡象"},{"w":"audition","p":"(n.)","z":"試鏡","b":3,"u":"3-4","n":"實例"},{"w":"metro","p":"(n.)","z":"捷運","b":3,"u":"3-5","n":"聲響；噪音"},{"w":"lost","p":"(adj.)","z":"迷路的","b":3,"u":"3-5","n":"第一（的）"},{"w":"map","p":"(n.)","z":"地圖","b":3,"u":"3-5","n":"街道"},{"w":"ask","p":"(v.)","z":"請求；詢問","b":3,"u":"3-5","n":"記得"},{"w":"Excuse me.","p":"","z":"（對不起）請問…。","b":3,"u":"3-5","n":"請便；開始做"},{"w":"straight","p":"(adv.)；(adj.)","z":"直地；直的","b":3,"u":"3-5","n":"曾經"},{"w":"turn left","p":"","z":"向左轉","b":3,"u":"3-5","n":"稍候"},{"w":"along","p":"(prep.)","z":"沿著","b":3,"u":"3-5","n":"在…期間"},{"w":"block","p":"(n.)","z":"街區","b":3,"u":"3-5","n":"牛椋鳥"},{"w":"corner","p":"(n.)","z":"轉角；角落","b":3,"u":"3-5","n":"南瓜"},{"w":"across from","p":"","z":"在…的對面","b":3,"u":"3-5","n":"下定決心"},{"w":"supermarket","p":"(n.)","z":"超市","b":3,"u":"3-5","n":"沙發"},{"w":"ground","p":"(n.)","z":"地面","b":3,"u":"3-5","n":"角色"},{"w":"sir","p":"(n.)","z":"先生","b":3,"u":"3-5","n":"鬼"},{"w":"on foot","p":"","z":"步行","b":3,"u":"3-5","n":"立刻；馬上"},{"w":"get off","p":"","z":"下（車、飛機等）","b":3,"u":"3-5","n":"執行；落實"},{"w":"ship","p":"(n.)","z":"輪船","b":3,"u":"3-5","n":"三明治"},{"w":"taxi","p":"(n.)","z":"計程車","b":3,"u":"3-5","n":"假髮"},{"w":"bike","p":"(n.)","z":"單車","b":3,"u":"3-5","n":"國家；鄉村"},{"w":"motorcycle","p":"(n.)","z":"機車；摩托車","b":3,"u":"3-5","n":"衣服"},{"w":"scooter","p":"(n.)","z":"機車","b":3,"u":"3-5","n":"課；班級"},{"w":"bank","p":"(n.)","z":"銀行；河岸","b":3,"u":"3-5","n":"月亮"},{"w":"fire station","p":"(n.)","z":"消防局","b":3,"u":"3-5","n":"泳者"},{"w":"toy","p":"(n.)","z":"玩具","b":3,"u":"3-5","n":"景色"},{"w":"post office","p":"(n.)","z":"郵局","b":3,"u":"3-5","n":"襪子"},{"w":"hospital","p":"(n.)","z":"醫院","b":3,"u":"3-5","n":"毛巾"},{"w":"pool","p":"(n.)","z":"水池","b":3,"u":"3-5","n":"燈；光；點亮；輕的"},{"w":"go jogging","p":"","z":"慢跑","b":3,"u":"3-5","n":"爆炸"},{"w":"go sailing","p":"","z":"玩帆船；航行","b":3,"u":"3-5","n":"簡單地說"},{"w":"go surfing","p":"","z":"衝浪","b":3,"u":"3-5","n":"起床"},{"w":"fly","p":"(v.)","z":"飛行；駕駛","b":3,"u":"3-5","n":"給；給予"},{"w":"bus stop","p":"(n.)","z":"公車站","b":3,"u":"3-5","n":"注意力持續時間"},{"w":"go biking","p":"","z":"騎單車","b":3,"u":"3-5","n":"一點點"},{"w":"go shopping","p":"","z":"購物","b":3,"u":"3-5","n":"不是…就是…"},{"w":"hit","p":"(v.)；(n.)","z":"碰撞；打擊；點擊數","b":3,"u":"3-5","m":1,"n":"聽見"},{"w":"sound","p":"(n.)；(v.)","z":"聲音；聽起來","b":3,"u":"3-5","m":1,"n":"世界"},{"w":"bell","p":"(n.)","z":"鐘；鈴","b":3,"u":"3-5","n":"寵物"},{"w":"experience","p":"(n.)；(v.)","z":"經歷；經驗","b":3,"u":"3-5","n":"音樂影片"},{"w":"wonderful","p":"(adj.)","z":"美好的","b":3,"u":"3-5","n":"高興的"},{"w":"play","p":"(n.)；(v.)","z":"戲劇；扮演","b":3,"u":"3-5","m":1,"n":"輪船"},{"w":"go sightseeing","p":"","z":"觀光；遊覽","b":3,"u":"3-5","n":"能夠"},{"w":"will","p":"(aux.)","z":"將","b":3,"u":"3-6","n":"手套"},{"w":"ugly","p":"(adj.)","z":"醜的","b":3,"u":"3-6","n":"真實的"},{"w":"sweater","p":"(n.)","z":"毛衣","b":3,"u":"3-6","n":"農夫"},{"w":"tonight","p":"(adv.)；(n.)","z":"今晚","b":3,"u":"3-6","n":"永遠"},{"w":"funny","p":"(adj.)","z":"滑稽的","b":3,"u":"3-6","n":"每一個（的）"},{"w":"cost","p":"(v.)","z":"價錢為；花費","b":3,"u":"3-6","n":"迫使；推動"},{"w":"price","p":"(n.)","z":"價格","b":3,"u":"3-6","n":"浴室；廁所"},{"w":"spend","p":"(v.)","z":"花費（時間、金錢）","b":3,"u":"3-6","n":"下定義；界定"},{"w":"expensive","p":"(adj.)","z":"昂貴的","b":3,"u":"3-6","n":"簡單的"},{"w":"on sale","p":"","z":"特價中","b":3,"u":"3-6","n":"另一方面"},{"w":"pair","p":"(n.)","z":"(一)雙；(一)對","b":3,"u":"3-6","n":"課；班級"},{"w":"total","p":"(n.)；(adj.)","z":"總計（的）；全部（的）","b":3,"u":"3-6","n":"四月"},{"w":"pay","p":"(v.)","z":"付費","b":3,"u":"3-6","n":"借（入）"},{"w":"thousand","p":"(n.)","z":"千","b":3,"u":"3-6","n":"雞肉飯"},{"w":"tomorrow","p":"(adv.)；(n.)","z":"明天","b":3,"u":"3-6","n":"總是"},{"w":"high","p":"(adj.)","z":"高的","b":3,"u":"3-6","n":"緊張的"},{"w":"would like","p":"","z":"想要","b":3,"u":"3-6","n":"處理；負責"},{"w":"dress","p":"(v.)；(n.)","z":"打扮；洋裝","b":3,"u":"3-6","n":"降臨；發生"},{"w":"cap","p":"(n.)","z":"（前有遮簷的）帽子","b":3,"u":"3-6","n":"小考"},{"w":"shirt","p":"(n.)","z":"襯衫","b":3,"u":"3-6","n":"超市"},{"w":"belt","p":"(n.)","z":"腰帶","b":3,"u":"3-6","n":"夾克"},{"w":"jeans","p":"(n.)","z":"牛仔褲","b":3,"u":"3-6","n":"星期六"},{"w":"sock","p":"(n.)","z":"襪子","b":3,"u":"3-6","n":"衣服"},{"w":"tie","p":"(n.)","z":"領帶","b":3,"u":"3-6","n":"菜單"},{"w":"pants","p":"(n.)","z":"長褲","b":3,"u":"3-6","n":"收音機；廣播"},{"w":"shoe","p":"(n.)","z":"鞋","b":3,"u":"3-6","n":"聊天"},{"w":"T-shirt","p":"(n.)","z":"T恤","b":3,"u":"3-6","n":"長凳；長椅"},{"w":"shorts","p":"(n.)","z":"短褲","b":3,"u":"3-6","n":"公斤"},{"w":"hat","p":"(n.)","z":"帽子","b":3,"u":"3-6","n":"包裹"},{"w":"skirt","p":"(n.)","z":"裙子","b":3,"u":"3-6","n":"嘴巴"},{"w":"glasses","p":"(n.)","z":"眼鏡","b":3,"u":"3-6","n":"座位"},{"w":"ring","p":"(n.)","z":"戒指；環（狀物）","b":3,"u":"3-6","n":"機器人"},{"w":"take off","p":"","z":"脫下","b":3,"u":"3-6","n":"增強力量"},{"w":"fast","p":"(adj.)；(adv.)","z":"快的；快地","b":3,"u":"3-6","n":"多雲的"},{"w":"low","p":"(adj.)","z":"低的","b":3,"u":"3-6","n":"有雪的；下雪"},{"w":"cheap","p":"(adj.)","z":"便宜的","b":3,"u":"3-6","n":"健康的"},{"w":"what's more","p":"","z":"而且","b":3,"u":"3-6","n":"尋找"},{"w":"most","p":"(adj.)；(adv.)","z":"大部分的；最…；最多","b":3,"u":"3-6","m":1,"n":"圓形的"},{"w":"hurt","p":"(v.)","z":"傷害","b":3,"u":"3-6","n":"抵達"},{"w":"come off","p":"","z":"從…脫落","b":3,"u":"3-6","n":"採取行動"},{"w":"checkout","p":"(n.)","z":"結帳處","b":3,"u":"3-6","n":"錯誤"},{"w":"cash","p":"(n.)","z":"現金","b":3,"u":"3-6","n":"展覽會"},{"w":"truth","p":"(n.)","z":"真相","b":3,"u":"3-6","n":"肉"},{"w":"fashion","p":"(n.)","z":"時尚","b":3,"u":"3-6","n":"課；班級"},{"w":"environment","p":"(n.)","z":"環境","b":3,"u":"3-6","n":"來源"},{"w":"Halloween","p":"(n.)","z":"萬聖節","b":3,"u":"3-CF","n":"樂趣；喜悅"},{"w":"children","p":"(n.)","z":"兒童 （單數為 child）","b":3,"u":"3-CF","n":"流行音樂"},{"w":"pumpkin","p":"(n.)","z":"南瓜","b":3,"u":"3-CF","n":"紀錄；記載"},{"w":"cut out","p":"","z":"割出；切出","b":3,"u":"3-CF","n":"爆炸"},{"w":"moment","p":"(n.)","z":"時刻","b":3,"u":"3-CF","n":"黑板"},{"w":"go trick-or-treating","p":"","z":"不給糖就搗蛋","b":3,"u":"3-CF","n":"一點點"},{"w":"costume","p":"(n.)","z":"道具服","b":3,"u":"3-CF","n":"資訊"},{"w":"jack-o'-lantern","p":"(n.)","z":"南瓜燈","b":3,"u":"3-CF","n":"肩膀"},{"w":"haunted house","p":"(n.)","z":"鬼屋","b":3,"u":"3-CF","n":"愚人節"},{"w":"scary","p":"(adj.)","z":"嚇人的；令人害怕的","b":3,"u":"3-CF","m":1,"n":"愚蠢的"},{"w":"foreign","p":"(adj.)","z":"外國的","b":4,"u":"4-1","n":"有才華的"},{"w":"than","p":"(conj.)；(prep.)","z":"比","b":4,"u":"4-1","n":"當…時"},{"w":"friendly","p":"(adj.)","z":"友善的","b":4,"u":"4-1","n":"小的"},{"w":"convenient","p":"(adj.)","z":"便利的","b":4,"u":"4-1","n":"乾淨的"},{"w":"pork","p":"(n.)","z":"豬肉","b":4,"u":"4-1","n":"蔬菜"},{"w":"beef","p":"(n.)","z":"牛肉","b":4,"u":"4-1","n":"百萬"},{"w":"delicious","p":"(adj.)","z":"美味的","b":4,"u":"4-1","n":"酷的；涼爽的"},{"w":"feel","p":"(v.)","z":"感到","b":4,"u":"4-1","n":"爬（山）"},{"w":"steak","p":"(n.)","z":"牛排；肉排","b":4,"u":"4-1","n":"城堡"},{"w":"menu","p":"(n.)","z":"菜單","b":4,"u":"4-1","n":"元旦前夕"},{"w":"waitress","p":"(n.)","z":"女服務生","b":4,"u":"4-1","n":"嗜好"},{"w":"ham","p":"(n.)","z":"火腿","b":4,"u":"4-1","n":"水"},{"w":"butter","p":"(n.)","z":"奶油","b":4,"u":"4-1","n":"攤位"},{"w":"medium","p":"(adj.)","z":"五分熟；中等的","b":4,"u":"4-1","n":"美好的"},{"w":"meat","p":"(n.)","z":"肉","b":4,"u":"4-1","n":"裙子"},{"w":"smell","p":"(v.)；(n.)","z":"聞起來；氣味","b":4,"u":"4-1","n":"知道；知道；認識"},{"w":"taste","p":"(v.)；(n.)","z":"嚐起來；味道","b":4,"u":"4-1","n":"拜訪"},{"w":"as…as…","p":"","z":"如同…一樣…","b":4,"u":"4-1","t":0,"n":"另一方面"},{"w":"get around","p":"","z":"各處旅行","b":4,"u":"4-1","n":"算…參加一份"},{"w":"dish","p":"(n.)","z":"菜餚","b":4,"u":"4-1","n":"字典"},{"w":"more","p":"(adv.)；(adj.)","z":"更…","b":4,"u":"4-1","n":"也；此外"},{"w":"fries","p":"(n.)","z":"薯條（= French fries）","b":4,"u":"4-1","n":"行星"},{"w":"knife","p":"(n.)","z":"刀","b":4,"u":"4-1","n":"韓國流行音樂（=Korean popular music）"},{"w":"fork","p":"(n.)","z":"叉子","b":4,"u":"4-1","n":"歌手"},{"w":"noodle","p":"(n.)","z":"麵","b":4,"u":"4-1","n":"萬聖節"},{"w":"chopsticks","p":"(n.)","z":"筷子","b":4,"u":"4-1","n":"身體"},{"w":"spoon","p":"(n.)","z":"湯匙","b":4,"u":"4-1","n":"手臂"},{"w":"fried chicken","p":"(n.)","z":"炸雞","b":4,"u":"4-1","n":"頭；朝…前進"},{"w":"waiter","p":"(n.)","z":"男服務生","b":4,"u":"4-1","n":"垃圾"},{"w":"strawberry","p":"(n.)","z":"草莓","b":4,"u":"4-1","n":"戰爭"},{"w":"bun","p":"(n.)","z":"小圓麵包","b":4,"u":"4-1","n":"環境"},{"w":"earth","p":"(n.)","z":"地球","b":4,"u":"4-1","n":"十二月"},{"w":"bring","p":"(v.)","z":"帶來；攜帶","b":4,"u":"4-1","n":"開（車）"},{"w":"smile","p":"(n.)；(v.)","z":"微笑","b":4,"u":"4-1","n":"大門"},{"w":"land","p":"(n.)；(v.)","z":"陸地；落地","b":4,"u":"4-1","n":"乳酪"},{"w":"shape","p":"(n.)","z":"形狀","b":4,"u":"4-1","n":"畢業"},{"w":"clear","p":"(adj.)","z":"晴朗的；清楚的","b":4,"u":"4-1","n":"美麗的"},{"w":"comfortable","p":"(adj.)","z":"舒適的；自在的","b":4,"u":"4-1","n":"幾個的"},{"w":"fill","p":"(v.)","z":"充滿；裝滿","b":4,"u":"4-1","n":"爬（山）"},{"w":"pack","p":"(v.)；(n.)","z":"打包；塞進；一副；一包","b":4,"u":"4-1","m":1,"n":"複習"},{"w":"hot-air balloon","p":"(n.)","z":"熱氣球","b":4,"u":"4-1","n":"杯"},{"w":"view","p":"(n.)","z":"景色","b":4,"u":"4-1","n":"寵物"},{"w":"grass","p":"(n.)","z":"草地","b":4,"u":"4-2","n":"聲音；聽起來"},{"w":"red fire ant","p":"(n.)","z":"紅火蟻","b":4,"u":"4-2","n":"公尺"},{"w":"dangerous","p":"(adj.)","z":"危險的","b":4,"u":"4-2","n":"早的"},{"w":"bite","p":"(n.)；(v.)","z":"咬；咬（傷）","b":4,"u":"4-2","n":"木瓜"},{"w":"death","p":"(n.)","z":"死亡","b":4,"u":"4-2","n":"鄰居"},{"w":"kick","p":"(v.)","z":"踢","b":4,"u":"4-2","n":"改變；找零"},{"w":"themsleves","p":"(pron.)","z":"他們自己","b":4,"u":"4-2","n":"任何人（= anyone）"},{"w":"kill","p":"(v.)","z":"殺死","b":4,"u":"4-2","n":"想像"},{"w":"stay away from…","p":"","z":"遠離…","b":4,"u":"4-2","t":0,"n":"下定決心"},{"w":"agree","p":"(v.)","z":"同意","b":4,"u":"4-2","n":"付費"},{"w":"circle","p":"(n.)；(v.)","z":"圓圈；畫圈","b":4,"u":"4-2","n":"能力"},{"w":"myself","p":"(pron.)","z":"我自己","b":4,"u":"4-2","n":"某人 (=somebody)"},{"w":"snake","p":"(n.)","z":"蛇","b":4,"u":"4-2","n":"生命；生活"},{"w":"wet","p":"(adj.)","z":"潮濕的","b":4,"u":"4-2","n":"成功的"},{"w":"deep","p":"(adj.)","z":"深的","b":4,"u":"4-2","n":"主要的"},{"w":"true","p":"(adj.)","z":"真實的","b":4,"u":"4-2","n":"口渴的"},{"w":"give…a hand","p":"","z":"幫助…","b":4,"u":"4-2","t":0,"n":"想要"},{"w":"spider","p":"(n.)","z":"蜘蛛","b":4,"u":"4-2","n":"碼"},{"w":"gram","p":"(n.)","z":"公克","b":4,"u":"4-2","n":"工作"},{"w":"insect","p":"(n.)","z":"昆蟲","b":4,"u":"4-2","n":"頭髮"},{"w":"bee","p":"(n.)","z":"蜜蜂","b":4,"u":"4-2","n":"四月"},{"w":"inch","p":"(n.)","z":"吋","b":4,"u":"4-2","n":"國家；鄉村"},{"w":"wide","p":"(adj.)","z":"寬的","b":4,"u":"4-2","n":"明智的"},{"w":"kilogram","p":"(n.)","z":"公斤","b":4,"u":"4-2","n":"公寓"},{"w":"nature","p":"(n.)","z":"大自然","b":4,"u":"4-2","n":"舞台"},{"w":"below","p":"(prep.)；(adv.)","z":"在… 之下；在下面","b":4,"u":"4-2","n":"在…前面"},{"w":"sea level","p":"(n.)","z":"海平面","b":4,"u":"4-2","n":"長褲"},{"w":"mile","p":"(n.)","z":"英里","b":4,"u":"4-2","n":"消防局"},{"w":"feet","p":"(n.)","z":"英尺（為 foot 的複數）","b":4,"u":"4-2","n":"獎項"},{"w":"smart","p":"(adj.)","z":"聰明的","b":4,"u":"4-2","n":"美麗的"},{"w":"traffic","p":"(n.)","z":"交通；車流（量）","b":4,"u":"4-2","n":"禮物；現在（的）；目前（的）"},{"w":"appear","p":"(v.)","z":"似乎；出現","b":4,"u":"4-2","m":1,"n":"報導"},{"w":"air","p":"(n.)","z":"空中；空氣","b":4,"u":"4-2","n":"丈夫"},{"w":"far","p":"(adv.)；(adj.)","z":"遠","b":4,"u":"4-2","n":"向北地；北方（的）"},{"w":"slow","p":"(v.)；(adj.)；(adv.)","z":"放慢；慢的；慢地","b":4,"u":"4-2","n":"購買"},{"w":"light","p":"(n.)；(v.)；(adj.)","z":"燈；光；點亮；輕的","b":4,"u":"4-2","m":1,"n":"蛇"},{"w":"cross","p":"(v.)","z":"穿越","b":4,"u":"4-2","n":"帶來；攜帶"},{"w":"cause","p":"(v.)","z":"造成","b":4,"u":"4-2","n":"給；給予"},{"w":"nest","p":"(n.)","z":"巢；窩","b":4,"u":"4-2","n":"聖誕節"},{"w":"protect","p":"(v.)","z":"保護","b":4,"u":"4-2","n":"贏；獲勝"},{"w":"outdoor","p":"(adj.)","z":"戶外的","b":4,"u":"4-2","n":"髒的"},{"w":"safety","p":"(n.)","z":"安全","b":4,"u":"4-2","n":"嬰兒；年幼的"},{"w":"weigh","p":"(v.)","z":"重達…","b":4,"u":"4-2","n":"標記"},{"w":"meter","p":"(n.)","z":"公尺","b":4,"u":"4-2","n":"母雞"},{"w":"accident","p":"(n.)","z":"意外","b":4,"u":"4-2","n":"錯誤"},{"w":"crosswalk","p":"(n.)","z":"行人穿越道","b":4,"u":"4-2","n":"沐浴"},{"w":"float","p":"(v.)","z":"漂浮","b":4,"u":"4-2","n":"滾動"},{"w":"loudly","p":"(adv.)","z":"大聲地","b":4,"u":"4-3","n":"…點鐘"},{"w":"hard","p":"(adv.)；(adj.)","z":"努力地；困難的","b":4,"u":"4-3","n":"在網上；線上的"},{"w":"well","p":"(adv.)；(adj.)","z":"好地；健康的","b":4,"u":"4-3","m":1,"n":"也不"},{"w":"share","p":"(v.)","z":"分享","b":4,"u":"4-3","n":"發生"},{"w":"weak","p":"(adj.)","z":"虛弱的","b":4,"u":"4-3","n":"陽光普照的"},{"w":"hen","p":"(n.)","z":"母雞","b":4,"u":"4-3","n":"復活節"},{"w":"dirty","p":"(adj.)","z":"髒的","b":4,"u":"4-3","n":"嘈雜的"},{"w":"bow","p":"(v.)；(n.)","z":"鞠躬；蝴蝶結","b":4,"u":"4-3","m":1,"n":"野餐"},{"w":"without","p":"(prep.)","z":"沒有；無","b":4,"u":"4-3","n":"穿越；從頭到尾；透過；憑藉"},{"w":"quickly","p":"(adv.)","z":"快地","b":4,"u":"4-3","n":"大聲地"},{"w":"web page","p":"(n.)","z":"網頁","b":4,"u":"4-3","n":"（前有遮簷的）帽子"},{"w":"service","p":"(n.)","z":"服務","b":4,"u":"4-3","n":"擁有者；主人"},{"w":"wise","p":"(adj.)","z":"明智的","b":4,"u":"4-3","n":"一些（的）"},{"w":"cheer","p":"(v.)；(n.)","z":"歡呼","b":4,"u":"4-3","n":"油炸；油煎"},{"w":"celebrate","p":"(v.)","z":"慶祝","b":4,"u":"4-3","n":"請求；詢問"},{"w":"make","p":"(v.)","z":"要…做…；使…","b":4,"u":"4-3","n":"說話"},{"w":"over","p":"(prep.)","z":"超過","b":4,"u":"4-3","n":"沿著"},{"w":"have","p":"(v.)","z":"使…","b":4,"u":"4-3","n":"夢遊"},{"w":"grape","p":"(n.)","z":"葡萄","b":4,"u":"4-3","n":"草地"},{"w":"goose","p":"(n.)","z":"鵝（複數為geese）","b":4,"u":"4-3","n":"戰爭"},{"w":"duck","p":"(n.)","z":"鴨","b":4,"u":"4-3","n":"公斤"},{"w":"goat","p":"(n.)","z":"山羊","b":4,"u":"4-3","n":"主題"},{"w":"sheep","p":"(n.)","z":"綿羊","b":4,"u":"4-3","n":"腳趾"},{"w":"peach","p":"(n.)","z":"桃子","b":4,"u":"4-3","n":"垃圾"},{"w":"turtle","p":"(n.)","z":"烏龜","b":4,"u":"4-3","n":"可可"},{"w":"pear","p":"(n.)","z":"梨子","b":4,"u":"4-3","n":"世界"},{"w":"papaya","p":"(n.)","z":"木瓜","b":4,"u":"4-3","n":"第三（的）"},{"w":"vegetable","p":"(n.)","z":"蔬菜","b":4,"u":"4-3","n":"食譜"},{"w":"guava","p":"(n.)","z":"芭樂","b":4,"u":"4-3","n":"飯廳"},{"w":"tomato","p":"(n.)","z":"番茄","b":4,"u":"4-3","n":"星期四"},{"w":"watermelon","p":"(n.)","z":"西瓜","b":4,"u":"4-3","n":"律師"},{"w":"American","p":"(n.)","z":"美國人","b":4,"u":"4-3","n":"週；星期"},{"w":"million","p":"(n.)","z":"百萬","b":4,"u":"4-3","n":"日；天"},{"w":"pound","p":"(n.)","z":"磅","b":4,"u":"4-3","n":"兒子"},{"w":"pick","p":"(v.)","z":"採摘；撿拾","b":4,"u":"4-3","n":"請求；詢問"},{"w":"bean","p":"(n.)","z":"豆","b":4,"u":"4-3","n":"漫畫展（= comic con）"},{"w":"cent","p":"(n.)","z":"美分","b":4,"u":"4-3","n":"城堡"},{"w":"chance","p":"(n.)","z":"機會","b":4,"u":"4-3","n":"長褲"},{"w":"choose","p":"(v.)","z":"選擇","b":4,"u":"4-3","n":"成為"},{"w":"owner","p":"(n.)","z":"擁有者；主人","b":4,"u":"4-3","n":"見面會"},{"w":"labor","p":"(n.)","z":"勞工","b":4,"u":"4-3","n":"鼻子"},{"w":"information","p":"(n.)","z":"資訊","b":4,"u":"4-3","n":"地址"},{"w":"cocoa","p":"(n.)","z":"可可","b":4,"u":"4-3","n":"蛇"},{"w":"alone","p":"(adv.)","z":"單獨地","b":4,"u":"4-3","n":"甚至"},{"w":"bitter","p":"(adj.)","z":"苦的","b":4,"u":"4-3","n":"尖銳的；敏銳的"},{"w":"typhoon","p":"(n.)","z":"颱風","b":4,"u":"4-4","n":"鴨"},{"w":"blow","p":"(v.)","z":"吹","b":4,"u":"4-4","n":"抵達"},{"w":"rose","p":"(n.)","z":"玫瑰花","b":4,"u":"4-4","n":"棕櫚"},{"w":"balcony","p":"(n.)","z":"陽台","b":4,"u":"4-4","n":"寺廟"},{"w":"must","p":"(aux.)","z":"必須；一定","b":4,"u":"4-4","n":"請客；款待；對待；治療"},{"w":"prepare","p":"(v.)","z":"準備","b":4,"u":"4-4","n":"看見"},{"w":"should","p":"(aux.)","z":"應該","b":4,"u":"4-4","n":"既不…也不…"},{"w":"candle","p":"(n.)","z":"蠟燭","b":4,"u":"4-4","n":"實例"},{"w":"radio","p":"(n.)","z":"收音機；廣播","b":4,"u":"4-4","n":"步驟"},{"w":"news","p":"(n.)","z":"新聞；消息","b":4,"u":"4-4","n":"戲劇；扮演"},{"w":"if","p":"(conj.)","z":"如果；是否","b":4,"u":"4-4","m":1,"n":"雖然（= though）"},{"w":"have to","p":"","z":"必須","b":4,"u":"4-4","n":"在那裡"},{"w":"go out","p":"","z":"熄滅","b":4,"u":"4-4","n":"看一看"},{"w":"try one's best","p":"","z":"盡力而為","b":4,"u":"4-4","n":"故意；特意"},{"w":"turn on","p":"","z":"打開（電源）","b":4,"u":"4-4","n":"多常…？"},{"w":"latest","p":"(adj.)","z":"最新","b":4,"u":"4-4","n":"飽的；滿的"},{"w":"star","p":"(n.)","z":"星星；明星","b":4,"u":"4-4","m":1,"n":"自我"},{"w":"shine","p":"(v.)","z":"閃耀；照耀","b":4,"u":"4-4","n":"發生"},{"w":"giant","p":"(adj.)","z":"巨大的","b":4,"u":"4-4","n":"最新"},{"w":"wave","p":"(n.)；(v.)","z":"浪；揮手；揮舞","b":4,"u":"4-4","m":1,"n":"力量"},{"w":"rainbow","p":"(n.)","z":"彩虹","b":4,"u":"4-4","n":"景色"},{"w":"pretty","p":"(adj.)","z":"漂亮的","b":4,"u":"4-4","n":"不快樂的"},{"w":"garden","p":"(n.)","z":"花園","b":4,"u":"4-4","n":"規則"},{"w":"frog","p":"(n.)","z":"青蛙","b":4,"u":"4-4","n":"恐龍"},{"w":"noise","p":"(n.)","z":"聲響；噪音","b":4,"u":"4-4","n":"鬼屋"},{"w":"pond","p":"(n.)","z":"池塘","b":4,"u":"4-4","n":"轉角；角落"},{"w":"noisy","p":"(adj.)","z":"嘈雜的","b":4,"u":"4-4","n":"整齊的；整理"},{"w":"earthquake","p":"(n.)","z":"地震","b":4,"u":"4-4","n":"玫瑰花"},{"w":"bravely","p":"(adv.)","z":"勇敢地","b":4,"u":"4-4","n":"批判地"},{"w":"sharp","p":"(adj.)","z":"尖銳的；敏銳的","b":4,"u":"4-4","m":1,"n":"親愛的"},{"w":"reach","p":"(v.)","z":"到達","b":4,"u":"4-4","n":"清洗"},{"w":"space","p":"(n.)","z":"空間","b":4,"u":"4-4","n":"生命；生活"},{"w":"size","p":"(n.)","z":"大小；尺寸","b":4,"u":"4-4","n":"差別"},{"w":"as","p":"(prep.)","z":"作為；如同","b":4,"u":"4-4","n":"在…裡面"},{"w":"times","p":"(n.)","z":"倍","b":4,"u":"4-4","n":"領帶"},{"w":"sway","p":"(v.)","z":"搖擺","b":4,"u":"4-4","n":"請求；詢問"},{"w":"flashlight","p":"(n.)","z":"手電筒","b":4,"u":"4-4","n":"原因；理由"},{"w":"suddenly","p":"(adv.)","z":"突然","b":4,"u":"4-4","n":"一次"},{"w":"fear","p":"(n.)","z":"恐懼","b":4,"u":"4-4","n":"星星；明星"},{"w":"rescue","p":"(n.)；(v.)","z":"救援","b":4,"u":"4-4","n":"信仰"},{"w":"rubble","p":"(n.)","z":"瓦礫；碎石","b":4,"u":"4-4","n":"大自然"},{"w":"sense","p":"(n.)","z":"感官","b":4,"u":"4-4","n":"補習班"},{"w":"survivor","p":"(n.)","z":"生還者","b":4,"u":"4-4","n":"計程車"},{"w":"although","p":"(conj.)","z":"雖然（= though）","b":4,"u":"4-5","n":"自從"},{"w":"matter","p":"(n.)；(v.)","z":"問題；事件；要緊；重要","b":4,"u":"4-5","m":1,"n":"祝福"},{"w":"sore throat","p":"(n.)","z":"喉嚨痛","b":4,"u":"4-5","n":"毛巾"},{"w":"explain","p":"(v.)","z":"解釋","b":4,"u":"4-5","n":"加熱；熱"},{"w":"cough","p":"(v.)；(n.)","z":"咳嗽","b":4,"u":"4-5","n":"專注；焦點"},{"w":"probably","p":"(adv.)","z":"很可能；大概","b":4,"u":"4-5","n":"很少"},{"w":"take care of","p":"","z":"照顧","b":4,"u":"4-5","n":"好吧；好的"},{"w":"noon","p":"(n.)","z":"中午","b":4,"u":"4-5","n":"生還者"},{"w":"medicine","p":"(n.)","z":"藥","b":4,"u":"4-5","n":"假髮"},{"w":"honey","p":"(n.)","z":"蜂蜜；親愛的（用於稱呼）","b":4,"u":"4-5","m":1,"n":"作家"},{"w":"lemon","p":"(n.)","z":"檸檬","b":4,"u":"4-5","n":"消防局"},{"w":"useful","p":"(adj.)","z":"有用的","b":4,"u":"4-5","n":"英俊的"},{"w":"stand","p":"(n.)","z":"攤位","b":4,"u":"4-5","n":"中午"},{"w":"feel like","p":"","z":"想要","b":4,"u":"4-5","n":"在那裡"},{"w":"head","p":"(n.)","z":"頭；朝…前進","b":4,"u":"4-5","m":1,"n":"英雄"},{"w":"headache","p":"(n.)","z":"頭痛","b":4,"u":"4-5","n":"翹翹板"},{"w":"stomachache","p":"(n.)","z":"胃痛","b":4,"u":"4-5","n":"圓點"},{"w":"fever","p":"(n.)","z":"發燒","b":4,"u":"4-5","n":"九月"},{"w":"runny nose","p":"(n.)","z":"流鼻水","b":4,"u":"4-5","n":"側邊；面"},{"w":"knee","p":"(n.)","z":"膝蓋","b":4,"u":"4-5","n":"戲劇；扮演"},{"w":"nail","p":"(n.)","z":"指甲","b":4,"u":"4-5","n":"語言"},{"w":"finger","p":"(n.)","z":"手指","b":4,"u":"4-5","n":"部分"},{"w":"neck","p":"(n.)","z":"脖子","b":4,"u":"4-5","n":"嬰兒；年幼的"},{"w":"shoulder","p":"(n.)","z":"肩膀","b":4,"u":"4-5","n":"字典"},{"w":"bakery","p":"(n.)","z":"麵包店","b":4,"u":"4-5","n":"草地"},{"w":"common","p":"(adj.)","z":"常見的；共同的","b":4,"u":"4-5","n":"生氣的"},{"w":"actually","p":"(adv.)","z":"實際上；事實上","b":4,"u":"4-5","n":"很快地"},{"w":"helpful","p":"(adj.)","z":"有幫助的","b":4,"u":"4-5","n":"好吃的"},{"w":"root","p":"(n.)","z":"根；根源","b":4,"u":"4-5","n":"蠟燭"},{"w":"reason","p":"(n.)","z":"原因；理由","b":4,"u":"4-5","n":"元"},{"w":"power up","p":"","z":"增強力量","b":4,"u":"4-5","n":"處理；負責"},{"w":"recipe","p":"(n.)","z":"食譜","b":4,"u":"4-5","n":"超市"},{"w":"memory","p":"(n.)","z":"記憶；記憶力；記憶","b":4,"u":"4-5","m":1,"n":"燈；光；點亮；輕的"},{"w":"brain","p":"(n.)","z":"頭腦","b":4,"u":"4-5","n":"生命；生活"},{"w":"focus","p":"(v.)；(n.)","z":"專注；焦點","b":4,"u":"4-5","n":"借（出）"},{"w":"blood","p":"(n.)","z":"血液","b":4,"u":"4-5","n":"蝙蝠"},{"w":"pass","p":"(v.)","z":"傳遞；通過","b":4,"u":"4-6","n":"種植；植物"},{"w":"throw","p":"(v.)","z":"丟；投擲","b":4,"u":"4-6","n":"閃耀；照耀"},{"w":"point","p":"(n.)；(v.)","z":"得分；對準；指；議論；論點","b":4,"u":"4-6","m":1,"n":"外表；外觀"},{"w":"win","p":"(v.)","z":"贏；獲勝","b":4,"u":"4-6","n":"旅行；行進"},{"w":"until","p":"(conj.)；(prep.)","z":"直到","b":4,"u":"4-6","n":"如果；是否"},{"w":"member","p":"(n.)","z":"成員","b":4,"u":"4-6","n":"筆記本"},{"w":"group","p":"(n.)","z":"團體","b":4,"u":"4-6","n":"漢堡（= burger）"},{"w":"fail","p":"(v.)","z":"考不及格；失敗","b":4,"u":"4-6","n":"攜帶"},{"w":"test","p":"(n.)","z":"考試","b":4,"u":"4-6","n":"吋"},{"w":"afraid","p":"(adj.)","z":"害怕的；擔憂的","b":4,"u":"4-6","n":"日常的"},{"w":"forget","p":"(v.)","z":"忘記","b":4,"u":"4-6","n":"殺死"},{"w":"fresh","p":"(adj.)","z":"新的；新鮮的","b":4,"u":"4-6","n":"特別的"},{"w":"count…in","p":"","z":"算…參加一份","b":4,"u":"4-6","t":0,"n":"拍照"},{"w":"begin","p":"(v.)","z":"開始","b":4,"u":"4-6","n":"點餐；訂購"},{"w":"meeting","p":"(n.)","z":"會議；會面","b":4,"u":"4-6","n":"夢；夢想（的）"},{"w":"come on","p":"","z":"快點；少來了","b":4,"u":"4-6","n":"對…不陌生"},{"w":"excuse","p":"(n.)","z":"藉口；理由","b":4,"u":"4-6","n":"小孩"},{"w":"around the corner","p":"","z":"即將來臨；在附近","b":4,"u":"4-6","n":"具有；呈現"},{"w":"hold back","p":"","z":"阻礙","b":4,"u":"4-6","n":"我沒辦法。/我控制不了。"},{"w":"few","p":"(adj.)；(pron.)","z":"很少（的）","b":4,"u":"4-6","n":"天生的；出生的"},{"w":"simple","p":"(adj.)","z":"簡單的","b":4,"u":"4-6","n":"足夠（的）"},{"w":"expect","p":"(v.)","z":"預計；期望","b":4,"u":"4-6","n":"希望"},{"w":"mistake","p":"(n.)","z":"錯誤","b":4,"u":"4-6","n":"牙醫"},{"w":"angle","p":"(n.)","z":"立場；角度","b":4,"u":"4-6","n":"桃子"},{"w":"allow","p":"(v.)","z":"允許","b":4,"u":"4-6","n":"清洗"},{"w":"laugh","p":"(v.)；(n.)","z":"笑；笑聲","b":4,"u":"4-6","n":"攜帶"},{"w":"keep in mind","p":"","z":"記住","b":4,"u":"4-6","n":"保持健康"},{"w":"honest","p":"(adj.)","z":"誠實的；可信的","b":4,"u":"4-6","n":"友善的"},{"w":"lead to","p":"","z":"導致","b":4,"u":"4-6","n":"前幾天"},{"w":"push","p":"(v.)","z":"迫使；推動","b":4,"u":"4-6","n":"殺死"},{"w":"excellent","p":"(adj.)","z":"優秀的；極佳的","b":4,"u":"4-6","n":"有名的"},{"w":"be able to","p":"","z":"能夠","b":4,"u":"4-6","n":"醒來；叫醒…"},{"w":"define","p":"(v.)","z":"下定義；界定","b":4,"u":"4-6","n":"希望"},{"w":"picture","p":"(v.)","z":"想像","b":4,"u":"4-6","n":"需要；需求"},{"w":"as for","p":"","z":"至於","b":4,"u":"4-6","n":"多常…？"},{"w":"to the full","p":"","z":"盡可能","b":4,"u":"4-6","n":"一點點"},{"w":"fair","p":"(n.)","z":"展覽會","b":4,"u":"4-6","n":"巢；窩"},{"w":"stereotype","p":"(n.)；(v.)","z":"刻板印象；對…有偏見","b":4,"u":"4-6","n":"元旦前夕"},{"w":"gender","p":"(n.)","z":"性別","b":4,"u":"4-6","n":"句子"},{"w":"self","p":"(n.)","z":"自我","b":4,"u":"4-6","n":"脖子"},{"w":"talent","p":"(n.)","z":"人才；天分","b":4,"u":"4-6","n":"菜單"},{"w":"designer","p":"(n.)","z":"設計師","b":4,"u":"4-6","n":"老虎"},{"w":"record","p":"(n.)","z":"紀錄；記載","b":4,"u":"4-6","n":"草莓"},{"w":"yet","p":"(adv.)","z":"還（沒）","b":5,"u":"5-1","n":"仍然"},{"w":"already","p":"(adv.)","z":"已經","b":5,"u":"5-1","n":"也；太…"},{"w":"diet","p":"(n.)","z":"節食；飲食","b":5,"u":"5-1","n":"次；時間"},{"w":"raise","p":"(v.)","z":"提高；舉起；舉高；提高","b":5,"u":"5-1","m":1,"n":"學習"},{"w":"since","p":"(conj.)；(prep.)","z":"自從","b":5,"u":"5-1","n":"但是"},{"w":"photo","p":"(n.)","z":"照片","b":5,"u":"5-1","n":"石塊；岩石"},{"w":"crazy","p":"(adj.)","z":"荒唐的；瘋狂的","b":5,"u":"5-1","n":"英俊的"},{"w":"as…as possible","p":"","z":"盡可能的…","b":5,"u":"5-1","t":0,"n":"墜入情網"},{"w":"slim","p":"(adj.)","z":"苗條的；微小的","b":5,"u":"5-1","n":"簡單的"},{"w":"type","p":"(n.)；(v.)","z":"類型；打字","b":5,"u":"5-1","m":1,"n":"公尺"},{"w":"ever","p":"(adv.)","z":"曾經","b":5,"u":"5-1","n":"還（沒）"},{"w":"habit","p":"(n.)","z":"習慣","b":5,"u":"5-1","n":"街區"},{"w":"take action","p":"","z":"採取行動","b":5,"u":"5-1","n":"振作起來"},{"w":"be all ears","p":"","z":"洗耳恭聽","b":5,"u":"5-1","n":"執行；落實"},{"w":"at least","p":"","z":"至少","b":5,"u":"5-1","n":"想要"},{"w":"You got it.","p":"","z":"沒錯","b":5,"u":"5-1","t":0,"n":"遠離…"},{"w":"gym","p":"(n.)","z":"健身房；體育館","b":5,"u":"5-1","n":"花園"},{"w":"abroad","p":"(adv.)","z":"到國外","b":5,"u":"5-1","n":"今晚"},{"w":"cheat","p":"(v.)","z":"作弊；欺騙","b":5,"u":"5-1","n":"取得；到達；變成"},{"w":"copy","p":"(v.)","z":"抄襲；複製","b":5,"u":"5-1","n":"開（車）"},{"w":"race","p":"(n.)","z":"速度競賽","b":5,"u":"5-1","n":"按鈕；鈕扣"},{"w":"stay in shape","p":"","z":"保持健康","b":5,"u":"5-1","n":"沒錯"},{"w":"letter","p":"(n.)","z":"信；字母","b":5,"u":"5-1","m":1,"n":"按鈕；鈕扣"},{"w":"teenager","p":"(n.)","z":"青少年","b":5,"u":"5-1","n":"樓梯"},{"w":"senior high school","p":"(n.)","z":"高中","b":5,"u":"5-1","n":"農夫"},{"w":"understand","p":"(v.)","z":"瞭解","b":5,"u":"5-1","n":"煮沸"},{"w":"drum","p":"(n.)","z":"鼓","b":5,"u":"5-1","n":"英雄"},{"w":"joy","p":"(n.)","z":"樂趣；喜悅","b":5,"u":"5-1","n":"桶"},{"w":"pop","p":"(n.)","z":"流行音樂","b":5,"u":"5-1","n":"安全"},{"w":"lately","p":"(adv.)","z":"最近","b":5,"u":"5-1","n":"其他"},{"w":"angry","p":"(adj.)","z":"生氣的","b":5,"u":"5-1","n":"生病的"},{"w":"serious","p":"(adj.)","z":"嚴重的；認真的","b":5,"u":"5-1","m":1,"n":"年輕的"},{"w":"interest","p":"(n.)；(v.)","z":"興趣；使感興趣","b":5,"u":"5-1","n":"滑雪板"},{"w":"garbage","p":"(n.)","z":"垃圾","b":5,"u":"5-1","n":"顏色"},{"w":"unhappy","p":"(adj.)","z":"不快樂的","b":5,"u":"5-1","n":"安全的"},{"w":"worried","p":"(adj.)","z":"擔心的","b":5,"u":"5-1","n":"便宜的"},{"w":"wish","p":"(n.)；(v.)","z":"祝福","b":5,"u":"5-1","n":"山"},{"w":"envelope","p":"(n.)","z":"信封","b":5,"u":"5-1","n":"沙發"},{"w":"stamp","p":"(n.)；(v.)","z":"郵票；印章；蓋章","b":5,"u":"5-1","m":1,"n":"外國人"},{"w":"talk…into","p":"","z":"說服（某人）做…","b":5,"u":"5-1","t":0,"n":"清理；打掃"},{"w":"skip","p":"(v.)","z":"省略","b":5,"u":"5-1","n":"喜歡；像…"},{"w":"appearance","p":"(n.)","z":"外表；外觀","b":5,"u":"5-1","n":"書店"},{"w":"weight","p":"(n.)","z":"體重","b":5,"u":"5-1","n":"十一月"},{"w":"balanced","p":"(adj.)","z":"均衡的","b":5,"u":"5-1","n":"英俊的"},{"w":"mood","p":"(n.)","z":"心情","b":5,"u":"5-1","n":"明信片"},{"w":"exam","p":"(n.)","z":"考試","b":5,"u":"5-1","n":"麵"},{"w":"feeling","p":"(n.)","z":"情緒；感覺","b":5,"u":"5-1","n":"旅行；行程"},{"w":"actor","p":"(n.)","z":"演員","b":5,"u":"5-2","n":"派對；宴會"},{"w":"touch","p":"(v.)","z":"觸動；碰觸","b":5,"u":"5-2","n":"喜歡；像…"},{"w":"heart","p":"(n.)","z":"心；心臟","b":5,"u":"5-2","n":"餅乾"},{"w":"surprise","p":"(v.)；(n.)","z":"（使）驚訝","b":5,"u":"5-2","n":"漂浮"},{"w":"bored","p":"(adj.)","z":"感到無聊的","b":5,"u":"5-2","n":"神奇的；魔法"},{"w":"hard-working","p":"(adj.)","z":"勤奮的","b":5,"u":"5-2","n":"靠近的"},{"w":"guess","p":"(v.)；(n.)","z":"猜測","b":5,"u":"5-2","n":"愛"},{"w":"several","p":"(adj.)","z":"幾個的","b":5,"u":"5-2","n":"感到無聊的"},{"w":"surprised","p":"(adj.)","z":"感到驚訝的","b":5,"u":"5-2","n":"安靜的"},{"w":"exciting","p":"(adj.)","z":"令人興奮的；刺激的","b":5,"u":"5-2","n":"有用的"},{"w":"ghost","p":"(n.)","z":"鬼","b":5,"u":"5-2","n":"衣服"},{"w":"castle","p":"(n.)","z":"城堡","b":5,"u":"5-2","n":"吉他"},{"w":"surprising","p":"(adj.)","z":"令人驚訝的","b":5,"u":"5-2","n":"危險的"},{"w":"interested","p":"(adj.)","z":"感興趣的","b":5,"u":"5-2","n":"每一個（的）"},{"w":"boring","p":"(adj.)","z":"無聊的","b":5,"u":"5-2","n":"感謝的"},{"w":"download","p":"(v.)","z":"下載","b":5,"u":"5-2","n":"移動"},{"w":"Internet","p":"(n.)","z":"網路（= Net）","b":5,"u":"5-2","n":"星期四"},{"w":"set","p":"(v.)；(n.)","z":"建立；樹立；（一）套；組；副","b":5,"u":"5-2","m":1,"n":"採摘；撿拾"},{"w":"excited","p":"(adj.)","z":"感到興奮的","b":5,"u":"5-2","n":"生氣的"},{"w":"ticket","p":"(n.)","z":"票","b":5,"u":"5-2","n":"牛；乳牛"},{"w":"online","p":"(adv.)；(adj.)","z":"在網上；線上的","b":5,"u":"5-2","n":"無論如何"},{"w":"proud","p":"(adj.)","z":"自豪的；驕傲的","b":5,"u":"5-2","n":"靠近的"},{"w":"I'll pass.","p":"","z":"不用了。","b":5,"u":"5-2","n":"特價中"},{"w":"book","p":"(v.)","z":"預訂；預約","b":5,"u":"5-2","n":"攜帶"},{"w":"actress","p":"(n.)","z":"女演員","b":5,"u":"5-2","n":"樂趣；有趣的"},{"w":"towel","p":"(n.)","z":"毛巾","b":5,"u":"5-2","n":"郵局"},{"w":"comb","p":"(n.)；(v.)","z":"梳子：梳理","b":5,"u":"5-2","n":"聲音；聽起來"},{"w":"bat","p":"(n.)","z":"蝙蝠","b":5,"u":"5-2","n":"星期六"},{"w":"lie","p":"(n.)；(v.)","z":"謊言；說謊（現在分詞為lying）；躺；臥（現在分詞為lying）","b":5,"u":"5-2","m":1,"n":"颱風"},{"w":"fake","p":"(adj.)","z":"假的；偽造的","b":5,"u":"5-2","n":"日常的"},{"w":"newspaper","p":"(n.)","z":"報紙","b":5,"u":"5-2","n":"結帳處"},{"w":"nobody","p":"(pron.)","z":"無人","b":5,"u":"5-2","n":"某人 (=somebody)"},{"w":"anybody","p":"(pron.)","z":"任何人（= anyone）","b":5,"u":"5-2","n":"每個人（= everybody）"},{"w":"piece","p":"(n.)","z":"（一）則；片；張","b":5,"u":"5-2","n":"外國人"},{"w":"dig","p":"(v.)","z":"挖掘；尋找","b":5,"u":"5-2","n":"移動"},{"w":"sentence","p":"(n.)","z":"句子","b":5,"u":"5-2","n":"錯誤"},{"w":"spell","p":"(v.)","z":"拼字","b":5,"u":"5-2","n":"借（入）"},{"w":"trick","p":"(v.)；(n.)","z":"騙；詭計","b":5,"u":"5-2","n":"拼字"},{"w":"post","p":"(n.)；(v.)","z":"貼文；張貼","b":5,"u":"5-2","n":"島嶼"},{"w":"right away","p":"","z":"立刻；馬上","b":5,"u":"5-2","n":"起床"},{"w":"talented","p":"(adj.)","z":"有才華的","b":5,"u":"5-2","n":"第一（的）"},{"w":"award","p":"(n.)","z":"獎項","b":5,"u":"5-2","n":"炸雞"},{"w":"pirated","p":"(adj.)","z":"盜版的","b":5,"u":"5-2","n":"令人驚訝的"},{"w":"horror","p":"(n.)","z":"恐怖","b":5,"u":"5-2","n":"元"},{"w":"by design","p":"","z":"故意；特意","b":5,"u":"5-2","n":"接管"},{"w":"difference","p":"(n.)","z":"差別","b":5,"u":"5-2","n":"攻擊"},{"w":"source","p":"(n.)","z":"來源","b":5,"u":"5-2","n":"裙子"},{"w":"fact-checking","p":"(adj.)","z":"查證事實的","b":5,"u":"5-2","n":"兼職的"},{"w":"senior center","p":"(n.)","z":"樂齡中心","b":5,"u":"5-3","n":"公眾（的）"},{"w":"pleasure","p":"(n.)","z":"愉快；榮幸","b":5,"u":"5-3","n":"鼓"},{"w":"attack","p":"(n.)；(v.)","z":"攻擊","b":5,"u":"5-3","n":"救援"},{"w":"toe","p":"(n.)","z":"腳趾","b":5,"u":"5-3","n":"美術；藝術"},{"w":"bridge","p":"(n.)","z":"橋","b":5,"u":"5-3","n":"牆壁"},{"w":"drop","p":"(v.)","z":"（使）落下；丟下","b":5,"u":"5-3","n":"（使）驚訝"},{"w":"smoke","p":"(n.)；(v.)","z":"煙霧；抽菸","b":5,"u":"5-3","n":"見面會"},{"w":"puppy","p":"(n.)","z":"幼犬","b":5,"u":"5-3","n":"鉛筆盒（= pencil box）"},{"w":"middle","p":"(n.)","z":"中間","b":5,"u":"5-3","n":"獅子"},{"w":"carry","p":"(v.)","z":"攜帶","b":5,"u":"5-3","n":"要…做…；使…"},{"w":"note","p":"(n.)","z":"紙條","b":5,"u":"5-3","n":"草地"},{"w":"wallet","p":"(n.)","z":"錢包","b":5,"u":"5-3","n":"工作；作品"},{"w":"pocket","p":"(n.)","z":"口袋","b":5,"u":"5-3","n":"三明治"},{"w":"pray","p":"(v.)","z":"祈求；祈禱","b":5,"u":"5-3","n":"發生"},{"w":"blow up","p":"","z":"爆炸","b":5,"u":"5-3","n":"洗碗盤"},{"w":"in time","p":"","z":"及時","b":5,"u":"5-3","n":"做功課"},{"w":"area","p":"(n.)","z":"區域","b":5,"u":"5-3","n":"週末"},{"w":"glue","p":"(n.)","z":"膠水","b":5,"u":"5-3","n":"可可"},{"w":"paste","p":"(v.)","z":"黏貼","b":5,"u":"5-3","n":"遵守；跟隨"},{"w":"yard","p":"(n.)","z":"庭院；碼","b":5,"u":"5-3","m":1,"n":"大學"},{"w":"pipe","p":"(n.)","z":"水管","b":5,"u":"5-3","n":"手電筒"},{"w":"bench","p":"(n.)","z":"長凳；長椅","b":5,"u":"5-3","n":"小圓麵包"},{"w":"badminton","p":"(n.)","z":"羽毛球","b":5,"u":"5-3","n":"隊；組"},{"w":"tennis","p":"(n.)","z":"網球","b":5,"u":"5-3","n":"喉嚨痛"},{"w":"slide","p":"(n.)","z":"滑梯","b":5,"u":"5-3","n":"（一）則；片；張"},{"w":"seesaw","p":"(n.)","z":"翹翹板","b":5,"u":"5-3","n":"玩具"},{"w":"swing","p":"(n.)","z":"鞦韆","b":5,"u":"5-3","n":"花園"},{"w":"tool","p":"(n.)","z":"工具","b":5,"u":"5-3","n":"自我"},{"w":"pot","p":"(n.)","z":"盆；鍋","b":5,"u":"5-3","n":"短褲"},{"w":"seed","p":"(n.)","z":"種子","b":5,"u":"5-3","n":"鬼"},{"w":"basket","p":"(n.)","z":"籃子","b":5,"u":"5-3","n":"歷史"},{"w":"bake","p":"(v.)","z":"烘焙","b":5,"u":"5-3","n":"花費（時間、金錢）"},{"w":"notice","p":"(v.)；(n.)","z":"注意到；告示","b":5,"u":"5-3","n":"猜測"},{"w":"gas","p":"(n.)","z":"（化學、天然）氣體；汽油","b":5,"u":"5-3","n":"（一）則；片；張"},{"w":"modern","p":"(adj.)","z":"現代的","b":5,"u":"5-3","n":"晴朗的；清楚的"},{"w":"program","p":"(n.)","z":"計畫；節目","b":5,"u":"5-3","n":"紅火蟻"},{"w":"side","p":"(n.)","z":"側邊；面","b":5,"u":"5-3","n":"客廳"},{"w":"somewhere","p":"(adv.)","z":"在某處","b":5,"u":"5-3","n":"到國外"},{"w":"missing","p":"(adj.)","z":"失蹤的；找不到的","b":5,"u":"5-3","n":"不快樂的"},{"w":"cheer…up","p":"","z":"使…振作起來","b":5,"u":"5-3","t":0,"n":"割出；切出"},{"w":"volunteer","p":"(v.)；(n.)","z":"自願參加；志工","b":5,"u":"5-3","n":"離開；遺留"},{"w":"war","p":"(n.)","z":"戰爭","b":5,"u":"5-3","n":"包裹"},{"w":"bomb","p":"(n.)","z":"炸彈","b":5,"u":"5-3","n":"機場"},{"w":"bark","p":"(v.)","z":"狗吠","b":5,"u":"5-3","n":"擦拭"},{"w":"address","p":"(n.)","z":"地址","b":5,"u":"5-3","n":"大自然"},{"w":"hero","p":"(n.)","z":"英雄","b":5,"u":"5-3","n":"規則"},{"w":"warn","p":"(v.)","z":"警告","b":5,"u":"5-3","n":"討厭"},{"w":"gate","p":"(n.)","z":"大門","b":5,"u":"5-4","n":"爆米花"},{"w":"file","p":"(n.)","z":"檔案","b":5,"u":"5-4","n":"大象"},{"w":"quiz","p":"(n.)","z":"小考","b":5,"u":"5-4","n":"石塊；岩石"},{"w":"blackboard","p":"(n.)","z":"黑板","b":5,"u":"5-4","n":"活動"},{"w":"chalk","p":"(n.)","z":"粉筆","b":5,"u":"5-4","n":"鬼"},{"w":"screen","p":"(n.)","z":"螢幕","b":5,"u":"5-4","n":"聲音；聽起來"},{"w":"error","p":"(n.)","z":"錯誤","b":5,"u":"5-4","n":"技能"},{"w":"button","p":"(n.)","z":"按鈕；鈕扣","b":5,"u":"5-4","n":"興趣；使感興趣"},{"w":"enter","p":"(v.)","z":"輸入；進入","b":5,"u":"5-4","n":"打扮；洋裝"},{"w":"wake word","p":"(n.)","z":"喚醒字詞","b":5,"u":"5-4","n":"筆記本"},{"w":"whether","p":"(conj.)","z":"是否","b":5,"u":"5-4","n":"但是"},{"w":"list","p":"(n.)；(v.)","z":"清單；列出","b":5,"u":"5-4","n":"河流"},{"w":"not…anymore","p":"","z":"不再…","b":5,"u":"5-4","t":0,"n":"感到緊張"},{"w":"voice assistant","p":"(n.)","z":"語音助理","b":5,"u":"5-4","n":"蜂蜜；親愛的（用於稱呼）"},{"w":"machine","p":"(n.)","z":"機器","b":5,"u":"5-4","n":"星期三"},{"w":"dozen","p":"(n.)","z":"（一）打","b":5,"u":"5-4","n":"季節"},{"w":"boil","p":"(v.)","z":"煮沸","b":5,"u":"5-4","n":"（使）驚訝"},{"w":"refrigerator","p":"(n.)","z":"冰箱（ =fridge）","b":5,"u":"5-4","n":"謊言；說謊（現在分詞為lying）；躺；臥（現在分詞為lying）"},{"w":"upload","p":"(v.)","z":"上傳","b":5,"u":"5-4","n":"想要"},{"w":"e-mail","p":"(n.)","z":"電子郵件","b":5,"u":"5-4","n":"客廳"},{"w":"key","p":"(n.)；(adj.)","z":"鑰匙；關鍵（的）","b":5,"u":"5-4","m":1,"n":"妻子"},{"w":"the cloud","p":"(n.)","z":"雲端","b":5,"u":"5-4","n":"職業"},{"w":"rise","p":"(n.)；(v.)","z":"興起；上升","b":5,"u":"5-4","n":"攤位"},{"w":"collect","p":"(v.)","z":"收集","b":5,"u":"5-4","n":"抵達"},{"w":"lamp","p":"(n.)","z":"檯燈","b":5,"u":"5-4","n":"陸地；落地"},{"w":"couch","p":"(n.)","z":"沙發","b":5,"u":"5-4","n":"教堂"},{"w":"heat","p":"(v.)；(n.)","z":"加熱；熱","b":5,"u":"5-4","n":"清洗"},{"w":"cellphone","p":"(n.)","z":"手機","b":5,"u":"5-4","n":"攤位"},{"w":"correct","p":"(v.)；(adj.)","z":"更正；正確的","b":5,"u":"5-4","n":"爬（山）"},{"w":"fat","p":"(n.)","z":"脂肪","b":5,"u":"5-4","n":"麵粉"},{"w":"code","p":"(n.)","z":"碼","b":5,"u":"5-4","n":"早餐"},{"w":"ability","p":"(n.)","z":"能力","b":5,"u":"5-4","n":"方式；距離；路線"},{"w":"translate","p":"(v.)","z":"翻譯","b":5,"u":"5-4","n":"下雪；雪"},{"w":"arrive","p":"(v.)","z":"抵達","b":5,"u":"5-5","n":"拜訪"},{"w":"planet","p":"(n.)","z":"行星","b":5,"u":"5-5","n":"電子郵件"},{"w":"line","p":"(n.)","z":"隊伍；直線","b":5,"u":"5-5","n":"洞"},{"w":"god","p":"(n.)","z":"神","b":5,"u":"5-5","n":"臥室"},{"w":"outside","p":"(prep.)；(adv.)；(n.)；(adj.)","z":"在外面；外面（的）","b":5,"u":"5-5","n":"作為；如同"},{"w":"restroom","p":"(n.)","z":"洗手間","b":5,"u":"5-5","n":"襯衫"},{"w":"bath","p":"(n.)","z":"沐浴","b":5,"u":"5-5","n":"實驗室"},{"w":"uniform","p":"(n.)","z":"制服","b":5,"u":"5-5","n":"膠水"},{"w":"tail","p":"(n.)","z":"尾巴","b":5,"u":"5-5","n":"恐懼"},{"w":"bottom","p":"(n.)","z":"臀部；底部","b":5,"u":"5-5","n":"根；根源"},{"w":"main","p":"(adj.)","z":"主要的","b":5,"u":"5-5","n":"生氣的"},{"w":"belong","p":"(v.)","z":"屬於","b":5,"u":"5-5","n":"開（車）"},{"w":"go on","p":"","z":"發生","b":5,"u":"5-5","n":"退後；走開"},{"w":"lead","p":"(v.)","z":"通往","b":5,"u":"5-5","n":"賣"},{"w":"square","p":"(adj.)；(n.)","z":"正方形的；正方形","b":5,"u":"5-5","n":"飽的；滿的"},{"w":"string","p":"(n.)","z":"串；線","b":5,"u":"5-5","n":"來源"},{"w":"round","p":"(adj.)","z":"圓形的","b":5,"u":"5-5","n":"生氣的"},{"w":"dot","p":"(n.)","z":"圓點","b":5,"u":"5-5","n":"立場；角度"},{"w":"pin","p":"(n.)","z":"飾針；胸針","b":5,"u":"5-5","n":"垃圾"},{"w":"neighbor","p":"(n.)","z":"鄰居","b":5,"u":"5-5","n":"嬰兒；年幼的"},{"w":"foreigner","p":"(n.)","z":"外國人","b":5,"u":"5-5","n":"原因；理由"},{"w":"hobby","p":"(n.)","z":"嗜好","b":5,"u":"5-5","n":"按鈕；鈕扣"},{"w":"businessman","p":"(n.)","z":"商人","b":5,"u":"5-5","n":"勞工"},{"w":"business","p":"(n.)","z":"生意；事業","b":5,"u":"5-5","n":"音樂影片"},{"w":"shopkeeper","p":"(n.)","z":"店主","b":5,"u":"5-5","n":"派"},{"w":"dictionary","p":"(n.)","z":"字典","b":5,"u":"5-5","n":"公寓"},{"w":"workbook","p":"(n.)","z":"作業本","b":5,"u":"5-5","n":"成人"},{"w":"run","p":"(v.)","z":"運營","b":5,"u":"5-5","n":"規劃；計畫"},{"w":"be no stranger to","p":"","z":"對…不陌生","b":5,"u":"5-5","n":"沒錯"},{"w":"prize","p":"(n.)","z":"獎","b":5,"u":"5-5","n":"風"},{"w":"topic","p":"(n.)","z":"主題","b":5,"u":"5-5","n":"毛衣"},{"w":"knowledge","p":"(n.)","z":"知識","b":5,"u":"5-5","n":"課程；路線"},{"w":"public","p":"(n.)；(adj.)","z":"公眾（的）","b":5,"u":"5-5","n":"圓圈；畫圈"},{"w":"take over","p":"","z":"接管","b":5,"u":"5-5","n":"洗耳恭聽"},{"w":"comic book convention","p":"(n.)","z":"漫畫展（= comic con）","b":5,"u":"5-5","n":"紙"},{"w":"booth","p":"(n.)","z":"攤位","b":5,"u":"5-5","n":"長褲"},{"w":"character","p":"(n.)","z":"角色","b":5,"u":"5-5","n":"紙"},{"w":"hug","p":"(n.)；(v.)","z":"擁抱","b":5,"u":"5-5","n":"火腿"},{"w":"describe","p":"(v.)","z":"描述","b":5,"u":"5-5","n":"持續；保持"},{"w":"noun","p":"(n.)","z":"名詞","b":5,"u":"5-5","n":"碼"},{"w":"pearl","p":"(n.)","z":"珍珠","b":5,"u":"5-5","n":"成功"},{"w":"cosplayer","p":"(n.)","z":"角色扮演者","b":5,"u":"5-5","n":"星期二"},{"w":"meaning","p":"(n.)","z":"意思","b":5,"u":"5-5","n":"博物館"},{"w":"anime","p":"(n.)","z":"（日本的）動畫片","b":5,"u":"5-5","n":"交通；車流（量）"},{"w":"artist","p":"(n.)","z":"藝術家","b":5,"u":"5-5","n":"珊瑚礁"},{"w":"college","p":"(n.)","z":"大學","b":5,"u":"5-5","n":"浴室；廁所"},{"w":"knock","p":"(v.)","z":"敲","b":5,"u":"5-6","n":"知道；知道；認識"},{"w":"apartment","p":"(n.)","z":"公寓","b":5,"u":"5-6","n":"馬"},{"w":"glad","p":"(adj.)","z":"高興的","b":5,"u":"5-6","n":"容易的"},{"w":"town","p":"(n.)","z":"城鎮","b":5,"u":"5-6","n":"郵差（= mailman）"},{"w":"polite","p":"(adj.)","z":"有禮貌的","b":5,"u":"5-6","n":"虛弱的"},{"w":"seat","p":"(n.)","z":"座位","b":5,"u":"5-6","n":"歷史"},{"w":"beside","p":"(prep.)","z":"在…旁邊","b":5,"u":"5-6","n":"在…期間"},{"w":"except","p":"(prep.)","z":"除了","b":5,"u":"5-6","n":"作為；如同"},{"w":"blank","p":"(adj.)；(n.)","z":"空白（的）","b":5,"u":"5-6","n":"緊張的"},{"w":"present","p":"(n.)；(adj.)","z":"禮物；現在（的）；目前（的）","b":5,"u":"5-6","m":1,"n":"豆"},{"w":"invite","p":"(v.)","z":"邀請","b":5,"u":"5-6","n":"遛（寵物）"},{"w":"perhaps","p":"(adv.)","z":"或許","b":5,"u":"5-6","n":"下午；晚上"},{"w":"kiss","p":"(v.)","z":"吻","b":5,"u":"5-6","n":"使…"},{"w":"sidewalk","p":"(n.)","z":"人行道","b":5,"u":"5-6","n":"興趣；使感興趣"},{"w":"used to","p":"","z":"過去時常…","b":5,"u":"5-6","n":"看一看"},{"w":"throw up","p":"","z":"嘔吐","b":5,"u":"5-6","n":"得以"},{"w":"blind","p":"(adj.)","z":"盲的","b":5,"u":"5-6","n":"均衡的"},{"w":"April Fools' Day","p":"(n.)","z":"愚人節","b":5,"u":"5-6","n":"手臂"},{"w":"tape","p":"(v.)；(n.)","z":"用膠帶黏貼；膠帶","b":5,"u":"5-6","n":"（使）乾燥；乾的"},{"w":"paper","p":"(n.)","z":"紙","b":5,"u":"5-6","n":"山羊"},{"w":"joke","p":"(n.)","z":"玩笑；笑話","b":5,"u":"5-6","n":"斑馬"},{"w":"rich","p":"(adj.)","z":"豐富的；富有的","b":5,"u":"5-6","n":"幸運的"},{"w":"visitor","p":"(n.)","z":"遊客；參觀者","b":5,"u":"5-6","n":"問題；事件；要緊；重要"},{"w":"mark","p":"(v.)；(n.)","z":"標記","b":5,"u":"5-6","n":"要…做…；使…"},{"w":"shout","p":"(v.)","z":"喊叫","b":5,"u":"5-6","n":"抄襲；複製"},{"w":"lazy Susan","p":"(n.)","z":"餐桌轉盤","b":5,"u":"5-6","n":"訣竅"},{"w":"clap","p":"(v.)；(n.)","z":"拍；鼓掌","b":5,"u":"5-6","n":"騙；詭計"},{"w":"go ahead","p":"","z":"請便；開始做","b":5,"u":"5-6","n":"能夠"},{"w":"quite","p":"(adv.)","z":"相當","b":5,"u":"5-6","n":"很少"},{"w":"fry","p":"(v.)","z":"油炸；油煎","b":5,"u":"5-6","n":"付費"},{"w":"culture","p":"(n.)","z":"文化","b":5,"u":"5-6","n":"上班族"},{"w":"worthless","p":"(adj.)","z":"無價值的","b":5,"u":"5-6","n":"高興的"},{"w":"chat","p":"(n.)；(v.)","z":"聊天","b":5,"u":"5-6","n":"類型；打字"},{"w":"diary","p":"(n.)","z":"日記","b":5,"u":"5-6","n":"手電筒"},{"w":"stinky tofu","p":"(n.)","z":"臭豆腐","b":5,"u":"5-6","n":"垃圾"},{"w":"crispy","p":"(adj.)","z":"酥脆的","b":5,"u":"5-6","n":"滑稽的"},{"w":"either","p":"(adv.)","z":"也（不）","b":6,"u":"6-1","n":"批判地"},{"w":"north","p":"(adv.)；(n.)；(adj.)","z":"向北地；北方（的）","b":6,"u":"6-1","n":"直地；直的"},{"w":"south","p":"(adv.)；(n.)；(adj.)","z":"向南地；南方（的）","b":6,"u":"6-1","n":"其他"},{"w":"east","p":"(adv.)；(n.)；(adj.)","z":"向東地；東方（的）","b":6,"u":"6-1","n":"大聲地"},{"w":"west","p":"(adv.)；(n.)；(adj.)","z":"向西地；西方（的）","b":6,"u":"6-1","n":"一次"},{"w":"get married","p":"","z":"結婚","b":6,"u":"6-1","n":"借（書）；查看"},{"w":"neither","p":"(adv.)","z":"也不","b":6,"u":"6-1","n":"單獨地"},{"w":"shy","p":"(adj.)","z":"害羞的","b":6,"u":"6-1","n":"便利的"},{"w":"lonely","p":"(adj.)","z":"寂寞的；孤單的","b":6,"u":"6-1","n":"有空的；免費的"},{"w":"deal","p":"(n.)","z":"約定；交易","b":6,"u":"6-1","n":"餐"},{"w":"cheer up","p":"","z":"振作起來","b":6,"u":"6-1","n":"盡全力"},{"w":"even though","p":"","z":"即使","b":6,"u":"6-1","n":"請便；開始做"},{"w":"keep in touch","p":"","z":"保持聯繫","b":6,"u":"6-1","n":"內用"},{"w":"class leader","p":"(n.)","z":"班長","b":6,"u":"6-1","n":"樂趣；有趣的"},{"w":"queen","p":"(n.)","z":"皇后","b":6,"u":"6-1","n":"糖"},{"w":"national","p":"(adj.)","z":"國家的","b":6,"u":"6-1","n":"高興的"},{"w":"row","p":"(n.)","z":"（一）排；行；列","b":6,"u":"6-1","n":"斑馬"},{"w":"hot spring","p":"(n.)","z":"溫泉","b":6,"u":"6-1","n":"吋"},{"w":"power","p":"(n.)","z":"力量","b":6,"u":"6-1","n":"訣竅"},{"w":"as soon as","p":"","z":"一…就","b":6,"u":"6-1","n":"感到緊張"},{"w":"course","p":"(n.)","z":"課程；路線","b":6,"u":"6-1","n":"肉"},{"w":"part-time","p":"(adj.)","z":"兼職的","b":6,"u":"6-1","n":"幾個的"},{"w":"test the water","p":"","z":"試探","b":6,"u":"6-1","n":"請便；開始做"},{"w":"act on","p":"","z":"執行；落實","b":6,"u":"6-1","n":"放輕鬆"},{"w":"graduate","p":"(v.)","z":"畢業","b":6,"u":"6-1","n":"成為"},{"w":"vocational","p":"(adj.)","z":"職業的","b":6,"u":"6-1","n":"英俊的"},{"w":"at a crossroads","p":"","z":"處於關鍵時刻","b":6,"u":"6-1","n":"對…不陌生"},{"w":"graduation","p":"(n.)","z":"畢業","b":6,"u":"6-1","n":"樓梯"},{"w":"decision","p":"(n.)","z":"決定","b":6,"u":"6-1","n":"指甲"},{"w":"skill","p":"(n.)","z":"技能","b":6,"u":"6-1","n":"攤位"},{"w":"search","p":"(v.)","z":"搜索","b":6,"u":"6-1","n":"找到；發現"},{"w":"goal","p":"(n.)","z":"目標","b":6,"u":"6-1","n":"角色扮演者"},{"w":"blanket","p":"(n.)","z":"毯子","b":6,"u":"6-2","n":"叔伯；舅舅"},{"w":"neither…nor…","p":"","z":"既不…也不…","b":6,"u":"6-2","t":0,"n":"喊叫"},{"w":"stupid","p":"(adj.)","z":"愚蠢的","b":6,"u":"6-2","n":"寂寞的；孤單的"},{"w":"either…or…","p":"","z":"不是…就是…","b":6,"u":"6-2","t":0,"n":"下（車、飛機等）"},{"w":"have nothing to do with","p":"","z":"和…無關","b":6,"u":"6-2","t":0,"n":"試探"},{"w":"mind","p":"(v.)","z":"介意","b":6,"u":"6-2","n":"借（出）"},{"w":"not only…but also…","p":"","z":"不但…也…","b":6,"u":"6-2","t":0,"n":"好吧；好的"},{"w":"park","p":"(v.)","z":"停車","b":6,"u":"6-2","n":"表現；秀出；表演；節目"},{"w":"stay up","p":"","z":"熬夜","b":6,"u":"6-2","n":"很多的（= lots of）"},{"w":"sight","p":"(n.)","z":"視線；景象","b":6,"u":"6-2","n":"獲勝者"},{"w":"tidy","p":"(adj.)；(v.)","z":"整齊的；整理","b":6,"u":"6-2","n":"有名的"},{"w":"item","p":"(n.)","z":"品項","b":6,"u":"6-2","n":"頭腦"},{"w":"repeat","p":"(v.)","z":"重複","b":6,"u":"6-2","n":"傷害"},{"w":"package","p":"(n.)","z":"包裹","b":6,"u":"6-2","n":"庭院；碼"},{"w":"language","p":"(n.)","z":"語言","b":6,"u":"6-2","n":"假髮"},{"w":"to put it simply","p":"","z":"簡單地說","b":6,"u":"6-2","n":"既不…也不…"},{"w":"store","p":"(v.)","z":"儲存","b":6,"u":"6-2","n":"加熱；熱"},{"w":"count on","p":"","z":"依靠；指望","b":6,"u":"6-2","n":"算…參加一份"},{"w":"meme","p":"(n.)","z":"迷因","b":6,"u":"6-2","n":"六月"},{"w":"attention span","p":"(n.)","z":"注意力持續時間","b":6,"u":"6-2","n":"活動"},{"w":"addiction","p":"(n.)","z":"成癮","b":6,"u":"6-2","n":"機會"},{"w":"schedule","p":"(n.)","z":"計畫表","b":6,"u":"6-2","n":"檯燈"},{"w":"review","p":"(v.)；(n.)","z":"複習","b":6,"u":"6-2","n":"造成"},{"w":"daily","p":"(adj.)","z":"日常的","b":6,"u":"6-2","n":"不快樂的"},{"w":"while","p":"(conj.)","z":"當…時","b":6,"u":"6-3","n":"直到"},{"w":"point out","p":"","z":"指出","b":6,"u":"6-3","n":"遠離…"},{"w":"case","p":"(n.)","z":"案例","b":6,"u":"6-3","n":"數學（= mathematics）"},{"w":"depend on","p":"","z":"仰賴；取決於","b":6,"u":"6-3","n":"接管"},{"w":"critically","p":"(adv.)","z":"批判地","b":6,"u":"6-3","n":"更…"},{"w":"instead","p":"(adv.)","z":"作為替代","b":6,"u":"6-3","n":"總是"},{"w":"vote","p":"(v.)；(n.)","z":"投票","b":6,"u":"6-4","n":"迫使；推動"},{"w":"election","p":"(n.)","z":"選舉","b":6,"u":"6-4","n":"十二月"},{"w":"check in","p":"","z":"報到","b":6,"u":"6-4","n":"不再…"},{"w":"leave for","p":"","z":"前往","b":6,"u":"6-4","n":"保持健康"},{"w":"following","p":"(n.)；(adj.)","z":"以下（的）","b":6,"u":"6-4","n":"日；天"},{"w":"deal with","p":"","z":"處理；負責","b":6,"u":"6-4","n":"不再…"},{"w":"candidate","p":"(n.)","z":"候選人","b":6,"u":"6-4","n":"元"},{"w":"step","p":"(n.)","z":"步驟","b":6,"u":"6-4","n":"第三（的）"},{"w":"ballot","p":"(n.)","z":"選票","b":6,"u":"6-4","n":"種子"},{"w":"ID card","p":"(n.)","z":"身分證","b":6,"u":"6-4","n":"空中；空氣"},{"w":"go hand in hand with","p":"","z":"與…關係密切","b":6,"u":"6-CF","t":0,"n":"稍候"},{"w":"get to","p":"","z":"得以","b":6,"u":"6-CF","n":"嘔吐"},{"w":"take on","p":"","z":"具有；呈現","b":6,"u":"6-CF","n":"幸虧；由於"},{"w":"indigenous","p":"(adj.)","z":"原住民的；本土的","b":6,"u":"6-CF","n":"查證事實的"},{"w":"carving","p":"(n.)","z":"雕刻（品）","b":6,"u":"6-CF","n":"食物"},{"w":"faith","p":"(n.)","z":"信仰","b":6,"u":"6-CF","n":"頭；朝…前進"},{"w":"harvest","p":"(n.)；(v.)","z":"收穫","b":6,"u":"6-CF","n":"成功"},{"w":"scare","p":"(v.)","z":"使驚嚇","b":6,"u":"6-CF","n":"失去"}];
+
+/* =======================================================
+   設定區
+   ======================================================= */
+const POOL_NAME = "佳音翰林　B1–B6 單字表";
+const LESSON = "翰林字表";
+const ROUND = 20;                 // 每回合出幾題
+
+/* 班級名單 */
+const CLASSES = {
+  a: { name:"國三班", seats:[
+    {n:"01", s:"靜"}, {n:"02", s:"若"}, {n:"03", s:"慧"}, {n:"04", s:"欣"},
+    {n:"05", s:"衫"}, {n:"06", s:"睿"}, {n:"07", s:"芸"}, {n:"08", s:"蓁"},
+    {n:"09", s:"亘"}, {n:"10", s:"晏"}, {n:"11", s:"裕"}, {n:"12", s:"瑋"},
+    {n:"00", s:"訪客", guest:true}
+  ]}
+};
+let _cid = ((new URLSearchParams(location.search).get("c")) || "a").toLowerCase();
+if(!CLASSES[_cid]) _cid = "a";
+const CLASS_ID = _cid;
+const CLS = CLASSES[CLASS_ID];
+const ROSTER = CLS.seats;
+const ALL_SEATS = ROSTER.map(function(p){ return p.n; });
+const SEAT_IDS  = ROSTER.filter(function(p){ return !p.guest; }).map(function(p){ return p.n; });
+function isGuest(n){
+  for(var i=0;i<ROSTER.length;i++){ if(String(ROSTER[i].n)===String(n)) return !!ROSTER[i].guest; }
+  return false;
+}
+function sname(n){
+  for(var i=0;i<ROSTER.length;i++){
+    if(String(ROSTER[i].n)===String(n)) return ROSTER[i].n + (ROSTER[i].s ? " " + ROSTER[i].s : "");
+  }
+  return String(n);
+}
+const TEACHER_CODE = "2026";
+
+const HOMEWORK = {
+  on: false,                      // 隨時練預設不綁作業；要指定範圍時改成 true
+  title: "本週作業",
+  tasks: [ {stage:0, pass:18}, {stage:1, pass:14} ],
+  note: "可以重複練很多次，算你最好的那一次。"
+};
+
+const GFORM = {
+  url: "https://docs.google.com/forms/d/e/1FAIpQLSfJoXSEsU8EJ84jyyBiCaLf-B5lNTJHUuyYlYEYkV4pXQ_Aqg/formResponse",
+  f: { seat:"entry.109700768", lesson:"entry.1239910608", stage:"entry.914579534",
+       right:"entry.801992510", total:"entry.538869499", wrong:"entry.1986792941",
+       hw:"entry.1699141852" }
+};
+/* ======================================================= */
+
+const KEY = "hanlin_b16_" + CLASS_ID;
+const STAGES = [
+  {n:"第一階", t:"看得懂", d:"看英文，選中文"},
+  {n:"第二階", t:"想得起來", d:"看中文，把單字拼出來"}
+];
+WORDS.forEach(function(x,i){ x.id="w"+i; });
+let store=load(), seat=null, stage=0, mode="all", queue=[], idx=0, right=0;
+
+/* 冊次範圍：0 = 六冊全部，1~6 = 只練該冊 */
+const BOOKS = [
+  {v:0, t:"六冊全部"}, {v:1, t:"第一冊"}, {v:2, t:"第二冊"}, {v:3, t:"第三冊"},
+  {v:4, t:"第四冊"}, {v:5, t:"第五冊"}, {v:6, t:"第六冊"}
+];
+let book = 0;
+function inBook(x){ return book===0 || x.b===book; }
+function scoped(){ return WORDS.filter(inBook); }
+function bookName(){ return book===0 ? "六冊全部" : "第"+"一二三四五六"[book-1]+"冊"; }
+
+function load(){
+  try{ const o=JSON.parse(localStorage.getItem(KEY)); if(o&&o.logs&&o.wrong) return o; }catch(e){}
+  return {logs:[], wrong:{}};
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+function wrongOf(s){ if(!store.wrong[s]) store.wrong[s]={}; return store.wrong[s]; }
+function logsOf(s){ return store.logs.filter(function(l){ return String(l.seat)===String(s); }); }
+function bestOf(s,st){
+  const a=logsOf(s).filter(function(l){ return l.stage===st; }).map(function(l){ return l.right; });
+  return a.length ? Math.max.apply(null,a) : null;
+}
+function ymd(ts){ const d=new Date(ts); return (d.getMonth()+1)+"/"+d.getDate(); }
+function ymdhm(ts){ const d=new Date(ts);
+  return (d.getMonth()+1)+"/"+d.getDate()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function norm(s){ return String(s).toLowerCase().replace(/[‘’'`]/g,"").replace(/\s+/g," ").trim(); }
+function answersOf(w){
+  const m=w.match(/^(.+?)\s*\((.+?)\)\s*$/);
+  let list = m ? [m[1],m[2]] : [w];
+  const out=[];
+  list.forEach(function(x){ x.split("/").forEach(function(y){ y=y.trim(); if(y) out.push(y); }); });
+  return out;
+}
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+document.getElementById("sub").textContent =
+  "佳音翰林 B1–B6 課本單字　·　共 " + WORDS.length + " 字";
+
+function show(v){
+  ["Seat","Practice","Teacher","Report"].forEach(function(n){
+    document.getElementById("view"+n).classList.toggle("hide", n.toLowerCase()!==v); });
+  document.getElementById("who").classList.toggle("hide", v==="seat");
+  document.getElementById("foot").classList.toggle("hide", v!=="practice" && v!=="seat");
+  window.scrollTo(0,0);
+}
+
+/* ---------- 座號 ---------- */
+function drawSeats(){
+  document.getElementById("seatTitle").textContent = CLS.name + "　先選你的座號";
+  const g=document.getElementById("seatgrid"); g.innerHTML="";
+  for(const i of ALL_SEATS){
+    const b=document.createElement("button");
+    b.className="seat"+(isGuest(i)?" guest":"");
+    b.innerHTML=sname(i);
+    b.onclick=function(){ seat=i; startSeat(); };
+    g.appendChild(b);
+  }
+}
+function updateWho(){
+  const n=logsOf(seat).length;
+  document.getElementById("who").innerHTML =
+    CLS.name + "　" + sname(seat) + (n ? "　·　練過 " + n + " 次" : "")
+    + "<button onclick=\"show('seat');drawSeats()\">換人</button>";
+}
+function startSeat(){
+  updateWho(); show("practice");
+  stage=0;
+  mode = newCount() ? "new" : (todoCount() ? "todo" : "all");
+  drawBooks(); drawModes(); drawProgress(); drawTabs(); start(); drawHw();
+}
+
+/* ---------- 作業 ---------- */
+function hwStatus(s){
+  if(!HOMEWORK.on) return null;
+  const items=HOMEWORK.tasks.map(function(t){
+    const b=bestOf(s,t.stage,HOMEWORK.range);
+    return {stage:t.stage,pass:t.pass,best:b,ok:(b!=null&&b>=t.pass)};
+  });
+  const done=items.filter(function(x){return x.ok;}).length;
+  return {items:items,done:done,all:items.length,complete:(done===items.length)};
+}
+function drawHw(){
+  const box=document.getElementById("hwPractice"), st=hwStatus(seat);
+  if(!st){ box.innerHTML=""; return; }
+  const li=st.items.map(function(x){
+    return "<li>"+(x.ok?"<span class='ok'>✅":"<span class='wait'>⬜")
+      +" "+STAGES[x.stage].n+"　"+STAGES[x.stage].t+"　至少 "+x.pass+" 題"
+      +(x.best==null?"（還沒做）":"（目前最好 "+x.best+" 題）")+"</span></li>"; }).join("");
+  box.innerHTML="<div class='hw"+(st.complete?" done":"")+"'><div class='t'>"+HOMEWORK.title
+    +"</div>"
+    +"<ul>"+li+"</ul><p class='n'>"+(st.complete?"🎉 本週作業完成了！":HOMEWORK.note)+"</p></div>";
+}
+
+/* ---------- 模式與範圍 ---------- */
+function notPassed(x){ const w=wrongOf(seat); return w[x.id]===true; }
+function notTouched(x){ const w=wrongOf(seat); return w[x.id]===undefined; }
+/* 按鈕上的數字＝這個模式在「目前範圍」實際會出的題數，不用全域數字，避免標籤說謊 */
+function countMode(m){ const keep=mode; mode=m; const n=bankOf(stage).length; mode=keep; return n; }
+function newCount(){ return scoped().filter(notTouched).length; }
+function todoCount(){ return scoped().filter(notPassed).length; }
+
+/* ---------- 總進度（學生看得到自己離完成還有多遠） ---------- */
+function drawProgress(){
+  const box=document.getElementById("prog"); if(!box) return;
+  const list=scoped();
+  const w=wrongOf(seat), total=list.length;
+  let done=0, left=0;
+  list.forEach(function(x){
+    if(w[x.id]===false) done++;
+    else if(w[x.id]===true) left++;
+  });
+  const untouched=total-done-left;
+  const pct=total?Math.round(done/total*1000)/10:0;
+  box.innerHTML=
+    "<div class='pt'><span>"+bookName()+"　總進度</span><em>"+pct+"%</em></div>"
+   +"<div class='ptrack'>"
+   +"<span class='pdone' style='width:"+(done/total*100)+"%'></span>"
+   +"<span class='pleft' style='width:"+(left/total*100)+"%'></span>"
+   +"</div>"
+   +"<div class='pn'>已經會 <b>"+done+"</b> 字 ・ 還沒過 <b>"+left+"</b> 字 ・ "
+   +"還沒練到 <b>"+untouched+"</b> 字 ・ 共 "+total+" 字</div>";
+}
+
+function drawModes(){
+  const box=document.getElementById("modes");
+  const nNew=countMode("new"), nTodo=countMode("todo"), nAll=countMode("all");
+  box.innerHTML="";
+  [["new","接著練", nNew ? "沒練過的 "+nNew+" 字" : "都練過了！"],
+   ["todo","只練我還沒過的", nTodo ? nTodo+" 字" : "目前沒有"],
+   ["all","全部複習", nAll+" 字"]].forEach(function(m){
+    const dead=(m[0]==="new"&&!nNew)||(m[0]==="todo"&&!nTodo);
+    const b=document.createElement("button");
+    b.className="mode"+(mode===m[0]?" on":"")+(dead?" dead":"")
+      +((m[0]==="todo"&&nTodo&&mode!=="todo")?" hot":"");
+    b.innerHTML="<b>"+m[1]+"</b><small>"+m[2]+"</small>";
+    b.onclick=function(){ if(dead) return; mode=m[0]; drawModes(); drawProgress(); start(); };
+    box.appendChild(b);
+  });
+}
+
+/* ---------- 動態分頁（只顯示有題目的階） ---------- */
+function bankOf(st){
+  let list=scoped();
+  if(mode==="todo") list=list.filter(notPassed);
+  if(mode==="new")  list=list.filter(notTouched);
+  if(st===1) list=list.filter(function(x){ return x.t!==0; });  // 句型／整句打不出來
+  return list;
+}
+
+/* ---------- 冊次 ---------- */
+function drawBooks(){
+  const box=document.getElementById("books");
+  const cnt={}; WORDS.forEach(function(x){ cnt[x.b]=(cnt[x.b]||0)+1; });
+  let h="<div class='lb'>要練哪一冊？老師沒特別說的話，就用「六冊全部」。</div><div class='gs'>";
+  BOOKS.forEach(function(b){
+    const nb = b.v===0 ? WORDS.length : (cnt[b.v]||0);
+    h+="<button class='gchip"+(book===b.v?" on":"")+"' data-b='"+b.v+"'>"+b.t+" <i>"+nb+"</i></button>";
+  });
+  box.innerHTML=h+"</div>";
+  box.querySelectorAll(".gchip").forEach(function(el){
+    el.onclick=function(){
+      book=parseInt(el.dataset.b,10);
+      mode = newCount() ? "new" : (todoCount() ? "todo" : "all");
+      drawBooks(); drawModes(); drawProgress(); start(); drawChips();
+    };
+  });
+}
+function liveStages(){
+  const out=[];
+  for(let i=0;i<STAGES.length;i++){ if(bankOf(i).length) out.push(i); }
+  return out;
+}
+function drawTabs(){
+  const live=liveStages();
+  if(live.indexOf(stage)<0 && live.length) stage=live[0];
+  const box=document.getElementById("tabs");
+  box.style.gridTemplateColumns="repeat("+Math.max(live.length,1)+",1fr)";
+  box.innerHTML="";
+  live.forEach(function(i){
+    const d=document.createElement("div");
+    d.className="tab"+(i===stage?" on":"");
+    d.innerHTML="<b>"+STAGES[i].n+"</b>"+STAGES[i].t;
+    d.onclick=function(){ stage=i; drawTabs(); start(); };
+    box.appendChild(d);
+  });
+}
+
+/* ---------- 出題 ---------- */
+function start(){
+  drawTabs();
+  /* 這個模式在這個範圍沒題目了就自動換一個，避免「畫面說都練過了、卻還在出舊題」 */
+  if(!bankOf(stage).length){
+    const order=["new","todo","all"].filter(function(m){ return m!==mode; });
+    for(let i=0;i<order.length;i++){ mode=order[i]; if(bankOf(stage).length) break; }
+    drawModes(); drawProgress();
+  }
+  const all=shuffle(bankOf(stage));
+  queue=all.slice(0, Math.min(ROUND, all.length));
+  idx=0; right=0;
+  document.getElementById("stageName").textContent=STAGES[stage].n+"　"+STAGES[stage].d;
+  const b=bestOf(seat,stage);
+  document.getElementById("best").textContent=b==null?"最佳 —":"最佳 "+b+" 題";
+  if(!queue.length){
+    document.getElementById("card").innerHTML=
+      "<div class='done'><p class='msg'>這個範圍目前沒有題目。<br>換一個範圍，或按上面的「練全部的字」。</p></div>";
+    drawChips(); return;
+  }
+  render(); drawChips();
+}
+function bar(){
+  document.getElementById("count").textContent=idx+" / "+queue.length;
+  document.getElementById("fill").style.width=(idx/queue.length*100)+"%";
+}
+function say(t){
+  try{ const u=new SpeechSynthesisUtterance(t); u.lang="en-US"; u.rate=.85;
+       speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+function render(){
+  bar();
+  if(idx>=queue.length) return finish();
+  const q=queue[idx], card=document.getElementById("card");
+  const head="<div class='stage'><span>"+STAGES[stage].n+"　"+STAGES[stage].t+"</span></div>";
+  const spoken=answersOf(q.w)[0].replace(/'/g,"\\'");
+
+  if(stage===0){
+    card.innerHTML=head
+      +"<div class='word'>"+esc(q.w)+"<button class='say' onclick=\"say('"+spoken+"')\">🔊</button></div>"
+      +"<div class='zh'>"+esc(q.p||"")+(q.m?" <span class='gtag'>一字多義</span>":"")+"</div>"
+      +"<div class='opts two' id='opts'></div><div class='fb' id='fb'></div>";
+    shuffle([q.z,q.n]).forEach(function(x){
+      const b=document.createElement("button"); b.className="opt"; b.textContent=x;
+      b.onclick=function(){ answer(x===q.z,q,q.z,b); };
+      document.getElementById("opts").appendChild(b);
+    });
+  }else if(stage===1){
+    const a0=answersOf(q.w)[0];
+    const hint=a0[0]+a0.slice(1).replace(/[a-zA-Z]/g,"_");
+    card.innerHTML=head
+      +"<div class='word' style='font-size:34px'>"+esc(q.z)
+      +"<button class='say' onclick=\"say('"+spoken+"')\">🔊</button></div>"
+      +"<div class='zh'>"+esc(q.p||"")+(q.m?" <span class='gtag'>一字多義　把每個意思都記起來</span>":"")+"</div>"
+      +"<div class='hint'>"+esc(hint)+"</div>"
+      +"<div class='typebox'><input type='text' id='inp' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='把單字打出來'>"
+      +"<button class='go' onclick='checkType()'>看看對不對</button></div>"
+      +"<div class='fb' id='fb'></div>";
+    const inp=document.getElementById("inp"); inp.focus();
+    inp.onkeydown=function(e){ if(e.key==="Enter") checkType(); };
+  }else{
+    card.innerHTML=head
+      +"<div class='sent'>"+esc(q.g).replace("___","<span class='gap'></span>")+"</div>"
+      +"<div class='opts' id='opts'></div><div class='fb' id='fb'></div>";
+    shuffle(q.o).forEach(function(x){
+      const b=document.createElement("button"); b.className="opt"; b.textContent=x;
+      b.onclick=function(){ answer(x===q.o[0],q,q.o[0],b); };
+      document.getElementById("opts").appendChild(b);
+    });
+  }
+}
+function checkType(){
+  const q=queue[idx], inp=document.getElementById("inp");
+  const v=norm(inp.value);
+  const ok=answersOf(q.w).some(function(a){ return norm(a)===v; });
+  inp.disabled=true; answer(ok,q,answersOf(q.w)[0],null);
+}
+function answer(ok,q,correct,btn){
+  document.querySelectorAll(".opt").forEach(function(b){
+    b.disabled=true; if(b.textContent===correct) b.classList.add("right"); });
+  if(btn&&!ok) btn.classList.add("wrong");
+  const fb=document.getElementById("fb"), w=wrongOf(seat);
+  fb.className="fb show "+(ok?"good":"bad");
+  if(ok){ right++; w[q.id]=false;
+    fb.innerHTML="<span class='big'>✓ 答對了</span>"+esc(q.w)+"　"+esc(q.z); }
+  else{ w[q.id]=true;
+    fb.innerHTML="<span class='big'>再看一次就好</span>正確答案是 <b>"+esc(correct)+"</b>　（"+esc(q.w)+"　"+esc(q.z)+"）"; }
+  save(); drawChips(); drawModes(); drawProgress(); say(answersOf(q.w)[0]);
+  const next=document.createElement("button");
+  next.className="go"; next.style.marginTop="16px";
+  next.textContent=idx+1>=queue.length?"看結果":"下一題 →";
+  next.onclick=function(){ idx++; render(); };
+  fb.appendChild(document.createElement("br")); fb.appendChild(next); next.focus();
+}
+function finish(){
+  const prevBest=bestOf(seat,stage), before=hwStatus(seat);
+  store.logs.push({seat:seat,stage:stage,mode:mode,right:right,total:queue.length,ts:Date.now()});
+  save(); drawHw(); updateWho(); drawModes(); drawProgress();
+  const after=hwStatus(seat);
+  const justDone=after&&after.complete&&before&&!before.complete;
+  sendOut(seat,stage,right,queue.length,after);
+
+  const nowBest=bestOf(seat,stage), isBest=prevBest==null||right>prevBest;
+  document.getElementById("count").textContent=queue.length+" / "+queue.length;
+  document.getElementById("fill").style.width="100%";
+  document.getElementById("best").textContent="最佳 "+nowBest+" 題";
+
+  const left=todoCount();
+  let msg; const rate=right/queue.length;
+  if(justDone) msg="🎉 本週作業完成了！";
+  else if(mode==="todo") msg = left ? "還沒過的字剩下 "+left+" 個。再跑一次會更少。"
+                                    : "太厲害了，這個範圍的字你全部都過了！";
+  else if(isBest&&prevBest!=null) msg="破紀錄了！上次 "+prevBest+" 題，這次 "+right+" 題。";
+  else if(rate===1) msg="全對。往上一階試試看。";
+  else msg="按上面的「只練我還沒過的」再跑一次，第二次一定會比第一次好。";
+
+  const live=liveStages(), pos=live.indexOf(stage);
+  document.getElementById("card").innerHTML=
+    "<div class='done'><div class='score'>"+right+"</div>"
+    +"<div class='of'>答對 "+right+" 題 / 共 "+queue.length+" 題</div>"
+    +"<div class='best'>你的最佳紀錄："+nowBest+" 題</div><br>"
+    +"<p class='msg'>"+msg+"</p><div class='btnrow'>"
+    +"<button class='go' onclick='start()'>再練一次</button>"
+    +(pos>=0&&pos<live.length-1
+       ? "<button class='go ghost' onclick='stage="+live[pos+1]+";start()'>進到"+STAGES[live[pos+1]].n+" →</button>" : "")
+    +"</div></div>";
+  drawChips();
+}
+function drawChips(){
+  const w=wrongOf(seat);
+  const ks=scoped().filter(function(x){ return w[x.id]; });
+  const box=document.getElementById("chips"), mini=document.getElementById("mini");
+  box.innerHTML="";
+  if(!ks.length){
+    box.innerHTML="<span class='chip clear'>目前沒有還沒過的字</span>";
+    mini.textContent="答錯的字會自動留在這裡，答對之後就會消失。"; return;
+  }
+  ks.slice(0,40).forEach(function(x){
+    const s=document.createElement("span"); s.className="chip"; s.textContent=x.w; box.appendChild(s); });
+  mini.textContent="共 "+ks.length+" 個字"+(ks.length>40?"（只列前 40 個）":"")
+    +"。按上面的「只練我還沒過的」就會只出這些。";
+}
+
+/* ---------- 送出 ---------- */
+function sendOut(seat,stage,right,total,hw){
+  if(!GFORM.url || isGuest(seat)) return;
+  const w=store.wrong[seat]||{};
+  const left=WORDS.filter(function(x){ return w[x.id]; });
+  const row={};
+  row[GFORM.f.seat]=CLASS_ID.toUpperCase()+"-"+sname(seat);
+  row[GFORM.f.lesson]=LESSON+(book?"　"+bookName():"");
+  row[GFORM.f.stage]=STAGES[stage].n+" "+STAGES[stage].t+(mode==="todo"?"（只練沒過的）":mode==="new"?"（接著練新的）":"");
+  row[GFORM.f.right]=right;
+  row[GFORM.f.total]=total;
+  row[GFORM.f.wrong]="還沒過 "+left.length+" 字：" + left.slice(0,12).map(function(x){return x.w;}).join(" ");
+  row[GFORM.f.hw]=hw?(hw.complete?"已完成":"進行中 "+hw.done+"/"+hw.all):"";
+  post(row);
+}
+function post(row){
+  const body=new URLSearchParams();
+  for(const k in row) body.append(k,row[k]);
+  fetch(GFORM.url,{method:"POST",mode:"no-cors",body:body}).catch(function(){ queueRow(row); });
+}
+function queueRow(row){
+  if(!store.pending) store.pending=[];
+  store.pending.push(row);
+  if(store.pending.length>200) store.pending=store.pending.slice(-200);
+  save();
+}
+function flushPending(){
+  if(!GFORM.url||!store.pending||!store.pending.length) return;
+  const rows=store.pending.slice(); store.pending=[]; save();
+  rows.forEach(function(r){ post(r); });
+}
+
+/* ---------- 老師檢視 ---------- */
+function teacherGate(){
+  const f=document.getElementById("foot");
+  f.innerHTML="<div style='display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center'>"
+    +"<input type='password' id='tcode' placeholder='老師密碼' autocomplete='off' "
+    +  "style='font-size:17px;padding:9px 14px;border:2px solid #E2DDD0;border-radius:10px;width:150px;font-family:inherit'>"
+    +"<button id='tgo' style='background:#1F6B58;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:16px;cursor:pointer;font-family:inherit;text-decoration:none'>進入</button>"
+    +"<button id='tno' style='background:none;border:2px solid #E2DDD0;color:#5A554C;border-radius:10px;padding:9px 16px;font-size:16px;cursor:pointer;font-family:inherit;text-decoration:none'>取消</button>"
+    +"<span id='tmsg' style='color:#B23A32;font-size:15px'></span></div>";
+  const i=document.getElementById("tcode");
+  document.getElementById("tgo").onclick=tryCode;
+  document.getElementById("tno").onclick=resetFoot;
+  i.onkeydown=function(e){ if(e.key==="Enter") tryCode(); };
+  i.focus();
+}
+function tryCode(){
+  if(document.getElementById("tcode").value!==TEACHER_CODE){
+    document.getElementById("tmsg").textContent="密碼不對"; return; }
+  resetFoot(); drawTeacher(); show("teacher");
+}
+function resetFoot(){
+  const f=document.getElementById("foot");
+  f.innerHTML="<button>老師檢視</button>";
+  f.firstChild.onclick=teacherGate;
+}
+function leftOf(s){
+  const w=store.wrong[s]||{};
+  return WORDS.filter(function(x){ return w[x.id]; }).length;
+}
+function drawTeacher(){
+  let doneN=0, hwDone=0;
+  for(const i of SEAT_IDS){ if(logsOf(i).length) doneN++;
+    const st=hwStatus(i); if(st&&st.complete) hwDone++; }
+  document.getElementById("tSub").textContent=
+    "全班 "+SEAT_IDS.length+" 人，已經練過的有 "+doneN+" 人"
+    +(HOMEWORK.on?"，本週作業完成 "+hwDone+" 人":"")
+    +"，總共 "+store.logs.filter(function(l){ return !isGuest(l.seat); }).length+" 次練習紀錄。";
+
+  let h="<tr><th>座號</th><th class='num'>練習次數</th><th>最近一次</th>"
+    +STAGES.map(function(s){ return "<th class='num'>"+s.t+"</th>"; }).join("")
+    +"<th class='num'>還沒過</th></tr>";
+  for(const i of SEAT_IDS){
+    const ls=logsOf(i);
+    if(!ls.length){
+      h+="<tr class='none'><td>"+sname(i)+"</td><td class='num'>—</td><td>還沒做</td>"
+        +STAGES.map(function(){ return "<td class='num'>—</td>"; }).join("")+"<td class='num'>—</td></tr>";
+      continue;
+    }
+    const last=ls[ls.length-1];
+    h+="<tr><td><span class='seatlink' onclick='drawReport(\""+i+"\")'>"+sname(i)+"</span></td>"
+      +"<td class='num'>"+ls.length+"</td><td>"+ymdhm(last.ts)+"</td>"
+      +STAGES.map(function(s,si){ const b=bestOf(i,si); return "<td class='num'>"+(b==null?"—":b)+"</td>"; }).join("")
+      +"<td class='num'>"+leftOf(i)+"</td></tr>";
+  }
+  document.getElementById("tClass").innerHTML=h;
+
+  const tally={};
+  for(const i of SEAT_IDS){
+    const w=store.wrong[i]||{};
+    WORDS.forEach(function(x){ if(w[x.id]) tally[x.id]=(tally[x.id]||0)+1; });
+  }
+  const rank=Object.keys(tally).sort(function(a,b){ return tally[b]-tally[a]; });
+  let h2="<tr><th>單字</th><th>中文</th><th class='num'>幾個人還沒過</th><th></th></tr>";
+  if(!rank.length) h2+="<tr class='none'><td colspan='4'>還沒有資料</td></tr>";
+  const maxN=rank.length?tally[rank[0]]:1;
+  rank.slice(0,20).forEach(function(k){
+    const wd=WORDS.filter(function(x){ return x.id===k; })[0];
+    h2+="<tr><td><b>"+esc(wd.w)+"</b></td><td>"+esc(wd.z)+"</td><td class='num'>"+tally[k]+"</td>"
+      +"<td><span class='barcell'><i style='width:"+(tally[k]/maxN*140)+"px'></i></span></td></tr>";
+  });
+  document.getElementById("tWrong").innerHTML=h2;
+}
+
+/* ---------- 個人報告 ---------- */
+function drawReport(s){
+  const ls=logsOf(s);
+  document.getElementById("rTitle").textContent="座號 "+sname(s)+"　單字庫學習報告";
+  if(!ls.length){ document.getElementById("rRange").textContent="還沒有練習紀錄。"; show("report"); return; }
+  const first=ls[0], last=ls[ls.length-1];
+  document.getElementById("rRange").textContent=
+    "統計期間："+ymd(first.ts)+" ～ "+ymd(last.ts)+"　（"+POOL_NAME+"，共 "+WORDS.length+" 字）";
+  const days={}; ls.forEach(function(l){ days[ymd(l.ts)]=1; });
+  const w=store.wrong[s]||{};
+  const left=WORDS.filter(function(x){ return w[x.id]; });
+  const seen=WORDS.filter(function(x){ return w[x.id]!==undefined; });
+  document.getElementById("rKpis").innerHTML=
+    kpi("練習次數",ls.length+" 次")+kpi("練習天數",Object.keys(days).length+" 天")
+    +kpi("碰過的字",seen.length+" / "+WORDS.length)
+    +kpi("還沒過",left.length+" 字");
+  document.getElementById("rMsg").textContent =
+    ls.length>=3 ? "已經主動練了 "+ls.length+" 次。單字最需要的是反覆接觸，次數比分數重要。"
+                 : "才剛開始，先看練習次數就好，分數會慢慢跟上來。";
+  let h="<tr><th>日期</th><th>階段</th><th class='num'>答對</th><th class='num'>題數</th></tr>";
+  ls.slice().reverse().forEach(function(l){
+    h+="<tr><td>"+ymdhm(l.ts)+"</td>"
+      +"<td>"+STAGES[l.stage].n+"　"+STAGES[l.stage].t+(l.mode==="todo"?"（只練沒過的）":"")+"</td>"
+      +"<td class='num'>"+l.right+"</td><td class='num'>"+l.total+"</td></tr>"; });
+  document.getElementById("rLogs").innerHTML=h;
+  const box=document.getElementById("rChips"); box.innerHTML="";
+  if(!left.length) box.innerHTML="<span class='chip clear'>目前沒有還沒過的字</span>";
+  else left.slice(0,60).forEach(function(x){
+    const e=document.createElement("span"); e.className="chip";
+    e.textContent=x.w+"（"+x.z.split("；")[0]+"）"; box.appendChild(e); });
+  show("report");
+}
+function kpi(l,v){ return "<div class='kpi'><span>"+l+"</span><b class='big2'>"+v+"</b></div>"; }
+
+function exportCSV(){
+  const rows=[["座號","日期時間","階段","模式","答對","題數"]];
+  store.logs.filter(function(l){ return !isGuest(l.seat); })
+    .sort(function(a,b){ return String(a.seat).localeCompare(String(b.seat))||a.ts-b.ts; })
+    .forEach(function(l){
+      rows.push([sname(l.seat),ymdhm(l.ts),
+                 STAGES[l.stage].n+" "+STAGES[l.stage].t,(l.mode==="todo"?"只練沒過的":"全部"),l.right,l.total]); });
+  const csv="﻿"+rows.map(function(r){
+    return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(","); }).join("\r\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download="單字庫練習紀錄_"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function wipe(){
+  if(!confirm("要清空全班所有紀錄嗎？這個動作無法復原。")) return;
+  if(!confirm("再確認一次：所有座號的練習紀錄都會不見。")) return;
+  store={logs:[],wrong:{}}; save(); drawTeacher(); drawSeats();
+}
+
+resetFoot(); drawSeats(); show("seat"); flushPending();
+
+/* ============================================================
+   沒做完就離開，也要留下紀錄
+   ------------------------------------------------------------
+   原本只有 finish()（做完整回合）才會送出，學生做到一半關掉，
+   那一次完全收不到。這段在關頁面或切到別的 App 時補送一筆，
+   每回合最多補一次——做完的那一筆由 finish() 自己送。
+   用 sendBeacon 而不是 fetch，是因為關頁面時 fetch 會被瀏覽器中斷。
+   ============================================================ */
+(function(){
+  var roundSent = false;
+  var _start = start, _finish = finish;
+  start  = function(){ roundSent = false; return _start.apply(this, arguments); };
+  finish = function(){ roundSent = true;  return _finish.apply(this, arguments); };
+
+  function leftCount(){
+    var w = wrongOf(seat), n = 0;
+    for (var k in w) if (w[k] === true) n++;
+    return n;
+  }
+  function beacon(row){
+    try{
+      var body = new URLSearchParams();
+      for (var k in row) body.append(k, row[k]);
+      var blob = new Blob([body.toString()],
+                          { type: "application/x-www-form-urlencoded;charset=UTF-8" });
+      if (navigator.sendBeacon && navigator.sendBeacon(GFORM.url, blob)) return true;
+    }catch(e){}
+    return false;
+  }
+  function flushPartial(){
+    if (roundSent || !GFORM.url || !seat || isGuest(seat)) return;
+    if (!queue.length || !idx) return;      /* 一題都還沒做完就離開，不記 */
+    roundSent = true;
+    var st = STAGES[stage] || { n: "", t: "" };
+    var hw = hwStatus(seat);
+    var row = {};
+    row[GFORM.f.seat]   = CLASS_ID.toUpperCase() + "-" + sname(seat);
+    row[GFORM.f.lesson] = LESSON + (book ? "　" + bookName() : "");
+    row[GFORM.f.stage]  = st.n + " " + st.t + "（沒做完就離開　" + idx + "/" + queue.length + " 題）";
+    row[GFORM.f.right]  = right;
+    row[GFORM.f.total]  = idx;
+    row[GFORM.f.wrong]  = "沒做完就離開　·　累計還沒過 " + leftCount() + " 項";
+    row[GFORM.f.hw]     = hw ? (hw.complete ? "已完成" : "進行中 " + hw.done + "/" + hw.all) : "";
+    if (!beacon(row)) queueRow(row);
+  }
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState === "hidden") flushPartial();
+  });
+  window.addEventListener("pagehide", flushPartial);
+})();
+</script>
+</body>
+</html>
