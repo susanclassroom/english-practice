@@ -531,6 +531,17 @@ function say(t){
   try{ const u=new SpeechSynthesisUtterance(t); u.lang="en-US"; u.rate=.85;
        speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
 }
+/* 出題時只顯示詞性，不能把中文意思印出來——那等於先給答案。
+   完整的「詞性＋中文」留到答完之後的回饋才顯示。
+   pos 欄位長得像 "adj. 美國的；n. 美國人"，這裡只取出詞性標籤。 */
+function posTag(p){
+  if(!p) return "";
+  var m = String(p).match(/\b(n|v|adj|adv|prep|conj|pron|aux|art|int)\./g);
+  if(!m) return "";
+  var seen = {}, out = [];
+  m.forEach(function(x){ if(!seen[x]){ seen[x] = 1; out.push(x); } });
+  return out.join(" / ");
+}
 function render(){
   bar();
   if(idx >= queue.length) return finish();
@@ -541,7 +552,7 @@ function render(){
   if(stage===0){
     card.innerHTML = head
       + "<div class='word'>" + q.w + "<button class='say' onclick=\"say('"+q.w+"')\">🔊</button></div>"
-      + "<div class='zh'>" + q.pos + "</div>"
+      + "<div class='zh'>" + posTag(q.pos) + "</div>"
       + "<div class='opts two' id='opts'></div><div class='fb' id='fb'></div>";
     shuffle([q.zh, q.no]).forEach(o=>{
       const b=document.createElement("button"); b.className="opt"; b.textContent=o;
@@ -553,7 +564,7 @@ function render(){
     card.innerHTML = head
       + "<div class='word' style='font-size:34px'>" + q.zh
       + "<button class='say' onclick=\"say('"+q.w+"')\">🔊</button></div>"
-      + "<div class='zh'>" + q.pos + "</div>"
+      + "<div class='zh'>" + posTag(q.pos) + "</div>"
       + "<div class='hint'>" + q.w[0] + rest + "</div>"
       + "<div class='typebox'><input type='text' id='inp' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='把單字打出來'>"
       + "<button class='go' onclick='checkType()'>看看對不對</button></div>"
